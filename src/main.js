@@ -8,6 +8,7 @@ const DEFAULT_CONFIG = {
   projectPath: '',
   opacity: 100,
   scale: 100,
+  theme: 'dark',
   voicePreset: {
     reverbLong: 0,
     reverbShort: 0,
@@ -114,6 +115,7 @@ const DOM = {
   btnMinimize: document.getElementById('btn-minimize'),
   btnClose: document.getElementById('btn-close'),
   btnSettingsToggle: document.getElementById('btn-settings-toggle'),
+  btnThemeToggle: document.getElementById('btn-theme-toggle'),
   
   // Nút chức năng chính
   btnBeatMute: document.getElementById('btn-beat-mute'),
@@ -398,6 +400,9 @@ async function autoSaveCurrentStates() {
     activePreset: states.activePreset
   };
   
+  // Lưu trạng thái theme hiện tại
+  appConfig.theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+  
   // Tự động CẬP NHẬT các thông số fader mới vào chính Preset đang được chọn (chỉ áp dụng cho Preset TỰ TẠO, không ghi đè Preset mặc định)
   const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
   if (states.activePreset && !defaultPresets.includes(states.activePreset) && appConfig.presets && appConfig.presets[states.activePreset]) {
@@ -411,6 +416,32 @@ async function autoSaveCurrentStates() {
   }
   
   await window.electronAPI.saveConfig(appConfig);
+}
+
+// Áp dụng lớp CSS và biểu tượng nút theo theme sáng/tối
+function applyTheme(theme) {
+  if (theme === 'light') {
+    document.body.classList.add('light-theme');
+    if (DOM.btnThemeToggle) {
+      DOM.btnThemeToggle.innerText = '🌙'; // Click để chuyển về tối
+      DOM.btnThemeToggle.title = 'Chuyển sang Chế độ Tối';
+    }
+  } else {
+    document.body.classList.remove('light-theme');
+    if (DOM.btnThemeToggle) {
+      DOM.btnThemeToggle.innerText = '☀️'; // Click để chuyển về sáng
+      DOM.btnThemeToggle.title = 'Chuyển sang Chế độ Sáng';
+    }
+  }
+}
+
+// Chuyển đổi theme qua lại và tự động lưu cấu hình
+function toggleTheme() {
+  if (!appConfig) return;
+  const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  applyTheme(newTheme);
+  autoSaveCurrentStates();
 }
 
 // Render các nút Preset giọng hát từ config (Chia nhóm Hệ Thống và Cá Nhân)
@@ -776,7 +807,7 @@ function cancelSettings() {
   closeSettingsPanelUI();
   
   // Khôi phục lại độ trong suốt preview về đúng config cũ
-  DOM.app.style.opacity = appConfig.opacity / 100;
+  DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
   
   // Khôi phục lại trạng thái mở bảng Vang nếu trước đó đang mở
   if (states.isFxPanelOpen) {
@@ -825,13 +856,13 @@ function loadConfigToForm() {
 
 async function saveSettings() {
   const newConfig = {
+    ...appConfig, // Bảo toàn các cấu hình khác như presets, theme, lastValues
     midiOutPort: DOM.selectMidiOut.value,
     midiInPort: DOM.selectMidiIn.value,
     midiChannel: parseInt(DOM.inputMidiChannel.value),
     autoOpenProject: DOM.chkAutoOpen.checked,
     projectPath: DOM.inputProjectPath.value,
     opacity: parseInt(DOM.sliderOpacity.value),
-    scale: appConfig.scale, // giữ nguyên tỷ lệ hiện tại
     voicePreset: {
       reverbLong: parseInt(DOM.presetReverbLong.value),
       reverbShort: parseInt(DOM.presetReverbShort.value),
@@ -860,7 +891,7 @@ async function saveSettings() {
     // Áp dụng các thay đổi cấu hình mới
     midi.setChannel(appConfig.midiChannel);
     connectMidi();
-    DOM.app.style.opacity = appConfig.opacity / 100;
+    DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
     
     // Đóng panel
     closeSettingsPanelUI();
@@ -893,6 +924,7 @@ function setupEventListeners() {
       openSettingsPanel();
     }
   });
+  DOM.btnThemeToggle.addEventListener('click', toggleTheme);
   
   // Xử lý Tabs trong phần cài đặt
   DOM.tabButtons.forEach(btn => {
@@ -932,8 +964,9 @@ function setupEventListeners() {
   DOM.sliderOpacity.addEventListener('input', (e) => {
     const val = e.target.value;
     DOM.valOpacity.innerText = val + '%';
-    DOM.app.style.opacity = val / 100;
+    DOM.app.style.setProperty('--bg-opacity', val / 100);
   });
+
 
   // Gắn sự kiện gửi MIDI cho các thanh trượt Vol chính
   DOM.sliderBeatVol.addEventListener('input', (e) => {
@@ -999,6 +1032,11 @@ async function bootstrap() {
     // 1. Tải cấu hình từ file
     appConfig = await window.electronAPI.loadConfig();
     
+    // Áp dụng theme lưu từ trước
+    applyTheme(appConfig.theme ?? 'dark');
+    
+
+    
     // Áp dụng các giá trị slider/mute được lưu từ phiên làm việc trước
     if (appConfig.lastValues) {
       DOM.sliderBeatVol.value = appConfig.lastValues.beatVol ?? 100;
@@ -1031,7 +1069,7 @@ async function bootstrap() {
     renderPresets();
     
     // 3. Đưa cấu hình lên UI chính
-    DOM.app.style.opacity = appConfig.opacity / 100;
+    DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
     
     // Cập nhật giá trị hiển thị và fill track cho các slider chính
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);

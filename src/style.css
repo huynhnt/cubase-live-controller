@@ -1,7 +1,11 @@
 /* Cài đặt biến màu và CSS Reset */
 :root {
-  --bg-color: rgba(18, 18, 18, 0.85);
-  --bg-header: rgba(10, 10, 10, 0.9);
+  --bg-color-rgb: 18, 18, 18;
+  --bg-header-rgb: 10, 10, 10;
+  --bg-opacity: 0.85; /* Được điều khiển động từ cài đặt */
+  
+  --bg-color: rgba(var(--bg-color-rgb), var(--bg-opacity));
+  --bg-header: rgba(var(--bg-header-rgb), var(--bg-opacity));
   --border-color: rgba(255, 255, 255, 0.08);
   --text-primary: #f0f0f0;
   --text-secondary: #aaaaaa;
@@ -41,9 +45,7 @@ body {
 
 /* Container chính của ứng dụng - Giao diện Glassmorphism */
 .app-container {
-  background: var(--bg-color);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(var(--bg-color-rgb), var(--bg-opacity));
   border: 1px solid var(--border-color);
   border-radius: 12px;
   width: 100%;
@@ -58,7 +60,7 @@ body {
 /* Header ứng dụng - hỗ trợ kéo thả cửa sổ */
 .app-header {
   height: 24px;
-  background: var(--bg-header);
+  background: rgba(var(--bg-header-rgb), var(--bg-opacity));
   border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
@@ -884,6 +886,188 @@ body {
 
 .modal-footer .sec-btn {
   height: 28px;
+}
+
+/* =============================================================
+   CHẾ ĐỘ SÁNG (LIGHT THEME) OVERRIDES
+   ============================================================= */
+body.light-theme {
+  --bg-color-rgb: 240, 240, 245;
+  --bg-header-rgb: 225, 225, 230;
+  --border-color: rgba(0, 0, 0, 0.12);
+  --text-primary: #1e293b;
+  --text-secondary: #5e6b7e;
+}
+
+body.light-theme .app-title {
+  color: #1e293b;
+}
+
+body.light-theme .preset-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .preset-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .preset-btn.active {
+  color: #ffffff;
+}
+
+body.light-theme .sec-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1e293b;
+}
+
+body.light-theme .sec-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .settings-row input[type="text"],
+body.light-theme .settings-row input[type="number"],
+body.light-theme .settings-row select {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1e293b;
+}
+
+body.light-theme .settings-row select option {
+  background: #ffffff;
+  color: #1e293b;
+}
+
+body.light-theme .modal-content {
+  background: rgba(245, 245, 250, 0.98);
+  color: #1e293b;
+}
+
+body.light-theme .modal-body input {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #1e293b;
+}
+
+body.light-theme .slider-wrapper input[type="range"]::-webkit-slider-runnable-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .slider-val,
+body.light-theme .slider-label,
+body.light-theme .presets-group-title {
+  color: #1e293b;
+}
+
+body.light-theme .settings-panel {
+  background: rgba(245, 245, 250, 0.98);
+}
+
+body.light-theme .settings-header {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .tab-btn {
+  color: var(--text-secondary);
+}
+
+body.light-theme .tab-btn:hover {
+  color: #1e293b;
+}
+
+body.light-theme .tab-btn.active {
+  color: var(--color-blue);
+  border-bottom-color: var(--color-blue);
+}
+
+body.light-theme .mapping-item input,
+body.light-theme .preset-item input {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1e293b;
+}
+
+body.light-theme .mapping-item input:focus,
+body.light-theme .preset-item input:focus {
+  border-color: var(--color-blue);
+}
+
+body.light-theme .settings-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .settings-tabs {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .settings-footer {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .status-bar {
+  border-top-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.light-theme .btn-mode-toggle.active {
+  color: #ffffff;
+}
+
+body.light-theme .action-btn.muted {
+  background: var(--color-grey) !important;
+  color: #ffffff !important;
+}
+
+body.light-theme .modal-overlay {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+/* Light Theme - Bảng Chỉnh Vang và Sliders */
+body.light-theme .fx-panel {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+body.light-theme .fx-slider-wrapper input[type="range"]::-webkit-slider-runnable-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Tăng độ tương phản cho các nhãn hàng slider vang */
+body.light-theme .label-orange { background: var(--color-orange); color: #ffffff; border: none; }
+body.light-theme .label-yellow { background: #d4a017; color: #ffffff; border: none; } /* Màu vàng sậm sặc sỡ, rõ chữ */
+body.light-theme .label-purple { background: var(--color-purple); color: #ffffff; border: none; }
+body.light-theme .label-red { background: var(--color-red); color: #ffffff; border: none; }
+body.light-theme .label-blue { background: var(--color-blue); color: #ffffff; border: none; }
+
+/* Kích hoạt lại màu sắc neon/rực rỡ cho các nút preset active trong theme sáng */
+body.light-theme .preset-btn.active {
+  background: var(--color-green) !important;
+  border-color: var(--color-green) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+}
+
+body.light-theme .preset-btn[data-preset="Bolero"].active {
+  background: var(--color-orange) !important;
+  border-color: var(--color-orange) !important;
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.4);
+}
+
+body.light-theme .preset-btn[data-preset="Remix"].active {
+  background: var(--color-red) !important;
+  border-color: var(--color-red) !important;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+}
+
+body.light-theme .preset-btn[data-preset="Lofi"].active {
+  background: var(--color-purple) !important;
+  border-color: var(--color-purple) !important;
+  box-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
+}
+
+body.light-theme .presets-divider-line {
+  background: rgba(0, 0, 0, 0.12);
 }
 
 

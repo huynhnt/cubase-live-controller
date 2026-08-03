@@ -24,6 +24,7 @@ const DEFAULT_CONFIG = {
   projectPath: '',
   opacity: 100,
   scale: 100,
+  theme: 'dark',
   voicePreset: {
     reverbLong: 0,
     reverbShort: 0,
