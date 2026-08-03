@@ -1,0 +1,11 @@
+import { contextBridge, ipcRenderer } from 'electron';
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  saveConfig: (config) => ipcRenderer.invoke('save-config', config),
+  loadConfig: () => ipcRenderer.invoke('load-config'),
+  selectFile: () => ipcRenderer.invoke('select-file'),
+  openCubaseProject: (filePath) => ipcRenderer.invoke('open-cubase-project', filePath),
+  minimizeWindow: () => ipcRenderer.send('window-minimize'),
+  closeWindow: () => ipcRenderer.send('window-close'),
+  resizeWindow: (state) => ipcRenderer.send('window-resize', state)
+});

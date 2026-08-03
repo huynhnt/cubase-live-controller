@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cubase Live Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Header ứng dụng hỗ trợ kéo thả -->
+    <header class="app-header">
+      <div class="drag-region">
+        <span class="logo-icon">🎛️</span>
+        <span class="app-title">CUBASE LIVE CONTROLLER</span>
+      </div>
+      <div class="window-controls">
+        <button id="btn-settings-toggle" class="control-btn" title="Cài đặt">⚙️</button>
+        <button id="btn-minimize" class="control-btn" title="Thu nhỏ">—</button>
+        <button id="btn-close" class="control-btn btn-close" title="Đóng">✕</button>
+      </div>
+    </header>
+
+    <!-- Panel chính (Luôn hiển thị) -->
+    <main class="main-panel">
+      <div class="control-group buttons-group">
+        <button id="btn-beat-mute" class="action-btn btn-green active">Tắt Nhạc</button>
+        <button id="btn-mic-mute" class="action-btn btn-green active">Tắt Mic</button>
+        <button id="btn-fx-mute" class="action-btn btn-green active">Tắt Vang</button>
+        <button id="btn-mode-toggle" class="action-btn btn-blue" data-mode="sing">
+          <span class="mode-text">HÁT LIVE</span>
+          <span class="mode-sub">Click đổi Voice</span>
+        </button>
+      </div>
+
+      <div class="control-group sliders-group">
+        <div class="slider-item">
+          <span class="slider-label">Vol Nhạc</span>
+          <div class="slider-wrapper">
+            <input type="range" id="slider-beat-vol" min="0" max="127" value="100">
+            <div class="slider-track-fill" id="fill-beat-vol"></div>
+          </div>
+          <span class="slider-value" id="val-beat-vol">100</span>
+        </div>
+        <div class="slider-item">
+          <span class="slider-label">Vol Mic</span>
+          <div class="slider-wrapper">
+            <input type="range" id="slider-mic-vol" min="0" max="127" value="100">
+            <div class="slider-track-fill" id="fill-mic-vol"></div>
+          </div>
+          <span class="slider-value" id="val-mic-vol">100</span>
+        </div>
+      </div>
+
+      <div class="control-group actions-group">
+        <button id="btn-reverb-toggle" class="action-btn btn-red">Chỉnh Vang ▾</button>
+      </div>
+    </main>
+
+    <!-- Panel chỉnh vang chi tiết (Xổ xuống khi nhấn Chỉnh Vang) -->
+    <section id="fx-panel" class="fx-panel hidden">
+      <div class="fx-container">
+        <!-- Vang Dài -->
+        <div class="fx-row">
+          <span class="fx-label label-orange">VANG DÀI</span>
+          <div class="fx-slider-wrapper">
+            <input type="range" id="slider-reverb-long" class="orange" min="0" max="127" value="24">
+            <div class="fx-track-fill fill-orange"></div>
+          </div>
+          <span class="fx-value" id="val-reverb-long">24</span>
+        </div>
+        <!-- Vang Ngắn -->
+        <div class="fx-row">
+          <span class="fx-label label-yellow">VANG NGẮN</span>
+          <div class="fx-slider-wrapper">
+            <input type="range" id="slider-reverb-short" class="yellow" min="0" max="127" value="24">
+            <div class="fx-track-fill fill-yellow"></div>
+          </div>
+          <span class="fx-value" id="val-reverb-short">24</span>
+        </div>
+        <!-- Delay -->
+        <div class="fx-row">
+          <span class="fx-label label-purple">DELAY</span>
+          <div class="fx-slider-wrapper">
+            <input type="range" id="slider-delay" class="purple" min="0" max="127" value="24">
+            <div class="fx-track-fill fill-purple"></div>
+          </div>
+          <span class="fx-value" id="val-delay">24</span>
+        </div>
+        <!-- Auto-Tune -->
+        <div class="fx-row">
+          <span class="fx-label label-red">AUTO TUNE</span>
+          <div class="fx-slider-wrapper">
+            <input type="range" id="slider-autotune" class="red" min="0" max="127" value="20">
+            <div class="fx-track-fill fill-red"></div>
+          </div>
+          <span class="fx-value" id="val-autotune">20</span>
+        </div>
+        <!-- Flex -->
+        <div class="fx-row">
+          <span class="fx-label label-blue">FLEX</span>
+          <div class="fx-slider-wrapper">
+            <input type="range" id="slider-flex" class="blue" min="0" max="127" value="50">
+            <div class="fx-track-fill fill-blue"></div>
+          </div>
+          <span class="fx-value" id="val-flex">50</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel cài đặt (Settings Panel) -->
+    <section id="settings-panel" class="settings-panel hidden">
+      <div class="settings-header">
+        <div class="settings-tabs">
+          <button class="tab-btn active" data-tab="tab-midi">Cấu hình MIDI</button>
+          <button class="tab-btn" data-tab="tab-mapping">Ánh xạ CC</button>
+          <button class="tab-btn" data-tab="tab-general">Chung & Chế độ</button>
+        </div>
+      </div>
+
+      <div class="settings-content">
+        <!-- Tab 1: Cấu hình MIDI -->
+        <div id="tab-midi" class="tab-content active">
+          <div class="settings-row">
+            <label for="select-midi-out">Cổng MIDI Out (Gửi tới Cubase)</label>
+            <select id="select-midi-out">
+              <option value="">-- Chưa kết nối --</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <label for="select-midi-in">Cổng MIDI In (Đồng bộ từ Cubase)</label>
+            <select id="select-midi-in">
+              <option value="">-- Chưa kết nối --</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <label for="input-midi-channel">Kênh MIDI (MIDI Channel)</label>
+            <input type="number" id="input-midi-channel" min="1" max="16" value="1">
+          </div>
+        </div>
+
+        <!-- Tab 2: Ánh xạ MIDI CC -->
+        <div id="tab-mapping" class="tab-content">
+          <div class="mapping-grid">
+            <div class="mapping-item">
+              <label>Vol Nhạc CC</label>
+              <input type="number" id="map-beat-vol" min="0" max="127" value="20">
+            </div>
+            <div class="mapping-item">
+              <label>Tắt Nhạc CC</label>
+              <input type="number" id="map-beat-mute" min="0" max="127" value="21">
+            </div>
+            <div class="mapping-item">
+              <label>Vol Mic CC</label>
+              <input type="number" id="map-mic-vol" min="0" max="127" value="22">
+            </div>
+            <div class="mapping-item">
+              <label>Tắt Mic CC</label>
+              <input type="number" id="map-mic-mute" min="0" max="127" value="23">
+            </div>
+            <div class="mapping-item">
+              <label>Tắt Vang CC</label>
+              <input type="number" id="map-fx-mute" min="0" max="127" value="24">
+            </div>
+            <div class="mapping-item">
+              <label>Vang Dài CC</label>
+              <input type="number" id="map-reverb-long" min="0" max="127" value="25">
+            </div>
+            <div class="mapping-item">
+              <label>Vang Ngắn CC</label>
+              <input type="number" id="map-reverb-short" min="0" max="127" value="26">
+            </div>
+            <div class="mapping-item">
+              <label>Delay CC</label>
+              <input type="number" id="map-delay" min="0" max="127" value="27">
+            </div>
+            <div class="mapping-item">
+              <label>AutoTune CC</label>
+              <input type="number" id="map-autotune" min="0" max="127" value="28">
+            </div>
+            <div class="mapping-item">
+              <label>Flex CC</label>
+              <input type="number" id="map-flex" min="0" max="127" value="29">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Cài đặt chung & presets -->
+        <div id="tab-general" class="tab-content">
+          <div class="settings-row project-select-row">
+            <label>Cubase Project File (.cpr)</label>
+            <div class="file-picker-group">
+              <input type="text" id="input-project-path" placeholder="Chưa chọn file..." readonly>
+              <button id="btn-select-project" class="sec-btn">Chọn file</button>
+            </div>
+          </div>
+          <div class="settings-row checkbox-row">
+            <input type="checkbox" id="chk-auto-open">
+            <label for="chk-auto-open">Tự động mở file Project này khi bật Tool</label>
+          </div>
+          <div class="settings-row opacity-row">
+            <label for="slider-opacity">Độ trong suốt cửa sổ: <span id="val-opacity">100%</span></label>
+            <input type="range" id="slider-opacity" min="40" max="100" value="100">
+          </div>
+          <div class="settings-group-title">Preset Chế độ Voice (Nói chuyện)</div>
+          <div class="voice-presets-grid">
+            <div class="preset-item">
+              <label>Vang Dài</label>
+              <input type="number" id="preset-reverb-long" min="0" max="127" value="0">
+            </div>
+            <div class="preset-item">
+              <label>Vang Ngắn</label>
+              <input type="number" id="preset-reverb-short" min="0" max="127" value="0">
+            </div>
+            <div class="preset-item">
+              <label>Delay</label>
+              <input type="number" id="preset-delay" min="0" max="127" value="0">
+            </div>
+            <div class="preset-item">
+              <label>Tăng Vol Mic</label>
+              <input type="number" id="preset-mic-change" min="-50" max="50" value="10">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-footer">
+        <button id="btn-save-settings" class="action-btn btn-blue">Lưu cài đặt</button>
+        <button id="btn-close-settings" class="sec-btn">Hủy bỏ</button>
+      </div>
+    </section>
+
+    <!-- Thanh trạng thái (Status Bar) -->
+    <footer class="status-bar">
+      <span class="status-indicator connected" id="status-indicator">●</span>
+      <span class="status-text" id="status-text">Đang tải cấu hình...</span>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
