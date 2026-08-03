@@ -11,9 +11,9 @@ const configPath = path.join(app.getPath('userData'), 'config.json');
 
 // Cấu hình kích thước mặc định cho các trạng thái cửa sổ
 const WINDOW_SIZES = {
-  collapsed: { width: 920, height: 90 },
-  expanded: { width: 920, height: 260 },
-  settings: { width: 920, height: 380 }
+  collapsed: { width: 960, height: 95 },
+  expanded: { width: 960, height: 310 },
+  settings: { width: 960, height: 430 }
 };
 
 const DEFAULT_CONFIG = {
@@ -44,13 +44,27 @@ const DEFAULT_CONFIG = {
     autoTune: 28,
     flex: 29,
     modeSingVoice: 30
+  },
+  presets: {
+    "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
+    "Bolero": { reverbLong: 45, reverbShort: 30, delay: 40, autotune: 15, flex: 60 },
+    "Remix": { reverbLong: 15, reverbShort: 10, delay: 15, autotune: 40, flex: 20 },
+    "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
   }
 };
 
 async function loadConfig() {
   try {
     const data = await fs.readFile(configPath, 'utf8');
-    return JSON.parse(data);
+    const loaded = JSON.parse(data);
+    // Tự động trộn cấu hình cũ với các cấu hình mới thêm (như presets) để tránh mất file hoặc thiếu trường
+    return {
+      ...DEFAULT_CONFIG,
+      ...loaded,
+      midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
+      voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
+      presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets
+    };
   } catch (error) {
     return DEFAULT_CONFIG;
   }

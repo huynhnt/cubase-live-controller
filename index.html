@@ -109,6 +109,24 @@
           <span class="fx-value" id="val-flex">50</span>
         </div>
       </div>
+
+      <!-- Hàng Preset giọng hát nổi (Được chia nhóm Mặc định và Cá nhân) -->
+      <div class="presets-container">
+        <div class="presets-group system-group">
+          <span class="presets-group-title">MẪU HỆ THỐNG:</span>
+          <div class="presets-list-wrapper" id="presets-system-list">
+            <!-- Render các nút mặc định -->
+          </div>
+        </div>
+        <div class="presets-divider-line"></div>
+        <div class="presets-group custom-group">
+          <span class="presets-group-title">MẪU CÁ NHÂN:</span>
+          <div class="presets-list-wrapper" id="presets-custom-list">
+            <!-- Render các nút tự tạo -->
+          </div>
+          <button id="btn-add-preset" class="preset-add-btn" title="Lưu cấu hình hiện tại thành Preset mới">+</button>
+        </div>
+      </div>
     </section>
 
     <!-- Panel cài đặt (Settings Panel) -->
@@ -238,6 +256,33 @@
       <span class="status-indicator connected" id="status-indicator">●</span>
       <span class="status-text" id="status-text">Đang tải cấu hình...</span>
     </footer>
+    <!-- Modal nhập tên Preset tự thiết kế (Thay thế prompt() bị lỗi trên Electron) -->
+    <div id="preset-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h4 class="modal-title">LƯU PRESET GIỌNG MỚI</h4>
+        <div class="modal-body">
+          <label for="input-preset-name">Tên Preset</label>
+          <input type="text" id="input-preset-name" placeholder="Ví dụ: Pop Ballad, Acoustic, Remix 2..." maxlength="20">
+        </div>
+        <div class="modal-footer">
+          <button id="btn-modal-save" class="action-btn btn-blue">Lưu Lại</button>
+          <button id="btn-modal-cancel" class="sec-btn">Hủy Bỏ</button>
+        </div>
+      </div>
+    </div>
+    <!-- Modal xác nhận xóa Preset tự thiết kế (Thay thế confirm() bị lỗi đơ trên Electron) -->
+    <div id="confirm-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h4 class="modal-title" style="color: var(--color-red);">XÁC NHẬN XÓA PRESET</h4>
+        <div class="modal-body">
+          <p id="confirm-modal-text" style="font-size: 11px; color: var(--text-primary); margin: 8px 0; text-align: center;"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-confirm-yes" class="action-btn btn-red">Xóa</button>
+          <button id="btn-confirm-no" class="sec-btn">Hủy Bỏ</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>

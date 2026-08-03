@@ -26,6 +26,12 @@ const DEFAULT_CONFIG = {
     autotune: 28,
     flex: 29,
     modeSingVoice: 30
+  },
+  presets: {
+    "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
+    "Bolero": { reverbLong: 45, reverbShort: 30, delay: 40, autotune: 15, flex: 60 },
+    "Remix": { reverbLong: 15, reverbShort: 10, delay: 15, autotune: 40, flex: 20 },
+    "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
   }
 };
 
@@ -35,7 +41,14 @@ if (!window.electronAPI) {
   window.electronAPI = {
     loadConfig: async () => {
       const data = localStorage.getItem('cubase_live_config');
-      return data ? JSON.parse(data) : JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+      const loaded = data ? JSON.parse(data) : {};
+      return {
+        ...DEFAULT_CONFIG,
+        ...loaded,
+        midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
+        voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
+        presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets
+      };
     },
     saveConfig: async (config) => {
       localStorage.setItem('cubase_live_config', JSON.stringify(config));
@@ -59,9 +72,9 @@ if (!window.electronAPI) {
       // Giả lập thay đổi kích thước cửa sổ trên trình duyệt bằng cách thay đổi CSS height
       const appEl = document.getElementById('app');
       if (appEl) {
-        if (state === 'collapsed') appEl.style.height = '90px';
-        else if (state === 'expanded') appEl.style.height = '260px';
-        else if (state === 'settings') appEl.style.height = '380px';
+        if (state === 'collapsed') appEl.style.height = '95px';
+        else if (state === 'expanded') appEl.style.height = '310px';
+        else if (state === 'settings') appEl.style.height = '430px';
       }
     }
   };
@@ -88,7 +101,9 @@ let states = {
   fxMuted: false,
   currentMode: 'sing', // 'sing' | 'voice'
   isFxPanelOpen: false,
-  isSettingsOpen: false
+  isSettingsOpen: false,
+  activePreset: 'Mặc định',
+  presetToDelete: ''
 };
 
 // Các phần tử DOM
@@ -171,6 +186,19 @@ const DOM = {
   presetReverbShort: document.getElementById('preset-reverb-short'),
   presetDelay: document.getElementById('preset-delay'),
   presetMicChange: document.getElementById('preset-mic-change'),
+  
+  // Cấu hình Preset
+  presetsSystemList: document.getElementById('presets-system-list'),
+  presetsCustomList: document.getElementById('presets-custom-list'),
+  btnAddPreset: document.getElementById('btn-add-preset'),
+  presetModal: document.getElementById('preset-modal'),
+  inputPresetName: document.getElementById('input-preset-name'),
+  btnModalSave: document.getElementById('btn-modal-save'),
+  btnModalCancel: document.getElementById('btn-modal-cancel'),
+  confirmModal: document.getElementById('confirm-modal'),
+  confirmModalText: document.getElementById('confirm-modal-text'),
+  btnConfirmYes: document.getElementById('btn-confirm-yes'),
+  btnConfirmNo: document.getElementById('btn-confirm-no'),
   
   btnSaveSettings: document.getElementById('btn-save-settings'),
   btnCloseSettings: document.getElementById('btn-close-settings'),
@@ -366,10 +394,193 @@ async function autoSaveCurrentStates() {
     beatMuted: states.beatMuted,
     micMuted: states.micMuted,
     fxMuted: states.fxMuted,
-    currentMode: states.currentMode
+    currentMode: states.currentMode,
+    activePreset: states.activePreset
   };
   
+  // Tự động CẬP NHẬT các thông số fader mới vào chính Preset đang được chọn (chỉ áp dụng cho Preset TỰ TẠO, không ghi đè Preset mặc định)
+  const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
+  if (states.activePreset && !defaultPresets.includes(states.activePreset) && appConfig.presets && appConfig.presets[states.activePreset]) {
+    appConfig.presets[states.activePreset] = {
+      reverbLong: parseInt(DOM.sliders.reverbLong.value),
+      reverbShort: parseInt(DOM.sliders.reverbShort.value),
+      delay: parseInt(DOM.sliders.delay.value),
+      autotune: parseInt(DOM.sliders.autotune.value),
+      flex: parseInt(DOM.sliders.flex.value)
+    };
+  }
+  
   await window.electronAPI.saveConfig(appConfig);
+}
+
+// Render các nút Preset giọng hát từ config (Chia nhóm Hệ Thống và Cá Nhân)
+function renderPresets() {
+  if (!DOM.presetsSystemList || !DOM.presetsCustomList || !appConfig || !appConfig.presets) return;
+  
+  DOM.presetsSystemList.innerHTML = '';
+  DOM.presetsCustomList.innerHTML = '';
+  
+  const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
+  
+  // Sắp xếp các phím preset (Hệ thống lên trước theo thứ tự chuẩn, Cá nhân xếp alphabet)
+  const keys = Object.keys(appConfig.presets);
+  keys.sort((a, b) => {
+    const idxA = defaultPresets.indexOf(a);
+    const idxB = defaultPresets.indexOf(b);
+    
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  });
+  
+  keys.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn';
+    btn.setAttribute('data-preset', name);
+    btn.innerText = name;
+    
+    if (name === states.activePreset) {
+      btn.classList.add('active');
+    }
+    
+    // Sự kiện click để load
+    btn.addEventListener('click', () => loadPreset(name));
+    
+    const isSystem = defaultPresets.includes(name);
+    
+    if (isSystem) {
+      btn.classList.add('system-preset');
+      btn.title = "Preset chuẩn hệ thống (không thể ghi đè thông số gốc)";
+      DOM.presetsSystemList.appendChild(btn);
+    } else {
+      btn.classList.add('custom-preset');
+      btn.title = "Preset cá nhân của bạn (tự động lưu khi chỉnh, chuột phải để xóa)";
+      
+      // Sự kiện chuột phải để xóa
+      btn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        deletePreset(name);
+      });
+      
+      DOM.presetsCustomList.appendChild(btn);
+    }
+  });
+}
+
+// Tải một preset lên faders và gửi tín hiệu MIDI sang Cubase
+function loadPreset(name) {
+  if (!appConfig || !appConfig.presets || !appConfig.presets[name]) return;
+  
+  states.activePreset = name;
+  renderPresets();
+  
+  const preset = appConfig.presets[name];
+  
+  // 1. Cập nhật giá trị vào các thanh trượt
+  DOM.sliders.reverbLong.value = preset.reverbLong;
+  DOM.sliders.reverbShort.value = preset.reverbShort;
+  DOM.sliders.delay.value = preset.delay;
+  DOM.sliders.autotune.value = preset.autotune ?? preset.autoTune ?? 20;
+  DOM.sliders.flex.value = preset.flex;
+  
+  // 2. Cập nhật background track fill của fader
+  Object.keys(DOM.sliders).forEach(key => {
+    updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
+  });
+  
+  // 3. Gửi lệnh MIDI CC tương ứng sang Cubase
+  midi.sendCC(appConfig.midiMappings.reverbLong, preset.reverbLong);
+  midi.sendCC(appConfig.midiMappings.reverbShort, preset.reverbShort);
+  midi.sendCC(appConfig.midiMappings.delay, preset.delay);
+  midi.sendCC(appConfig.midiMappings.autotune, preset.autotune ?? preset.autoTune ?? 20);
+  midi.sendCC(appConfig.midiMappings.flex, preset.flex);
+  
+  // 4. Tự động lưu trạng thái hiện tại
+  autoSaveCurrentStates();
+}
+
+// Lưu các giá trị hiện tại của fader thành Preset mới
+// Lưu các giá trị hiện tại của fader thành Preset mới (Mở Modal nhập tên)
+function saveCurrentAsPreset() {
+  DOM.inputPresetName.value = '';
+  DOM.presetModal.classList.remove('hidden');
+  DOM.inputPresetName.focus();
+}
+
+// Xử lý lưu lại preset khi nhấn nút trên Modal
+async function submitNewPreset() {
+  const name = DOM.inputPresetName.value.trim();
+  if (name === '') {
+    alert('Tên Preset không được để trống!');
+    return;
+  }
+  
+  if (appConfig.presets && appConfig.presets[name]) {
+    const override = confirm(`Preset tên "${name}" đã tồn tại. Bạn có muốn ghi đè cấu hình mới này đè lên không?`);
+    if (!override) return;
+  }
+  
+  // Tạo đối tượng preset mới
+  const newPreset = {
+    reverbLong: parseInt(DOM.sliders.reverbLong.value),
+    reverbShort: parseInt(DOM.sliders.reverbShort.value),
+    delay: parseInt(DOM.sliders.delay.value),
+    autotune: parseInt(DOM.sliders.autotune.value),
+    flex: parseInt(DOM.sliders.flex.value)
+  };
+  
+  // Lưu vào cấu hình
+  if (!appConfig.presets) appConfig.presets = {};
+  appConfig.presets[name] = newPreset;
+  states.activePreset = name;
+  
+  // Ghi tệp config.json
+  const success = await window.electronAPI.saveConfig(appConfig);
+  if (success) {
+    renderPresets();
+    DOM.presetModal.classList.add('hidden'); // Ẩn modal sau khi lưu thành công
+  } else {
+    alert('Lỗi: Không thể lưu Preset mới.');
+  }
+}
+
+// Xóa Preset (Mở Modal xác nhận xóa, không dùng confirm() đồng bộ gây đơ)
+function deletePreset(name) {
+  // Không cho xóa preset mặc định hệ thống
+  const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
+  if (defaultPresets.includes(name)) {
+    alert(`Không thể xóa Preset mặc định "${name}" của hệ thống!`);
+    return;
+  }
+  
+  states.presetToDelete = name;
+  DOM.confirmModalText.innerText = `Bạn có chắc chắn muốn xóa Preset giọng hát "${name}" không?`;
+  DOM.confirmModal.classList.remove('hidden');
+}
+
+// Xử lý thực hiện xóa Preset khi nhấn xác nhận trên Modal
+async function confirmDeletePreset() {
+  const name = states.presetToDelete;
+  if (!name) return;
+  
+  delete appConfig.presets[name];
+  
+  // Nếu đang active preset bị xóa, quay về mặc định
+  if (states.activePreset === name) {
+    states.activePreset = "Mặc định";
+  }
+  
+  const success = await window.electronAPI.saveConfig(appConfig);
+  if (success) {
+    renderPresets();
+  } else {
+    alert('Lỗi: Không thể xóa Preset.');
+  }
+  
+  // Đóng modal và reset trạng thái
+  DOM.confirmModal.classList.add('hidden');
+  states.presetToDelete = '';
 }
 
 function toggleBeatMute() {
@@ -764,6 +975,20 @@ function setupEventListeners() {
   DOM.sliders.delay.addEventListener('change', autoSaveCurrentStates);
   DOM.sliders.autotune.addEventListener('change', autoSaveCurrentStates);
   DOM.sliders.flex.addEventListener('change', autoSaveCurrentStates);
+  
+  // Sự kiện click thêm Preset mới
+  DOM.btnAddPreset.addEventListener('click', saveCurrentAsPreset);
+  
+  // Sự kiện của Modal lưu Preset mới
+  DOM.btnModalSave.addEventListener('click', submitNewPreset);
+  DOM.btnModalCancel.addEventListener('click', () => DOM.presetModal.classList.add('hidden'));
+  DOM.inputPresetName.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitNewPreset();
+  });
+  
+  // Sự kiện của Modal xác nhận xóa Preset
+  DOM.btnConfirmYes.addEventListener('click', confirmDeletePreset);
+  DOM.btnConfirmNo.addEventListener('click', () => DOM.confirmModal.classList.add('hidden'));
 }
 
 // -------------------------------------------------------------
@@ -788,6 +1013,7 @@ async function bootstrap() {
       states.micMuted = appConfig.lastValues.micMuted ?? false;
       states.fxMuted = appConfig.lastValues.fxMuted ?? false;
       states.currentMode = appConfig.lastValues.currentMode ?? 'sing';
+      states.activePreset = appConfig.lastValues.activePreset ?? 'Mặc định';
 
       // Cập nhật giao diện nút chế độ nếu trước đó đang ở Voice
       if (states.currentMode === 'voice') {
@@ -800,6 +1026,9 @@ async function bootstrap() {
     
     // 2. Thiết lập sự kiện lắng nghe người dùng
     setupEventListeners();
+    
+    // Vẽ danh sách các Presets
+    renderPresets();
     
     // 3. Đưa cấu hình lên UI chính
     DOM.app.style.opacity = appConfig.opacity / 100;

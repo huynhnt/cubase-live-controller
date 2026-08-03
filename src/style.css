@@ -669,3 +669,221 @@ body {
   color: var(--text-secondary);
   font-weight: 500;
 }
+
+/* =============================================================
+   PRESETS STYLE (HÀNG PRESETS DƯỚI BẢNG CHỈNH VANG)
+   ============================================================= */
+.presets-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+}
+
+.presets-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.system-group {
+  flex-shrink: 0;
+}
+
+.custom-group {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.presets-group-title {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+.presets-list-wrapper {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Ẩn scrollbar */
+}
+
+.presets-list-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.presets-divider-line {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+.preset-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.preset-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Các màu sắc trạng thái active khác nhau cho từng preset */
+.preset-btn.active {
+  background: var(--color-green);
+  border-color: var(--color-green);
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
+}
+
+.preset-btn[data-preset="Bolero"].active {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  box-shadow: 0 0 8px rgba(243, 156, 18, 0.4);
+}
+
+.preset-btn[data-preset="Remix"].active {
+  background: var(--color-red);
+  border-color: var(--color-red);
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+}
+
+.preset-btn[data-preset="Lofi"].active {
+  background: var(--color-purple);
+  border-color: var(--color-purple);
+  box-shadow: 0 0 8px rgba(155, 89, 182, 0.4);
+}
+
+.preset-add-btn {
+  background: rgba(52, 152, 219, 0.12);
+  border: 1px dashed var(--color-blue);
+  color: var(--color-blue);
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.preset-add-btn:hover {
+  background: var(--color-blue);
+  color: #ffffff;
+  border-style: solid;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+}
+
+.preset-add-btn:active {
+  transform: scale(0.92);
+}
+
+/* Custom Modal Overlay (Lưu & Xác nhận Preset) */
+.modal-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  background: rgba(25, 25, 25, 0.95);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  width: 320px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: modalZoomIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalZoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-blue);
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-body label {
+  font-size: 9px;
+  color: var(--text-secondary);
+}
+
+.modal-body input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 8px 10px;
+  font-size: 11px;
+  outline: none;
+}
+
+.modal-body input:focus {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.modal-footer .action-btn {
+  height: 28px;
+  min-width: 80px;
+}
+
+.modal-footer .sec-btn {
+  height: 28px;
+}
+
+
