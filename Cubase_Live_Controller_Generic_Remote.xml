@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<remotedescription version="1.1">
+  <ctrltable name="Cubase Live Controller">
+    <ctrl>
+      <name>Vol Nhac</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>20</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Tat Nhac</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>21</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Vol Mic</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>22</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Tat Mic</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>23</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Tat Vang</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>24</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Vang Dai</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>25</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Vang Ngan</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>26</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Delay</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>27</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Autotune</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>28</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Flex</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>29</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+  </ctrltable>
+  <bank name="Cubase Live Controller Bank">
+    <entry ctrl="Vol Nhac">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Beat</chan>
+        <tag>Volume</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Tat Nhac">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Beat</chan>
+        <tag>Mute</tag>
+        <flags>2</flags>
+      </value>
+    </entry>
+    <entry ctrl="Vol Mic">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Mic</chan>
+        <tag>Volume</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Tat Mic">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Mic</chan>
+        <tag>Mute</tag>
+        <flags>2</flags>
+      </value>
+    </entry>
+    <entry ctrl="Tat Vang">
+      <value>
+        <device>VST Mixer</device>
+        <chan>FX Reverb</chan>
+        <tag>Mute</tag>
+        <flags>2</flags>
+      </value>
+    </entry>
+    <entry ctrl="Vang Dai">
+      <value>
+        <device>VST Mixer</device>
+        <chan>FX Reverb</chan>
+        <tag>Send 1</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Vang Ngan">
+      <value>
+        <device>VST Mixer</device>
+        <chan>FX Reverb</chan>
+        <tag>Send 2</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Delay">
+      <value>
+        <device>VST Mixer</device>
+        <chan>FX Delay</chan>
+        <tag>Send 3</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Autotune">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Mic</chan>
+        <tag>Insert 1</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Flex">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Mic</chan>
+        <tag>Insert 2</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+  </bank>
+</remotedescription>
