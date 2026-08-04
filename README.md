@@ -17,6 +17,7 @@
 7. **Đồng Bộ 2 Chiều (2-way Sync):** Khi bạn kéo âm lượng hoặc bật/tắt trong Cubase, thanh trượt trên phần mềm tự động di chuyển theo để đồng bộ trạng thái thực tế.
 8. **Tự Động Mở Cubase Project (.cpr):** Cấu hình đường dẫn tệp dự án của bạn để phần mềm tự động kích hoạt Cubase tải project đó lên ngay khi mở tool.
 9. **Cửa Sổ Tiện Ích Cài Đặt (Settings):** Cho phép đổi cổng MIDI In/Out, thay đổi kênh MIDI (MIDI Channel), tùy biến số CC (Control Change) cho từng tính năng, chỉnh độ trong suốt của cửa sổ (Opacity) và thiết lập Preset cho chế độ Voice.
+10. **Bảng Chọn Tone Autotune Thủ Công:** Nhấn nút "Chọn Tone" để xổ hàng 12 phím Key (C đến B) và 2 phím giọng (Trưởng/Thứ) giúp ca sĩ chuyển tone Autotune tức thời ngay trên màn hình app.
 
 ---
 
@@ -55,7 +56,9 @@ npm install
    - **Auto-Tune (Retune Speed/Mix):** CC `28`
    - **Flex:** CC `29`
    - **Sing/Voice Mode Toggle:** CC `30`
-6. Ở bảng cấu hình phía dưới (Lower Table), chọn hành động tương ứng trong Mixer Cubase cho mỗi dòng (ví dụ: CC 20 điều khiển Fader Volume của track tên "Beat", CC 22 điều khiển Fader Volume của track tên "Mic"...).
+   - **Autotune Key:** CC `31`
+   - **Autotune Scale:** CC `32`
+6. Ở bảng cấu hình phía dưới (Lower Table), chọn hành động tương ứng trong Mixer Cubase cho mỗi dòng (ví dụ: CC 20 điều khiển Fader Volume của track tên "Beat", CC 22 điều khiển Fader Volume của track tên "Mic"..., CC 31 điều khiển tham số Key và CC 32 điều khiển tham số Scale của plugin Auto-Tune cắm ở insert).
 7. Nhấn **Apply** và **OK**.
 
 ---

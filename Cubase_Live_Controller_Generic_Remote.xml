@@ -81,6 +81,22 @@
       <max>127</max>
       <flags>1</flags>
     </ctrl>
+    <ctrl>
+      <name>Autotune Key</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>31</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
+    <ctrl>
+      <name>Autotune Scale</name>
+      <stat>1</stat>
+      <chan>0</chan>
+      <addr>32</addr>
+      <max>127</max>
+      <flags>1</flags>
+    </ctrl>
   </ctrltable>
   <bank name="Cubase Live Controller Bank">
     <entry ctrl="Vol Nhac">
@@ -160,6 +176,22 @@
         <device>VST Mixer</device>
         <chan>Mic</chan>
         <tag>Insert 2</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Autotune Key">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Mic</chan>
+        <tag>Insert 1 - Key</tag>
+        <flags>0</flags>
+      </value>
+    </entry>
+    <entry ctrl="Autotune Scale">
+      <value>
+        <device>VST Mixer</device>
+        <chan>Mic</chan>
+        <tag>Insert 1 - Scale</tag>
         <flags>0</flags>
       </value>
     </entry>

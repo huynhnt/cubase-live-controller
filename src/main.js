@@ -28,7 +28,9 @@ const DEFAULT_CONFIG = {
     delay: 27,
     autotune: 28,
     flex: 29,
-    modeSingVoice: 30
+    modeSingVoice: 30,
+    autotuneKey: 31,
+    autotuneScale: 32
   },
   presets: {
     "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
@@ -104,9 +106,12 @@ let states = {
   fxMuted: false,
   currentMode: 'sing', // 'sing' | 'voice'
   isFxPanelOpen: false,
+  isKeySelectorOpen: false,
   isSettingsOpen: false,
   activePreset: 'Mặc định',
-  presetToDelete: ''
+  presetToDelete: '',
+  currentKey: 0, // 0 = C (Đô)
+  currentScale: 0 // 0 = Major (Trưởng)
 };
 
 // Các phần tử DOM
@@ -125,6 +130,7 @@ const DOM = {
   btnFxMute: document.getElementById('btn-fx-mute'),
   btnModeToggle: document.getElementById('btn-mode-toggle'),
   btnReverbToggle: document.getElementById('btn-reverb-toggle'),
+  btnToneToggle: document.getElementById('btn-tone-toggle'),
   
   // Thanh trượt chính
   sliderBeatVol: document.getElementById('slider-beat-vol'),
@@ -136,6 +142,8 @@ const DOM = {
   
   // Panel chỉnh vang & sliders
   fxPanel: document.getElementById('fx-panel'),
+  keySelectorContainer: document.getElementById('key-selector-container'),
+  currentKeyDisplay: document.getElementById('current-key-display'),
   sliders: {
     reverbLong: document.getElementById('slider-reverb-long'),
     reverbShort: document.getElementById('slider-reverb-short'),
@@ -177,6 +185,8 @@ const DOM = {
   mapDelay: document.getElementById('map-delay'),
   mapAutotune: document.getElementById('map-autotune'),
   mapFlex: document.getElementById('map-flex'),
+  mapAutotuneKey: document.getElementById('map-autotune-key'),
+  mapAutotuneScale: document.getElementById('map-autotune-scale'),
   
   // General inputs
   inputProjectPath: document.getElementById('input-project-path'),
@@ -401,7 +411,9 @@ async function autoSaveCurrentStates() {
     micMuted: states.micMuted,
     fxMuted: states.fxMuted,
     currentMode: states.currentMode,
-    activePreset: states.activePreset
+    activePreset: states.activePreset,
+    currentKey: states.currentKey,
+    currentScale: states.currentScale
   };
   
   // Lưu trạng thái theme hiện tại
@@ -764,15 +776,142 @@ function toggleFxPanel() {
       closeSettingsPanelUI();
     }
     
-    window.electronAPI.resizeWindow('expanded');
+    // Kiểm tra xem Key Selector có đang mở không để quyết định chiều cao
+    if (states.isKeySelectorOpen) {
+      window.electronAPI.resizeWindow('expanded_with_keys');
+    } else {
+      window.electronAPI.resizeWindow('expanded');
+    }
   } else {
     // Đóng bảng chỉnh vang
     DOM.fxPanel.classList.add('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
     DOM.btnReverbToggle.classList.remove('active');
     
+    // Đóng luôn cả key selector nếu nó đang mở
+    if (states.isKeySelectorOpen) {
+      DOM.keySelectorContainer.classList.add('hidden');
+      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      DOM.btnToneToggle.classList.remove('active');
+      states.isKeySelectorOpen = false;
+    }
+    
     window.electronAPI.resizeWindow('collapsed');
   }
+}
+
+function toggleKeySelector() {
+  states.isKeySelectorOpen = !states.isKeySelectorOpen;
+  
+  if (states.isKeySelectorOpen) {
+    // Mở hàng chọn Tone
+    DOM.keySelectorContainer.classList.remove('hidden');
+    DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+    DOM.btnToneToggle.classList.add('active');
+    
+    // Đồng thời phải mở luôn Fx Panel nếu đang đóng
+    if (!states.isFxPanelOpen) {
+      states.isFxPanelOpen = true;
+      DOM.fxPanel.classList.remove('hidden');
+      DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
+      DOM.btnReverbToggle.classList.add('active');
+    }
+    
+    if (states.isSettingsOpen) {
+      closeSettingsPanelUI();
+    }
+    
+    window.electronAPI.resizeWindow('expanded_with_keys');
+  } else {
+    // Đóng hàng chọn Tone
+    DOM.keySelectorContainer.classList.add('hidden');
+    DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+    DOM.btnToneToggle.classList.remove('active');
+    
+    // Nếu Fx Panel vẫn đang mở thì co về chiều cao expanded (310px)
+    if (states.isFxPanelOpen) {
+      window.electronAPI.resizeWindow('expanded');
+    } else {
+      window.electronAPI.resizeWindow('collapsed');
+    }
+  }
+}
+
+const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function initKeySelector() {
+  const keyButtons = DOM.keySelectorContainer.querySelectorAll('.key-btn');
+  const scaleButtons = DOM.keySelectorContainer.querySelectorAll('.scale-btn');
+  
+  keyButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const keyIndex = parseInt(btn.getAttribute('data-key'));
+      selectKey(keyIndex);
+      autoSaveCurrentStates();
+    });
+  });
+  
+  scaleButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const scaleIndex = parseInt(btn.getAttribute('data-scale'));
+      selectScale(scaleIndex);
+      autoSaveCurrentStates();
+    });
+  });
+  
+  // Áp dụng giá trị hiện tại lên UI (không gửi MIDI lúc khởi động để tránh nhiễu tín hiệu)
+  selectKey(states.currentKey, false);
+  selectScale(states.currentScale, false);
+}
+
+function selectKey(keyIndex, sendMidi = true) {
+  states.currentKey = keyIndex;
+  
+  // Cập nhật UI active
+  const keyButtons = DOM.keySelectorContainer.querySelectorAll('.key-btn');
+  keyButtons.forEach(btn => {
+    const btnKey = parseInt(btn.getAttribute('data-key'));
+    if (btnKey === keyIndex) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  updateKeyDisplay();
+  
+  if (sendMidi) {
+    const ccValue = Math.round((keyIndex / 11) * 127);
+    midi.sendCC(appConfig.midiMappings.autotuneKey ?? 31, ccValue);
+  }
+}
+
+function selectScale(scaleIndex, sendMidi = true) {
+  states.currentScale = scaleIndex;
+  
+  // Cập nhật UI active
+  const scaleButtons = DOM.keySelectorContainer.querySelectorAll('.scale-btn');
+  scaleButtons.forEach(btn => {
+    const btnScale = parseInt(btn.getAttribute('data-scale'));
+    if (btnScale === scaleIndex) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  updateKeyDisplay();
+  
+  if (sendMidi) {
+    const ccValue = scaleIndex === 0 ? 0 : 127;
+    midi.sendCC(appConfig.midiMappings.autotuneScale ?? 32, ccValue);
+  }
+}
+
+function updateKeyDisplay() {
+  const keyName = KEY_NAMES[states.currentKey] || 'C';
+  const scaleName = states.currentScale === 0 ? 'Trưởng (Major)' : 'Thứ (Minor)';
+  DOM.currentKeyDisplay.innerText = `${keyName} ${scaleName}`;
 }
 
 function openSettingsPanel() {
@@ -780,10 +919,12 @@ function openSettingsPanel() {
   DOM.settingsPanel.classList.remove('hidden');
   DOM.btnSettingsToggle.classList.add('active');
   
-  // Đóng tạm thời panel chỉnh vang
+  // Đóng tạm thời panel chỉnh vang và chọn tone
   DOM.fxPanel.classList.add('hidden');
   DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
   DOM.btnReverbToggle.classList.remove('active');
+  DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+  DOM.btnToneToggle.classList.remove('active');
   
   // Resize window sang kích thước settings
   window.electronAPI.resizeWindow('settings');
@@ -809,7 +950,15 @@ function cancelSettings() {
     DOM.fxPanel.classList.remove('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
     DOM.btnReverbToggle.classList.add('active');
-    window.electronAPI.resizeWindow('expanded');
+    
+    if (states.isKeySelectorOpen) {
+      DOM.keySelectorContainer.classList.remove('hidden');
+      DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+      DOM.btnToneToggle.classList.add('active');
+      window.electronAPI.resizeWindow('expanded_with_keys');
+    } else {
+      window.electronAPI.resizeWindow('expanded');
+    }
   } else {
     window.electronAPI.resizeWindow('collapsed');
   }
@@ -835,6 +984,8 @@ function loadConfigToForm() {
   DOM.mapDelay.value = appConfig.midiMappings.delay;
   DOM.mapAutotune.value = appConfig.midiMappings.autotune;
   DOM.mapFlex.value = appConfig.midiMappings.flex;
+  DOM.mapAutotuneKey.value = appConfig.midiMappings.autotuneKey ?? 31;
+  DOM.mapAutotuneScale.value = appConfig.midiMappings.autotuneScale ?? 32;
   
   // General tab
   DOM.inputProjectPath.value = appConfig.projectPath;
@@ -879,7 +1030,9 @@ async function saveSettings() {
       delay: parseInt(DOM.mapDelay.value),
       autotune: parseInt(DOM.mapAutotune.value),
       flex: parseInt(DOM.mapFlex.value),
-      modeSingVoice: appConfig.midiMappings.modeSingVoice // giữ nguyên
+      modeSingVoice: appConfig.midiMappings.modeSingVoice, // giữ nguyên
+      autotuneKey: parseInt(DOM.mapAutotuneKey.value),
+      autotuneScale: parseInt(DOM.mapAutotuneScale.value)
     }
   };
   
@@ -900,7 +1053,15 @@ async function saveSettings() {
       DOM.fxPanel.classList.remove('hidden');
       DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
       DOM.btnReverbToggle.classList.add('active');
-      window.electronAPI.resizeWindow('expanded');
+      
+      if (states.isKeySelectorOpen) {
+        DOM.keySelectorContainer.classList.remove('hidden');
+        DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+        DOM.btnToneToggle.classList.add('active');
+        window.electronAPI.resizeWindow('expanded_with_keys');
+      } else {
+        window.electronAPI.resizeWindow('expanded');
+      }
     } else {
       window.electronAPI.resizeWindow('collapsed');
     }
@@ -945,8 +1106,9 @@ function setupEventListeners() {
   // Chuyển Mode Hát / Voice
   DOM.btnModeToggle.addEventListener('click', toggleSingVoiceMode);
   
-  // Nút mở bảng vang
+  // Nút mở bảng vang & chọn tone
   DOM.btnReverbToggle.addEventListener('click', toggleFxPanel);
+  DOM.btnToneToggle.addEventListener('click', toggleKeySelector);
   
   // Nút trong Cài đặt
   DOM.btnSaveSettings.addEventListener('click', saveSettings);
@@ -1051,6 +1213,8 @@ async function bootstrap() {
       states.fxMuted = appConfig.lastValues.fxMuted ?? false;
       states.currentMode = appConfig.lastValues.currentMode ?? 'sing';
       states.activePreset = appConfig.lastValues.activePreset ?? 'Mặc định';
+      states.currentKey = appConfig.lastValues.currentKey ?? 0;
+      states.currentScale = appConfig.lastValues.currentScale ?? 0;
 
       // Cập nhật giao diện nút chế độ nếu trước đó đang ở Voice
       if (states.currentMode === 'voice') {
@@ -1063,6 +1227,9 @@ async function bootstrap() {
     
     // 2. Thiết lập sự kiện lắng nghe người dùng
     setupEventListeners();
+    
+    // Khởi tạo bảng chọn Tone
+    initKeySelector();
     
     // Vẽ danh sách các Presets
     renderPresets();

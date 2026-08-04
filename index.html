@@ -58,6 +58,7 @@
 
       <div class="control-group actions-group">
         <button id="btn-reverb-toggle" class="action-btn btn-red">Chỉnh Vang ▾</button>
+        <button id="btn-tone-toggle" class="action-btn btn-orange">Chọn Tone ▾</button>
       </div>
     </main>
 
@@ -108,6 +109,33 @@
             <div class="fx-track-fill fill-blue"></div>
           </div>
           <span class="fx-value" id="val-flex">50</span>
+        </div>
+      </div>
+
+      <!-- Bảng chọn Tone thủ công cho Autotune -->
+      <div class="key-selector-container hidden" id="key-selector-container">
+        <div class="key-label-wrapper">
+          <span class="key-label">TÔNG AUTOTUNE:</span>
+          <span id="current-key-display" class="key-display">C Major</span>
+        </div>
+        <div class="keys-list">
+          <button class="key-btn active" data-key="0">C</button>
+          <button class="key-btn" data-key="1">C#</button>
+          <button class="key-btn" data-key="2">D</button>
+          <button class="key-btn" data-key="3">D#</button>
+          <button class="key-btn" data-key="4">E</button>
+          <button class="key-btn" data-key="5">F</button>
+          <button class="key-btn" data-key="6">F#</button>
+          <button class="key-btn" data-key="7">G</button>
+          <button class="key-btn" data-key="8">G#</button>
+          <button class="key-btn" data-key="9">A</button>
+          <button class="key-btn" data-key="10">A#</button>
+          <button class="key-btn" data-key="11">B</button>
+        </div>
+        <div class="divider-line"></div>
+        <div class="scales-list">
+          <button class="scale-btn active" data-scale="0">Trưởng (Major)</button>
+          <button class="scale-btn" data-scale="1">Thứ (Minor)</button>
         </div>
       </div>
 
@@ -203,6 +231,14 @@
             <div class="mapping-item">
               <label>Flex CC</label>
               <input type="number" id="map-flex" min="0" max="127" value="29">
+            </div>
+            <div class="mapping-item">
+              <label>Autotune Key CC</label>
+              <input type="number" id="map-autotune-key" min="0" max="127" value="31">
+            </div>
+            <div class="mapping-item">
+              <label>Autotune Scale CC</label>
+              <input type="number" id="map-autotune-scale" min="0" max="127" value="32">
             </div>
           </div>
         </div>

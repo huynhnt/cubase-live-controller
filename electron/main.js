@@ -13,6 +13,7 @@ const configPath = path.join(app.getPath('userData'), 'config.json');
 const WINDOW_SIZES = {
   collapsed: { width: 960, height: 95 },
   expanded: { width: 960, height: 310 },
+  expanded_with_keys: { width: 960, height: 375 },
   settings: { width: 960, height: 430 }
 };
 
@@ -42,9 +43,11 @@ const DEFAULT_CONFIG = {
     reverbLong: 25,
     reverbShort: 26,
     delay: 27,
-    autoTune: 28,
+    autotune: 28,
     flex: 29,
-    modeSingVoice: 30
+    modeSingVoice: 30,
+    autotuneKey: 31,
+    autotuneScale: 32
   },
   presets: {
     "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
