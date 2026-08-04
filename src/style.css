@@ -1268,3 +1268,174 @@ body.light-theme .autokey-btn:hover {
   background: rgba(46, 204, 113, 0.1);
   border-color: rgba(46, 204, 113, 0.3);
 }
+
+/* Hiển thị tone tự động phát hiện */
+.detected-key-display {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-green);
+  opacity: 0.85;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: rgba(46, 204, 113, 0.05);
+  border-radius: 4px;
+  border: 1px dashed rgba(46, 204, 113, 0.15);
+}
+
+body.light-theme .detected-key-display {
+  background: rgba(46, 204, 113, 0.03);
+  border-color: rgba(46, 204, 113, 0.1);
+}
+
+/* Trạng thái đang dò tone (pulsing orange) */
+.autokey-btn.analyzing {
+  background: rgba(230, 126, 34, 0.12) !important;
+  border-color: rgba(230, 126, 34, 0.4) !important;
+  color: #e67e22 !important;
+  animation: pulse-orange 1.5s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes pulse-orange {
+  0% {
+    box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(230, 126, 34, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(230, 126, 34, 0);
+  }
+}
+
+/* Trạng thái sẵn sàng gửi (pulsing green) */
+.autokey-btn.ready-to-send {
+  background: rgba(46, 204, 113, 0.15) !important;
+  border-color: rgba(46, 204, 113, 0.5) !important;
+  color: var(--color-green) !important;
+  animation: pulse-green 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(46, 204, 113, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+  }
+}
+
+/* About / Contact Panel Styles */
+.about-title {
+  color: var(--color-green);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.about-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+}
+
+.about-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+body.light-theme .about-card {
+  background: rgba(0, 0, 0, 0.01);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+.about-avatar-container {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(46, 204, 113, 0.1);
+  border: 2px solid var(--color-green);
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  flex-shrink: 0;
+}
+
+.about-info-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.creator-name {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.creator-slogan {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.contact-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.contact-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+.contact-text {
+  font-weight: 500;
+}
+
+.contact-text strong {
+  color: var(--color-green);
+}
+
+.about-footer-text {
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  margin-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.05);
+  padding-top: 12px;
+}
+
+body.light-theme .about-footer-text {
+  border-top-color: rgba(0, 0, 0, 0.05);
+}

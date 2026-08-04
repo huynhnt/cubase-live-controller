@@ -32,7 +32,9 @@ const DEFAULT_CONFIG = {
     autotuneKey: 31,
     autotuneScale: 32,
     getTone: 33,
-    sendTone: 34
+    sendTone: 34,
+    detectedKey: 35,
+    detectedScale: 36
   },
   presets: {
     "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
@@ -110,10 +112,14 @@ let states = {
   isFxPanelOpen: false,
   isKeySelectorOpen: false,
   isSettingsOpen: false,
+  isAboutOpen: false,
   activePreset: 'Mặc định',
   presetToDelete: '',
   currentKey: 0, // 0 = C (Đô)
-  currentScale: 0 // 0 = Major (Trưởng)
+  currentScale: 0, // 0 = Major (Trưởng)
+  detectedKey: null,
+  detectedScale: null,
+  isWaitingForAutoKey: false
 };
 
 // Các phần tử DOM
@@ -124,6 +130,7 @@ const DOM = {
   btnMinimize: document.getElementById('btn-minimize'),
   btnClose: document.getElementById('btn-close'),
   btnSettingsToggle: document.getElementById('btn-settings-toggle'),
+  btnAboutToggle: document.getElementById('btn-about-toggle'),
   btnThemeToggle: document.getElementById('btn-theme-toggle'),
   
   // Nút chức năng chính
@@ -146,6 +153,7 @@ const DOM = {
   fxPanel: document.getElementById('fx-panel'),
   keySelectorContainer: document.getElementById('key-selector-container'),
   currentKeyDisplay: document.getElementById('current-key-display'),
+  detectedKeyDisplay: document.getElementById('detected-key-display'),
   btnGetTone: document.getElementById('btn-get-tone'),
   btnSendTone: document.getElementById('btn-send-tone'),
   sliders: {
@@ -172,6 +180,8 @@ const DOM = {
   
   // Panel cài đặt & inputs
   settingsPanel: document.getElementById('settings-panel'),
+  aboutPanel: document.getElementById('about-panel'),
+  btnCloseAbout: document.getElementById('btn-close-about'),
   tabButtons: document.querySelectorAll('.tab-btn'),
   tabContents: document.querySelectorAll('.tab-content'),
   selectMidiOut: document.getElementById('select-midi-out'),
@@ -385,6 +395,18 @@ function handleIncomingMidiCC({ cc, value }) {
   else if (cc === mappings.flex) {
     DOM.sliders.flex.value = value;
     updateSliderFill(DOM.sliders.flex, DOM.fills.flex, DOM.vals.flex);
+  }
+  // Nhận diện Key từ Auto-Key
+  else if (cc === mappings.detectedKey) {
+    const keyIndex = Math.round((value / 127) * 11);
+    states.detectedKey = keyIndex;
+    updateAutoKeyDisplay();
+  }
+  // Nhận diện Scale từ Auto-Key
+  else if (cc === mappings.detectedScale) {
+    const scaleIndex = value > 64 ? 1 : 0;
+    states.detectedScale = scaleIndex;
+    updateAutoKeyDisplay();
   }
 }
 
@@ -772,6 +794,12 @@ function toggleFxPanel() {
   states.isFxPanelOpen = !states.isFxPanelOpen;
   
   if (states.isFxPanelOpen) {
+    // TẮT GIỚI THIỆU NẾU ĐANG MỞ
+    if (states.isAboutOpen) {
+      states.isAboutOpen = false;
+      DOM.aboutPanel.classList.add('hidden');
+      DOM.btnAboutToggle.classList.remove('active');
+    }
     // TẮT CHỌN TONE NẾU ĐANG MỞ (Độc lập tuyệt đối)
     if (states.isKeySelectorOpen) {
       states.isKeySelectorOpen = false;
@@ -811,6 +839,12 @@ function toggleKeySelector() {
   states.isKeySelectorOpen = !states.isKeySelectorOpen;
   
   if (states.isKeySelectorOpen) {
+    // TẮT GIỚI THIỆU NẾU ĐANG MỞ
+    if (states.isAboutOpen) {
+      states.isAboutOpen = false;
+      DOM.aboutPanel.classList.add('hidden');
+      DOM.btnAboutToggle.classList.remove('active');
+    }
     // TẮT CHỈNH VANG NẾU ĐANG MỞ (Độc lập tuyệt đối)
     if (states.isFxPanelOpen) {
       states.isFxPanelOpen = false;
@@ -878,25 +912,61 @@ function initKeySelector() {
   // Gắn sự kiện cho các nút điều khiển Auto-Key
   if (DOM.btnGetTone) {
     DOM.btnGetTone.addEventListener('click', () => {
+      // Gửi tín hiệu CC bắt đầu dò tone
       midi.sendCC(appConfig.midiMappings.getTone ?? 33, 127);
       
-      // Tạo hiệu ứng nhấp nháy click
-      DOM.btnGetTone.style.background = 'rgba(46, 204, 113, 0.3)';
+      // Reset trạng thái dò
+      states.detectedKey = null;
+      states.detectedScale = null;
+      states.isWaitingForAutoKey = true;
+      
+      // Chuyển nút sang trạng thái đang phân tích
+      DOM.btnGetTone.innerText = 'Đang dò...';
+      DOM.btnGetTone.classList.add('analyzing');
+      
+      // Đổi nhãn
+      DOM.detectedKeyDisplay.innerText = 'Auto-Key: Đang phân tích...';
+      DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
+      
+      // Tắt trạng thái sẵn sàng gửi nếu có
+      DOM.btnSendTone.classList.remove('ready-to-send');
+      
+      // Timeout dự phòng sau 15 giây nếu không nhận được tín hiệu MIDI
       setTimeout(() => {
-        DOM.btnGetTone.style.background = '';
-      }, 200);
+        if (states.isWaitingForAutoKey) {
+          states.isWaitingForAutoKey = false;
+          DOM.btnGetTone.innerText = 'Lấy Tone';
+          DOM.btnGetTone.classList.remove('analyzing');
+          DOM.detectedKeyDisplay.innerText = 'Auto-Key: Hết thời gian dò';
+          DOM.detectedKeyDisplay.style.color = '';
+        }
+      }, 15000);
     });
   }
   
   if (DOM.btnSendTone) {
     DOM.btnSendTone.addEventListener('click', () => {
+      // Gửi tín hiệu CC lệnh gửi sang Auto-Tune của Auto-Key
       midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
       
-      // Tạo hiệu ứng nhấp nháy click
-      DOM.btnSendTone.style.background = 'rgba(46, 204, 113, 0.3)';
+      // Nếu có sẵn tone nhận diện được từ Auto-Key, ta tự động áp dụng lên UI thủ công của app
+      // và gửi CC 31/32 sang Auto-Tune để đảm bảo đồng bộ tuyệt đối
+      if (states.detectedKey !== null && states.detectedScale !== null) {
+        selectKey(states.detectedKey);
+        selectScale(states.detectedScale);
+        autoSaveCurrentStates();
+      }
+      
+      // Tắt trạng thái nhấp nháy báo sẵn sàng
+      DOM.btnSendTone.classList.remove('ready-to-send');
+      
+      // Hiệu ứng nhấp nháy click thành công màu xanh lá
+      DOM.btnSendTone.style.background = 'rgba(46, 204, 113, 0.4)';
+      DOM.btnSendTone.style.boxShadow = '0 0 12px var(--color-green)';
       setTimeout(() => {
         DOM.btnSendTone.style.background = '';
-      }, 200);
+        DOM.btnSendTone.style.boxShadow = '';
+      }, 300);
     });
   }
   
@@ -955,6 +1025,28 @@ function updateKeyDisplay() {
   DOM.currentKeyDisplay.innerText = `${keyName} ${scaleName}`;
 }
 
+function updateAutoKeyDisplay() {
+  if (states.detectedKey !== null && states.detectedScale !== null) {
+    const keyName = KEY_NAMES[states.detectedKey] || 'C';
+    const scaleName = states.detectedScale === 0 ? 'Major' : 'Minor';
+    DOM.detectedKeyDisplay.innerText = `Auto-Key: ${keyName} ${scaleName}`;
+    DOM.detectedKeyDisplay.style.color = 'var(--color-green)';
+    
+    // Nếu đang chờ tín hiệu từ Auto-Key, kết thúc quá trình dò
+    if (states.isWaitingForAutoKey) {
+      states.isWaitingForAutoKey = false;
+      DOM.btnGetTone.innerText = 'Lấy Tone';
+      DOM.btnGetTone.classList.remove('analyzing');
+      
+      // Cho nút Gửi Tone nhấp nháy báo sẵn sàng
+      DOM.btnSendTone.classList.add('ready-to-send');
+    }
+  } else {
+    DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
+    DOM.detectedKeyDisplay.style.color = '';
+  }
+}
+
 function openSettingsPanel() {
   states.isSettingsOpen = true;
   DOM.settingsPanel.classList.remove('hidden');
@@ -978,6 +1070,39 @@ function closeSettingsPanelUI() {
   states.isSettingsOpen = false;
   DOM.settingsPanel.classList.add('hidden');
   DOM.btnSettingsToggle.classList.remove('active');
+}
+
+function toggleAboutPanel() {
+  states.isAboutOpen = !states.isAboutOpen;
+  
+  if (states.isAboutOpen) {
+    // Đóng các bảng khác
+    if (states.isFxPanelOpen) {
+      states.isFxPanelOpen = false;
+      DOM.fxPanel.classList.add('hidden');
+      DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
+      DOM.btnReverbToggle.classList.remove('active');
+    }
+    if (states.isKeySelectorOpen) {
+      states.isKeySelectorOpen = false;
+      DOM.keySelectorContainer.classList.add('hidden');
+      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      DOM.btnToneToggle.classList.remove('active');
+    }
+    if (states.isSettingsOpen) {
+      closeSettingsPanelUI();
+    }
+    
+    DOM.aboutPanel.classList.remove('hidden');
+    DOM.btnAboutToggle.classList.add('active');
+    
+    // Resize window sang kích thước settings (430px) để hiển thị trọn vẹn card creator
+    window.electronAPI.resizeWindow('settings');
+  } else {
+    DOM.aboutPanel.classList.add('hidden');
+    DOM.btnAboutToggle.classList.remove('active');
+    window.electronAPI.resizeWindow('collapsed');
+  }
 }
 
 function cancelSettings() {
@@ -1039,6 +1164,8 @@ function loadConfigToForm() {
   DOM.mapAutotuneScale.value = appConfig.midiMappings.autotuneScale ?? 32;
   DOM.mapGetTone.value = appConfig.midiMappings.getTone ?? 33;
   DOM.mapSendTone.value = appConfig.midiMappings.sendTone ?? 34;
+  DOM.mapDetectedKey.value = appConfig.midiMappings.detectedKey ?? 35;
+  DOM.mapDetectedScale.value = appConfig.midiMappings.detectedScale ?? 36;
   
   // General tab
   DOM.inputProjectPath.value = appConfig.projectPath;
@@ -1087,7 +1214,9 @@ async function saveSettings() {
       autotuneKey: parseInt(DOM.mapAutotuneKey.value),
       autotuneScale: parseInt(DOM.mapAutotuneScale.value),
       getTone: parseInt(DOM.mapGetTone.value),
-      sendTone: parseInt(DOM.mapSendTone.value)
+      sendTone: parseInt(DOM.mapSendTone.value),
+      detectedKey: parseInt(DOM.mapDetectedKey.value),
+      detectedScale: parseInt(DOM.mapDetectedScale.value)
     }
   };
   
@@ -1146,7 +1275,16 @@ function setupEventListeners() {
     if (states.isSettingsOpen) {
       cancelSettings();
     } else {
+      if (states.isAboutOpen) {
+        toggleAboutPanel();
+      }
       openSettingsPanel();
+    }
+  });
+  DOM.btnAboutToggle.addEventListener('click', toggleAboutPanel);
+  DOM.btnCloseAbout.addEventListener('click', () => {
+    if (states.isAboutOpen) {
+      toggleAboutPanel();
     }
   });
   DOM.btnThemeToggle.addEventListener('click', toggleTheme);

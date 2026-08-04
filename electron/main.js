@@ -49,7 +49,9 @@ const DEFAULT_CONFIG = {
     autotuneKey: 31,
     autotuneScale: 32,
     getTone: 33,
-    sendTone: 34
+    sendTone: 34,
+    detectedKey: 35,
+    detectedScale: 36
   },
   presets: {
     "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },

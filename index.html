@@ -19,6 +19,7 @@
       </div>
       <div class="window-controls">
         <button id="btn-theme-toggle" class="control-btn" title="Chuyển chế độ Sáng / Tối">🌙</button>
+        <button id="btn-about-toggle" class="control-btn" title="Giới thiệu & Liên hệ">ℹ️</button>
         <button id="btn-settings-toggle" class="control-btn" title="Cài đặt">⚙️</button>
         <button id="btn-minimize" class="control-btn" title="Thu nhỏ">—</button>
         <button id="btn-close" class="control-btn btn-close" title="Đóng">✕</button>
@@ -117,6 +118,7 @@
         <div class="key-label-wrapper">
           <span class="key-label">TÔNG AUTOTUNE:</span>
           <span id="current-key-display" class="key-display">C Major</span>
+          <span id="detected-key-display" class="detected-key-display">Auto-Key: Chưa rõ</span>
         </div>
         <div class="keys-list">
           <button class="key-btn active" data-key="0">C</button>
@@ -306,6 +308,44 @@
       <div class="settings-footer">
         <button id="btn-save-settings" class="action-btn btn-blue">Lưu cài đặt</button>
         <button id="btn-close-settings" class="sec-btn">Hủy bỏ</button>
+      </div>
+    </section>
+
+    <!-- Panel Giới thiệu & Liên hệ (About Panel) -->
+    <section id="about-panel" class="settings-panel hidden">
+      <div class="settings-header">
+        <h3 class="about-title">ℹ️ GIỚI THIỆU & LIÊN HỆ TÁC GIẢ</h3>
+      </div>
+      <div class="about-content">
+        <div class="about-card">
+          <div class="about-avatar-container">
+            👤
+          </div>
+          <div class="about-info-group">
+            <h4 class="creator-name">Huang Huihuang</h4>
+            <p class="creator-slogan">Phát triển ứng dụng hoàn toàn miễn phí, dành tặng cộng đồng livestream & hát karaoke thu âm Cubase Việt Nam.</p>
+            <div class="contact-methods">
+              <div class="contact-item">
+                <span class="contact-icon">📱</span>
+                <span class="contact-text">Zalo / Phone: <strong>0793360016</strong></span>
+              </div>
+              <div class="contact-item">
+                <span class="contact-icon">📧</span>
+                <span class="contact-text">Email: <strong>Vina.knights@gmail.com</strong></span>
+              </div>
+              <div class="contact-item">
+                <span class="contact-icon">🌐</span>
+                <span class="contact-text">Facebook: <strong>Huang Huihuang</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="about-footer-text">
+          <p>❤️ Phần mềm Cubase Live Controller được viết và chia sẻ phi thương mại. Cảm ơn anh đã ủng hộ!</p>
+        </div>
+      </div>
+      <div class="settings-footer" style="justify-content: flex-end;">
+        <button id="btn-close-about" class="action-btn btn-grey" style="min-width: 80px; height: 32px;">Đóng</button>
       </div>
     </section>
 
