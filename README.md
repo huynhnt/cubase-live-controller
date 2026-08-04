@@ -58,7 +58,9 @@ npm install
    - **Sing/Voice Mode Toggle:** CC `30`
    - **Autotune Key:** CC `31`
    - **Autotune Scale:** CC `32`
-6. Ở bảng cấu hình phía dưới (Lower Table), chọn hành động tương ứng trong Mixer Cubase cho mỗi dòng (ví dụ: CC 20 điều khiển Fader Volume của track tên "Beat", CC 22 điều khiển Fader Volume của track tên "Mic"..., CC 31 điều khiển tham số Key và CC 32 điều khiển tham số Scale của plugin Auto-Tune cắm ở insert).
+   - **Lấy Tone (Auto-Key):** CC `33`
+   - **Gửi Tone (Auto-Key):** CC `34`
+6. Ở bảng cấu hình phía dưới (Lower Table), chọn hành động tương ứng trong Mixer Cubase cho mỗi dòng (ví dụ: CC 20 điều khiển Fader Volume của track tên "Beat", CC 22 điều khiển Fader Volume của track tên "Mic"..., CC 31 điều khiển tham số Key và CC 32 điều khiển tham số Scale của plugin Auto-Tune cắm ở insert, CC 33 kích hoạt nút dò/reset và CC 34 kích hoạt nút Send to Auto-Tune của plugin Auto-Key cắm ở insert).
 7. Nhấn **Apply** và **OK**.
 
 ---

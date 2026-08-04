@@ -30,7 +30,9 @@ const DEFAULT_CONFIG = {
     flex: 29,
     modeSingVoice: 30,
     autotuneKey: 31,
-    autotuneScale: 32
+    autotuneScale: 32,
+    getTone: 33,
+    sendTone: 34
   },
   presets: {
     "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
@@ -144,6 +146,8 @@ const DOM = {
   fxPanel: document.getElementById('fx-panel'),
   keySelectorContainer: document.getElementById('key-selector-container'),
   currentKeyDisplay: document.getElementById('current-key-display'),
+  btnGetTone: document.getElementById('btn-get-tone'),
+  btnSendTone: document.getElementById('btn-send-tone'),
   sliders: {
     reverbLong: document.getElementById('slider-reverb-long'),
     reverbShort: document.getElementById('slider-reverb-short'),
@@ -187,6 +191,8 @@ const DOM = {
   mapFlex: document.getElementById('map-flex'),
   mapAutotuneKey: document.getElementById('map-autotune-key'),
   mapAutotuneScale: document.getElementById('map-autotune-scale'),
+  mapGetTone: document.getElementById('map-get-tone'),
+  mapSendTone: document.getElementById('map-send-tone'),
   
   // General inputs
   inputProjectPath: document.getElementById('input-project-path'),
@@ -766,37 +772,38 @@ function toggleFxPanel() {
   states.isFxPanelOpen = !states.isFxPanelOpen;
   
   if (states.isFxPanelOpen) {
+    // TẮT CHỌN TONE NẾU ĐANG MỞ (Độc lập tuyệt đối)
+    if (states.isKeySelectorOpen) {
+      states.isKeySelectorOpen = false;
+      DOM.keySelectorContainer.classList.add('hidden');
+      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      DOM.btnToneToggle.classList.remove('active');
+    }
+    
     // Mở bảng chỉnh vang
     DOM.fxPanel.classList.remove('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
     DOM.btnReverbToggle.classList.add('active');
+    
+    // Đảm bảo hiển thị đầy đủ faders và presets của bảng chỉnh vang
+    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+    if (fxContainer) fxContainer.classList.remove('hidden');
+    if (presetsContainer) presetsContainer.classList.remove('hidden');
     
     // Nếu bảng cài đặt đang mở thì đóng lại
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
     }
     
-    // Kiểm tra xem Key Selector có đang mở không để quyết định chiều cao
-    if (states.isKeySelectorOpen) {
-      window.electronAPI.resizeWindow('expanded_with_keys');
-    } else {
-      window.electronAPI.resizeWindow('expanded');
-    }
+    window.electronAPI.resizeWindow('expanded'); // 310px
   } else {
     // Đóng bảng chỉnh vang
     DOM.fxPanel.classList.add('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
     DOM.btnReverbToggle.classList.remove('active');
     
-    // Đóng luôn cả key selector nếu nó đang mở
-    if (states.isKeySelectorOpen) {
-      DOM.keySelectorContainer.classList.add('hidden');
-      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
-      DOM.btnToneToggle.classList.remove('active');
-      states.isKeySelectorOpen = false;
-    }
-    
-    window.electronAPI.resizeWindow('collapsed');
+    window.electronAPI.resizeWindow('collapsed'); // 95px
   }
 }
 
@@ -804,36 +811,45 @@ function toggleKeySelector() {
   states.isKeySelectorOpen = !states.isKeySelectorOpen;
   
   if (states.isKeySelectorOpen) {
-    // Mở hàng chọn Tone
+    // TẮT CHỈNH VANG NẾU ĐANG MỞ (Độc lập tuyệt đối)
+    if (states.isFxPanelOpen) {
+      states.isFxPanelOpen = false;
+      DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
+      DOM.btnReverbToggle.classList.remove('active');
+    }
+    
+    // Mở bảng chọn Tone
+    DOM.fxPanel.classList.remove('hidden'); // Dùng chung container lớn
     DOM.keySelectorContainer.classList.remove('hidden');
     DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
     DOM.btnToneToggle.classList.add('active');
     
-    // Đồng thời phải mở luôn Fx Panel nếu đang đóng
-    if (!states.isFxPanelOpen) {
-      states.isFxPanelOpen = true;
-      DOM.fxPanel.classList.remove('hidden');
-      DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
-      DOM.btnReverbToggle.classList.add('active');
-    }
+    // Ẩn faders và presets chỉnh vang đi để chỉ hiện hàng phím chọn tone ngang
+    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+    if (fxContainer) fxContainer.classList.add('hidden');
+    if (presetsContainer) presetsContainer.classList.add('hidden');
     
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
     }
     
-    window.electronAPI.resizeWindow('expanded_with_keys');
+    window.electronAPI.resizeWindow('expanded_tone_only'); // 165px
   } else {
     // Đóng hàng chọn Tone
     DOM.keySelectorContainer.classList.add('hidden');
     DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
     DOM.btnToneToggle.classList.remove('active');
     
-    // Nếu Fx Panel vẫn đang mở thì co về chiều cao expanded (310px)
-    if (states.isFxPanelOpen) {
-      window.electronAPI.resizeWindow('expanded');
-    } else {
-      window.electronAPI.resizeWindow('collapsed');
-    }
+    DOM.fxPanel.classList.add('hidden');
+    
+    // Hiện lại faders & presets chỉnh vang để sẵn sàng khi mở Chỉnh Vang
+    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+    if (fxContainer) fxContainer.classList.remove('hidden');
+    if (presetsContainer) presetsContainer.classList.remove('hidden');
+    
+    window.electronAPI.resizeWindow('collapsed'); // 95px
   }
 }
 
@@ -858,6 +874,31 @@ function initKeySelector() {
       autoSaveCurrentStates();
     });
   });
+  
+  // Gắn sự kiện cho các nút điều khiển Auto-Key
+  if (DOM.btnGetTone) {
+    DOM.btnGetTone.addEventListener('click', () => {
+      midi.sendCC(appConfig.midiMappings.getTone ?? 33, 127);
+      
+      // Tạo hiệu ứng nhấp nháy click
+      DOM.btnGetTone.style.background = 'rgba(46, 204, 113, 0.3)';
+      setTimeout(() => {
+        DOM.btnGetTone.style.background = '';
+      }, 200);
+    });
+  }
+  
+  if (DOM.btnSendTone) {
+    DOM.btnSendTone.addEventListener('click', () => {
+      midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
+      
+      // Tạo hiệu ứng nhấp nháy click
+      DOM.btnSendTone.style.background = 'rgba(46, 204, 113, 0.3)';
+      setTimeout(() => {
+        DOM.btnSendTone.style.background = '';
+      }, 200);
+    });
+  }
   
   // Áp dụng giá trị hiện tại lên UI (không gửi MIDI lúc khởi động để tránh nhiễu tín hiệu)
   selectKey(states.currentKey, false);
@@ -945,20 +986,30 @@ function cancelSettings() {
   // Khôi phục lại độ trong suốt preview về đúng config cũ
   DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
   
-  // Khôi phục lại trạng thái mở bảng Vang nếu trước đó đang mở
+  // Khôi phục lại trạng thái mở bảng Vang / Chọn Tone nếu trước đó đang mở
   if (states.isFxPanelOpen) {
     DOM.fxPanel.classList.remove('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
     DOM.btnReverbToggle.classList.add('active');
     
-    if (states.isKeySelectorOpen) {
-      DOM.keySelectorContainer.classList.remove('hidden');
-      DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
-      DOM.btnToneToggle.classList.add('active');
-      window.electronAPI.resizeWindow('expanded_with_keys');
-    } else {
-      window.electronAPI.resizeWindow('expanded');
-    }
+    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+    if (fxContainer) fxContainer.classList.remove('hidden');
+    if (presetsContainer) presetsContainer.classList.remove('hidden');
+    
+    window.electronAPI.resizeWindow('expanded');
+  } else if (states.isKeySelectorOpen) {
+    DOM.fxPanel.classList.remove('hidden');
+    DOM.keySelectorContainer.classList.remove('hidden');
+    DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+    DOM.btnToneToggle.classList.add('active');
+    
+    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+    if (fxContainer) fxContainer.classList.add('hidden');
+    if (presetsContainer) presetsContainer.classList.add('hidden');
+    
+    window.electronAPI.resizeWindow('expanded_tone_only');
   } else {
     window.electronAPI.resizeWindow('collapsed');
   }
@@ -986,6 +1037,8 @@ function loadConfigToForm() {
   DOM.mapFlex.value = appConfig.midiMappings.flex;
   DOM.mapAutotuneKey.value = appConfig.midiMappings.autotuneKey ?? 31;
   DOM.mapAutotuneScale.value = appConfig.midiMappings.autotuneScale ?? 32;
+  DOM.mapGetTone.value = appConfig.midiMappings.getTone ?? 33;
+  DOM.mapSendTone.value = appConfig.midiMappings.sendTone ?? 34;
   
   // General tab
   DOM.inputProjectPath.value = appConfig.projectPath;
@@ -1032,7 +1085,9 @@ async function saveSettings() {
       flex: parseInt(DOM.mapFlex.value),
       modeSingVoice: appConfig.midiMappings.modeSingVoice, // giữ nguyên
       autotuneKey: parseInt(DOM.mapAutotuneKey.value),
-      autotuneScale: parseInt(DOM.mapAutotuneScale.value)
+      autotuneScale: parseInt(DOM.mapAutotuneScale.value),
+      getTone: parseInt(DOM.mapGetTone.value),
+      sendTone: parseInt(DOM.mapSendTone.value)
     }
   };
   
@@ -1054,14 +1109,24 @@ async function saveSettings() {
       DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
       DOM.btnReverbToggle.classList.add('active');
       
-      if (states.isKeySelectorOpen) {
-        DOM.keySelectorContainer.classList.remove('hidden');
-        DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
-        DOM.btnToneToggle.classList.add('active');
-        window.electronAPI.resizeWindow('expanded_with_keys');
-      } else {
-        window.electronAPI.resizeWindow('expanded');
-      }
+      const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+      const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+      if (fxContainer) fxContainer.classList.remove('hidden');
+      if (presetsContainer) presetsContainer.classList.remove('hidden');
+      
+      window.electronAPI.resizeWindow('expanded');
+    } else if (states.isKeySelectorOpen) {
+      DOM.fxPanel.classList.remove('hidden');
+      DOM.keySelectorContainer.classList.remove('hidden');
+      DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+      DOM.btnToneToggle.classList.add('active');
+      
+      const fxContainer = DOM.fxPanel.querySelector('.fx-container');
+      const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
+      if (fxContainer) fxContainer.classList.add('hidden');
+      if (presetsContainer) presetsContainer.classList.add('hidden');
+      
+      window.electronAPI.resizeWindow('expanded_tone_only');
     } else {
       window.electronAPI.resizeWindow('collapsed');
     }
