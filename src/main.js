@@ -204,6 +204,8 @@ const DOM = {
   mapAutotuneScale: document.getElementById('map-autotune-scale'),
   mapGetTone: document.getElementById('map-get-tone'),
   mapSendTone: document.getElementById('map-send-tone'),
+  mapDetectedKey: document.getElementById('map-detected-key'),
+  mapDetectedScale: document.getElementById('map-detected-scale'),
   
   // General inputs
   inputProjectPath: document.getElementById('input-project-path'),
