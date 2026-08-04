@@ -646,14 +646,20 @@ body {
 
 /* Thanh Trạng Thái (Status Bar) */
 .status-bar {
-  height: 12px;
+  height: 18px;
   background: rgba(5, 5, 5, 0.85);
   border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 10px;
-  gap: 6px;
   flex-shrink: 0;
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .status-indicator {
@@ -1492,4 +1498,14 @@ body.light-theme .contact-item {
 
 body.light-theme .about-footer-text {
   border-top-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Footer Marquee specific style overrides */
+.footer-marquee {
+  width: 320px;
+  height: 100%;
+  margin-left: 0;
+  border-left: none !important;
+  padding-left: 0 !important;
+  background: transparent;
 }
