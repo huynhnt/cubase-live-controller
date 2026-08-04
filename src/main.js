@@ -10,9 +10,11 @@ const DEFAULT_CONFIG = {
   scale: 100,
   theme: 'dark',
   voicePreset: {
-    reverbLong: 0,
-    reverbShort: 0,
+    reverbLong: 10,
+    reverbShort: 25,
     delay: 0,
+    autotune: 0,
+    flex: 0,
     micChange: 10
   },
   midiMappings: {
@@ -187,6 +189,8 @@ const DOM = {
   presetReverbLong: document.getElementById('preset-reverb-long'),
   presetReverbShort: document.getElementById('preset-reverb-short'),
   presetDelay: document.getElementById('preset-delay'),
+  presetAutotune: document.getElementById('preset-autotune'),
+  presetFlex: document.getElementById('preset-flex'),
   presetMicChange: document.getElementById('preset-mic-change'),
   
   // Cấu hình Preset
@@ -676,7 +680,6 @@ function toggleSingVoiceMode() {
     savedSingingValues.delay = parseInt(DOM.sliders.delay.value);
     savedSingingValues.autotune = parseInt(DOM.sliders.autotune.value);
     savedSingingValues.flex = parseInt(DOM.sliders.flex.value);
-    savedSingingValues.fxMuted = states.fxMuted;
 
     // 2. Thiết lập thông số về mức nói chuyện (theo cài đặt)
     const preset = appConfig.voicePreset;
@@ -685,15 +688,15 @@ function toggleSingVoiceMode() {
     midi.sendCC(appConfig.midiMappings.reverbLong, preset.reverbLong);
     midi.sendCC(appConfig.midiMappings.reverbShort, preset.reverbShort);
     midi.sendCC(appConfig.midiMappings.delay, preset.delay);
-    midi.sendCC(appConfig.midiMappings.autotune, preset.autoTune);
-    midi.sendCC(appConfig.midiMappings.flex, preset.flex);
+    midi.sendCC(appConfig.midiMappings.autotune, preset.autotune ?? 0);
+    midi.sendCC(appConfig.midiMappings.flex, preset.flex ?? 0);
 
     // Cập nhật giao diện thanh trượt tương ứng
     DOM.sliders.reverbLong.value = preset.reverbLong;
     DOM.sliders.reverbShort.value = preset.reverbShort;
     DOM.sliders.delay.value = preset.delay;
-    DOM.sliders.autotune.value = preset.autoTune;
-    DOM.sliders.flex.value = preset.flex;
+    DOM.sliders.autotune.value = preset.autotune ?? 0;
+    DOM.sliders.flex.value = preset.flex ?? 0;
 
     Object.keys(DOM.sliders).forEach(key => {
       updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
@@ -705,10 +708,6 @@ function toggleSingVoiceMode() {
     DOM.sliderMicVol.value = newMicVol;
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
     midi.sendCC(appConfig.midiMappings.micVol, newMicVol);
-
-    // Tắt vang hoàn toàn trên Mixer
-    setFxMuteUI(true);
-    midi.sendCC(appConfig.midiMappings.fxMute, 127); // Gửi lệnh câm FX
 
     // Gửi tín hiệu CC thay đổi chế độ cho Cubase (nếu Cubase cần)
     midi.sendCC(appConfig.midiMappings.modeSingVoice, 0); // 0 = Voice
@@ -741,10 +740,6 @@ function toggleSingVoiceMode() {
       updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
     });
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
-
-    // Khôi phục trạng thái Mute FX
-    setFxMuteUI(savedSingingValues.fxMuted);
-    midi.sendCC(appConfig.midiMappings.fxMute, savedSingingValues.fxMuted ? 127 : 0);
 
     // Gửi tín hiệu CC sang Cubase
     midi.sendCC(appConfig.midiMappings.modeSingVoice, 127); // 127 = Hát
@@ -851,6 +846,8 @@ function loadConfigToForm() {
   DOM.presetReverbLong.value = appConfig.voicePreset.reverbLong;
   DOM.presetReverbShort.value = appConfig.voicePreset.reverbShort;
   DOM.presetDelay.value = appConfig.voicePreset.delay;
+  DOM.presetAutotune.value = appConfig.voicePreset.autotune ?? 0;
+  DOM.presetFlex.value = appConfig.voicePreset.flex ?? 0;
   DOM.presetMicChange.value = appConfig.voicePreset.micChange ?? appConfig.voicePreset.micVolChange ?? 10;
 }
 
@@ -867,6 +864,8 @@ async function saveSettings() {
       reverbLong: parseInt(DOM.presetReverbLong.value),
       reverbShort: parseInt(DOM.presetReverbShort.value),
       delay: parseInt(DOM.presetDelay.value),
+      autotune: parseInt(DOM.presetAutotune.value),
+      flex: parseInt(DOM.presetFlex.value),
       micChange: parseInt(DOM.presetMicChange.value)
     },
     midiMappings: {

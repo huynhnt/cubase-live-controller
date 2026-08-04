@@ -7,10 +7,31 @@
   "scripts": {
     "dev": "vite",
     "electron": "electron .",
-    "build": "vite build"
+    "build": "vite build",
+    "dist": "vite build && electron-builder"
   },
   "devDependencies": {
     "electron": "^31.2.0",
+    "electron-builder": "^26.15.3",
     "vite": "^5.3.1"
+  },
+  "build": {
+    "appId": "com.cubaselivecontroller.app",
+    "productName": "Cubase Live Controller",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ]
   }
 }

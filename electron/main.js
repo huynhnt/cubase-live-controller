@@ -26,12 +26,12 @@ const DEFAULT_CONFIG = {
   scale: 100,
   theme: 'dark',
   voicePreset: {
-    reverbLong: 0,
-    reverbShort: 0,
+    reverbLong: 10,
+    reverbShort: 25,
     delay: 0,
-    autoTune: 10,
-    flex: 20,
-    micVolChange: 10
+    autotune: 0,
+    flex: 0,
+    micChange: 10
   },
   midiMappings: {
     beatVol: 20,
