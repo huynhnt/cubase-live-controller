@@ -115,6 +115,7 @@ let states = {
   isAboutOpen: false,
   activePreset: 'Mặc định',
   presetToDelete: '',
+  presetToOverwrite: '',
   currentKey: 0, // 0 = C (Đô)
   currentScale: 0, // 0 = Major (Trưởng)
   detectedKey: null,
@@ -231,6 +232,11 @@ const DOM = {
   confirmModalText: document.getElementById('confirm-modal-text'),
   btnConfirmYes: document.getElementById('btn-confirm-yes'),
   btnConfirmNo: document.getElementById('btn-confirm-no'),
+  
+  overwriteModal: document.getElementById('overwrite-modal'),
+  overwriteModalText: document.getElementById('overwrite-modal-text'),
+  btnOverwriteYes: document.getElementById('btn-overwrite-yes'),
+  btnOverwriteNo: document.getElementById('btn-overwrite-no'),
   
   btnSaveSettings: document.getElementById('btn-save-settings'),
   btnCloseSettings: document.getElementById('btn-close-settings'),
@@ -592,10 +598,18 @@ async function submitNewPreset() {
   }
   
   if (appConfig.presets && appConfig.presets[name]) {
-    const override = confirm(`Preset tên "${name}" đã tồn tại. Bạn có muốn ghi đè cấu hình mới này đè lên không?`);
-    if (!override) return;
+    // Thay thế confirm() bằng Custom Modal để tránh treo đơ giao diện Electron
+    states.presetToOverwrite = name;
+    DOM.overwriteModalText.innerText = `Preset tên "${name}" đã tồn tại. Bạn có muốn ghi đè cấu hình mới này lên không?`;
+    DOM.overwriteModal.classList.remove('hidden');
+    return; // Dừng lại chờ người dùng click trên modal
   }
   
+  executeSavePreset(name);
+}
+
+// Hàm thực tế thực hiện ghi dữ liệu preset
+async function executeSavePreset(name) {
   // Tạo đối tượng preset mới
   const newPreset = {
     reverbLong: parseInt(DOM.sliders.reverbLong.value),
@@ -614,9 +628,18 @@ async function submitNewPreset() {
   const success = await window.electronAPI.saveConfig(appConfig);
   if (success) {
     renderPresets();
-    DOM.presetModal.classList.add('hidden'); // Ẩn modal sau khi lưu thành công
+    DOM.presetModal.classList.add('hidden'); // Ẩn modal nhập tên
+    DOM.overwriteModal.classList.add('hidden'); // Ẩn modal xác nhận ghi đè (nếu có)
   } else {
     alert('Lỗi: Không thể lưu Preset mới.');
+  }
+}
+
+// Thực hiện ghi đè preset khi người dùng đồng ý trên Modal
+function confirmOverwritePreset() {
+  const name = states.presetToOverwrite;
+  if (name) {
+    executeSavePreset(name);
   }
 }
 
@@ -1386,6 +1409,10 @@ function setupEventListeners() {
   // Sự kiện của Modal xác nhận xóa Preset
   DOM.btnConfirmYes.addEventListener('click', confirmDeletePreset);
   DOM.btnConfirmNo.addEventListener('click', () => DOM.confirmModal.classList.add('hidden'));
+  
+  // Sự kiện của Modal xác nhận ghi đè Preset
+  DOM.btnOverwriteYes.addEventListener('click', confirmOverwritePreset);
+  DOM.btnOverwriteNo.addEventListener('click', () => DOM.overwriteModal.classList.add('hidden'));
 }
 
 // -------------------------------------------------------------

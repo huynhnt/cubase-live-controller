@@ -386,6 +386,19 @@
         </div>
       </div>
     </div>
+    <!-- Modal xác nhận ghi đè Preset (Thay thế confirm() bị lỗi đơ trên Electron) -->
+    <div id="overwrite-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h4 class="modal-title" style="color: var(--color-orange);">XÁC NHẬN GHI ĐÈ</h4>
+        <div class="modal-body">
+          <p id="overwrite-modal-text" style="font-size: 11px; color: var(--text-primary); margin: 8px 0; text-align: center;"></p>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-overwrite-yes" class="action-btn btn-orange">Ghi Đè</button>
+          <button id="btn-overwrite-no" class="sec-btn">Hủy Bỏ</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script type="module" src="/src/main.js"></script>
