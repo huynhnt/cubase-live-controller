@@ -37,6 +37,12 @@ export function loadConfigToForm() {
   DOM.presetAutotune.value = appConfig.voicePreset.autotune ?? 0;
   DOM.presetFlex.value = appConfig.voicePreset.flex ?? 0;
   DOM.presetMicChange.value = appConfig.voicePreset.micChange ?? appConfig.voicePreset.micVolChange ?? 10;
+  
+  // Tải phím tắt cấu hình lên form
+  DOM.shortcutToggleMusic.value = appConfig.shortcuts?.toggleMusic || 'Chưa gán';
+  DOM.shortcutToggleMic.value = appConfig.shortcuts?.toggleMic || 'Chưa gán';
+  DOM.shortcutToggleFx.value = appConfig.shortcuts?.toggleFx || 'Chưa gán';
+  DOM.shortcutToggleWindow.value = appConfig.shortcuts?.toggleWindow || 'Chưa gán';
 }
 
 export async function saveSettings() {
@@ -74,6 +80,12 @@ export async function saveSettings() {
       sendTone: parseInt(DOM.mapSendTone.value),
       detectedKey: parseInt(DOM.mapDetectedKey.value),
       detectedScale: parseInt(DOM.mapDetectedScale.value)
+    },
+    shortcuts: {
+      toggleMusic: DOM.shortcutToggleMusic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMusic.value,
+      toggleMic: DOM.shortcutToggleMic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMic.value,
+      toggleFx: DOM.shortcutToggleFx.value === 'Chưa gán' ? '' : DOM.shortcutToggleFx.value,
+      toggleWindow: DOM.shortcutToggleWindow.value === 'Chưa gán' ? '' : DOM.shortcutToggleWindow.value
     }
   };
   

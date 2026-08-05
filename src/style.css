@@ -1509,3 +1509,116 @@ body.light-theme .about-footer-text {
   padding-left: 0 !important;
   background: transparent;
 }
+
+/* Custom Shortcut settings */
+.shortcuts-settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px 4px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.shortcut-item label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.shortcut-input-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 180px;
+}
+
+.shortcut-input-field {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 6px 8px;
+  font-size: 10px;
+  text-align: center;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  font-weight: 600;
+}
+
+.shortcut-input-field:focus {
+  background: rgba(52, 152, 219, 0.1);
+  border-color: var(--color-blue);
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
+}
+
+.shortcut-input-field.recording {
+  background: rgba(231, 76, 60, 0.15) !important;
+  border-color: var(--color-red) !important;
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.4) !important;
+  animation: pulse-recording 1.5s infinite;
+}
+
+@keyframes pulse-recording {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.btn-clear-shortcut {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 9px;
+}
+
+.btn-clear-shortcut:hover {
+  background: rgba(231, 76, 60, 0.15);
+  border-color: rgba(231, 76, 60, 0.3);
+  color: var(--color-red);
+}
+
+/* Light Theme overrides for shortcuts */
+body.light-theme .shortcut-item {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .shortcut-input-field {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #333333;
+}
+
+body.light-theme .shortcut-input-field:focus {
+  background: rgba(52, 152, 219, 0.08);
+}
+
+body.light-theme .btn-clear-shortcut {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-theme .btn-clear-shortcut:hover {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--color-red);
+}

@@ -50,3 +50,33 @@ All MIDI CC mappings must match this table:
 *   **Import Statements**: Always use explicit ES module import statements with file extensions (e.g., `import { DOM } from './dom.js';`).
 *   **Preserve Comments**: Do not strip developer comments or docstrings when making edits.
 *   **No Placeholders**: Never write placeholder code or comments like `// TODO: implement later`. All implementations must be complete.
+
+---
+
+## ⌨️ Global Hotkeys & Window Management
+
+The application supports system-wide global hotkeys for hands-free live streaming control.
+
+### Default Hotkey Mapping
+
+| Function | Default Hotkey | Action |
+| :--- | :---: | :--- |
+| **Toggle Music** | `Alt+F9` | Toggles beat mute (`toggleBeatMute`) |
+| **Toggle Mic** | `Alt+F10` | Toggles mic mute (`toggleMicMute`) |
+| **Toggle Vang** | `Alt+F11` | Toggles reverb/FX mute (`toggleFxMute`) |
+| **Toggle Window** | `Alt+F12` | Minimizes or restores window to top |
+
+### Architecture & IPC Dataflow
+
+1.  **Main Process (`electron/main.js`)**:
+    - Registers hotkeys globally via Electron's `globalShortcut` module.
+    - When a functional hotkey (`toggleMusic`, `toggleMic`, `toggleFx`) is triggered, it sends an IPC event `shortcut-pressed` to the frontend via `mainWindow.webContents.send()`.
+    - When `toggleWindow` is triggered, the main process directly manages window state:
+      - If minimized -> restores, shows, focuses, and brings to top (`setAlwaysOnTop(true)`).
+      - If focused -> minimizes.
+      - If visible but not focused -> focuses and brings to top.
+2.  **Preload Script (`electron/preload.js` / `.cjs`)**:
+    - Exposes the event listener binding `onShortcutPressed(callback)` in `window.electronAPI`.
+3.  **Renderer Process (`src/main.js`)**:
+    - Subscribes to `window.electronAPI.onShortcutPressed` in `bootstrap()` to receive events and invoke mute toggles.
+    - In Settings (`setupEventListeners`), it monitors input fields for `focus` to enter "recording" state. Captures modifiers (`Ctrl`, `Alt`, `Shift`) and main keys via `keydown` event, formatting them into standard Electron Accelerator strings (e.g. `Ctrl+Alt+A`). Saves results to `config.json`.

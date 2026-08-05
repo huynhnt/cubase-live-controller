@@ -1,6 +1,12 @@
 export const DEFAULT_CONFIG = {
   midiOutPort: '',
   midiInPort: '',
+  shortcuts: {
+    toggleMusic: 'Alt+F9',
+    toggleMic: 'Alt+F10',
+    toggleFx: 'Alt+F11',
+    toggleWindow: 'Alt+F12'
+  },
   midiChannel: 1,
   autoOpenProject: false,
   projectPath: '',
@@ -54,7 +60,8 @@ if (!window.electronAPI) {
         ...loaded,
         midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
         voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
-        presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets
+        presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
+        shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts }
       };
     },
     saveConfig: async (config) => {
@@ -82,6 +89,20 @@ if (!window.electronAPI) {
         else if (state === 'expanded') appEl.style.height = '310px';
         else if (state === 'settings') appEl.style.height = '430px';
       }
+    },
+    onShortcutPressed: (callback) => {
+      console.log('Giả lập đăng ký lắng nghe phím tắt');
+      window.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key === 'F9') {
+          callback('toggleMusic');
+        } else if (e.altKey && e.key === 'F10') {
+          callback('toggleMic');
+        } else if (e.altKey && e.key === 'F11') {
+          callback('toggleFx');
+        } else if (e.altKey && e.key === 'F12') {
+          console.log('Giả lập phím tắt toggleWindow (Alt+F12)');
+        }
+      });
     }
   };
 }

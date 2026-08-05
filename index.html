@@ -172,6 +172,7 @@
           <button class="tab-btn active" data-tab="tab-midi">Cấu hình MIDI</button>
           <button class="tab-btn" data-tab="tab-mapping">Ánh xạ CC</button>
           <button class="tab-btn" data-tab="tab-general">Chung & Chế độ</button>
+          <button class="tab-btn" data-tab="tab-shortcuts">Phím tắt</button>
         </div>
       </div>
 
@@ -308,6 +309,44 @@
             <div class="preset-item">
               <label>Tăng Vol Mic</label>
               <input type="number" id="preset-mic-change" min="-50" max="50" value="10">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tab 4: Phím tắt -->
+        <div id="tab-shortcuts" class="tab-content">
+          <div class="settings-group-title">Cấu hình Phím tắt Toàn cục (Global Hotkeys)</div>
+          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.4;">
+            Nhấp chuột vào ô và nhấn tổ hợp phím muốn gán (Ví dụ: Alt+F9). Nhấn nút '✕' bên cạnh để xóa phím tắt.
+          </p>
+          <div class="shortcuts-settings-grid">
+            <div class="shortcut-item">
+              <label>1. Tắt/mở Nhạc (Beat Mute)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-toggle-music" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-toggle-music" title="Xóa phím tắt">✕</button>
+              </div>
+            </div>
+            <div class="shortcut-item">
+              <label>2. Tắt/mở Mic (Mic Mute)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-toggle-mic" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-toggle-mic" title="Xóa phím tắt">✕</button>
+              </div>
+            </div>
+            <div class="shortcut-item">
+              <label>3. Tắt/mở Vang (FX Mute)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-toggle-fx" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-toggle-fx" title="Xóa phím tắt">✕</button>
+              </div>
+            </div>
+            <div class="shortcut-item">
+              <label>4. Ẩn/Hiện Tool (Window Toggle)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-toggle-window" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-toggle-window" title="Xóa phím tắt">✕</button>
+              </div>
             </div>
           </div>
         </div>

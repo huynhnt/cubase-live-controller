@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, session } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
@@ -20,6 +20,12 @@ const WINDOW_SIZES = {
 const DEFAULT_CONFIG = {
   midiOutPort: '',
   midiInPort: '',
+  shortcuts: {
+    toggleMusic: 'Alt+F9',
+    toggleMic: 'Alt+F10',
+    toggleFx: 'Alt+F11',
+    toggleWindow: 'Alt+F12'
+  },
   midiChannel: 1,
   autoOpenProject: false,
   projectPath: '',
@@ -65,16 +71,86 @@ async function loadConfig() {
   try {
     const data = await fs.readFile(configPath, 'utf8');
     const loaded = JSON.parse(data);
-    // Tự động trộn cấu hình cũ với các cấu hình mới thêm (như presets) để tránh mất file hoặc thiếu trường
+    // Tự động trộn cấu hình cũ với các cấu hình mới thêm (như presets và shortcuts) để tránh mất file hoặc thiếu trường
     return {
       ...DEFAULT_CONFIG,
       ...loaded,
       midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
       voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
-      presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets
+      presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
+      shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts }
     };
   } catch (error) {
     return DEFAULT_CONFIG;
+  }
+}
+
+function registerGlobalShortcuts(config) {
+  globalShortcut.unregisterAll();
+  
+  if (!config || !config.shortcuts) return;
+  
+  const { toggleMusic, toggleMic, toggleFx, toggleWindow } = config.shortcuts;
+  
+  if (toggleMusic && toggleMusic !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(toggleMusic, () => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('shortcut-pressed', 'toggleMusic');
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Nhạc: ${toggleMusic}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Nhạc (${toggleMusic}):`, err);
+    }
+  }
+  
+  if (toggleMic && toggleMic !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(toggleMic, () => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('shortcut-pressed', 'toggleMic');
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Mic: ${toggleMic}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Mic (${toggleMic}):`, err);
+    }
+  }
+  
+  if (toggleFx && toggleFx !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(toggleFx, () => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('shortcut-pressed', 'toggleFx');
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Vang: ${toggleFx}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Vang (${toggleFx}):`, err);
+    }
+  }
+  
+  if (toggleWindow && toggleWindow !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(toggleWindow, () => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          if (mainWindow.isMinimized()) {
+            mainWindow.restore();
+            mainWindow.focus();
+            mainWindow.setAlwaysOnTop(true);
+          } else if (mainWindow.isFocused()) {
+            mainWindow.minimize();
+          } else {
+            mainWindow.focus();
+            mainWindow.setAlwaysOnTop(true);
+          }
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Cửa sổ: ${toggleWindow}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Cửa sổ (${toggleWindow}):`, err);
+    }
   }
 }
 
@@ -124,9 +200,10 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
-  // Tự động mở dự án Cubase nếu được cấu hình
+  // Tự động mở dự án Cubase và đăng ký phím tắt toàn cục nếu được cấu hình
   mainWindow.webContents.on('did-finish-load', async () => {
     const config = await loadConfig();
+    registerGlobalShortcuts(config);
     if (config.autoOpenProject && config.projectPath) {
       try {
         await shell.openPath(config.projectPath);
@@ -165,7 +242,11 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('save-config', async (event, config) => {
-    return await saveConfig(config);
+    const success = await saveConfig(config);
+    if (success) {
+      registerGlobalShortcuts(config);
+    }
+    return success;
   });
 
   ipcMain.handle('select-file', async () => {
@@ -206,4 +287,8 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
+});
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });

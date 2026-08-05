@@ -385,6 +385,94 @@ export function setupEventListeners() {
   
   DOM.btnOverwriteYes.addEventListener('click', confirmOverwritePreset);
   DOM.btnOverwriteNo.addEventListener('click', () => DOM.overwriteModal.classList.add('hidden'));
+  
+  // Lắng nghe sự kiện ghi nhận phím tắt
+  const shortcutInputs = [
+    DOM.shortcutToggleMusic,
+    DOM.shortcutToggleMic,
+    DOM.shortcutToggleFx,
+    DOM.shortcutToggleWindow
+  ];
+  
+  shortcutInputs.forEach(input => {
+    if (!input) return;
+    
+    input.addEventListener('focus', () => {
+      input.classList.add('recording');
+      input.placeholder = 'Nhấn tổ hợp phím...';
+    });
+    
+    input.addEventListener('blur', () => {
+      input.classList.remove('recording');
+      if (!input.value) {
+        input.value = 'Chưa gán';
+      }
+      input.placeholder = 'Nhấp để ghi phím...';
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const keys = [];
+      if (e.ctrlKey) keys.push('Ctrl');
+      if (e.altKey) keys.push('Alt');
+      if (e.shiftKey) keys.push('Shift');
+      
+      let key = e.key;
+      
+      // Nếu chỉ nhấn modifier, cập nhật giao diện hiển thị modifier tạm thời
+      if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
+        input.value = keys.length > 0 ? keys.join('+') : '';
+        return;
+      }
+      
+      // Chuẩn hóa tên phím sang định dạng Electron Accelerator
+      if (key === ' ') {
+        key = 'Space';
+      } else if (key.length === 1) {
+        key = key.toUpperCase();
+      } else if (key.startsWith('Arrow')) {
+        key = key.replace('Arrow', '');
+      } else if (key === 'Escape') {
+        input.blur();
+        return;
+      }
+      
+      // Xử lý phím NumPad
+      if (e.code.startsWith('Numpad')) {
+        const num = e.code.replace('Numpad', '');
+        if (num >= '0' && num <= '9') {
+          key = 'num' + num;
+        } else if (e.code === 'NumpadAdd') {
+          key = 'numadd';
+        } else if (e.code === 'NumpadSubtract') {
+          key = 'numsub';
+        } else if (e.code === 'NumpadMultiply') {
+          key = 'nummult';
+        } else if (e.code === 'NumpadDivide') {
+          key = 'numdiv';
+        } else if (e.code === 'NumpadDecimal') {
+          key = 'numdec';
+        }
+      }
+      
+      keys.push(key);
+      input.value = keys.join('+');
+      input.blur();
+    });
+  });
+  
+  // Sự kiện xóa phím tắt bằng nút ✕
+  document.querySelectorAll('.btn-clear-shortcut').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const targetInput = document.getElementById(targetId);
+      if (targetInput) {
+        targetInput.value = 'Chưa gán';
+      }
+    });
+  });
 }
 
 // -------------------------------------------------------------
@@ -439,6 +527,19 @@ export async function bootstrap() {
     setBeatMuteUI(states.beatMuted);
     setMicMuteUI(states.micMuted);
     setFxMuteUI(states.fxMuted);
+    
+    // Đăng ký lắng nghe sự kiện phím tắt toàn cục từ Electron
+    if (window.electronAPI.onShortcutPressed) {
+      window.electronAPI.onShortcutPressed((action) => {
+        if (action === 'toggleMusic') {
+          toggleBeatMute();
+        } else if (action === 'toggleMic') {
+          toggleMicMute();
+        } else if (action === 'toggleFx') {
+          toggleFxMute();
+        }
+      });
+    }
     
     await initMidi();
   } catch (error) {

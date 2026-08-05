@@ -88,6 +88,12 @@ export const DOM = {
   sliderOpacity: document.getElementById('slider-opacity'),
   valOpacity: document.getElementById('val-opacity'),
   
+  // Shortcut inputs
+  shortcutToggleMusic: document.getElementById('shortcut-toggle-music'),
+  shortcutToggleMic: document.getElementById('shortcut-toggle-mic'),
+  shortcutToggleFx: document.getElementById('shortcut-toggle-fx'),
+  shortcutToggleWindow: document.getElementById('shortcut-toggle-window'),
+  
   // Voice Presets inputs
   presetReverbLong: document.getElementById('preset-reverb-long'),
   presetReverbShort: document.getElementById('preset-reverb-short'),
