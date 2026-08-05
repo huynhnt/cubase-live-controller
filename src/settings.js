@@ -37,12 +37,14 @@ export function loadConfigToForm() {
   DOM.presetAutotune.value = appConfig.voicePreset.autotune ?? 0;
   DOM.presetFlex.value = appConfig.voicePreset.flex ?? 0;
   DOM.presetMicChange.value = appConfig.voicePreset.micChange ?? appConfig.voicePreset.micVolChange ?? 10;
+  DOM.presetBeatChange.value = appConfig.voicePreset.beatChange ?? -20;
   
-  // Tải phím tắt cấu hình lên form
   DOM.shortcutToggleMusic.value = appConfig.shortcuts?.toggleMusic || 'Chưa gán';
   DOM.shortcutToggleMic.value = appConfig.shortcuts?.toggleMic || 'Chưa gán';
   DOM.shortcutToggleFx.value = appConfig.shortcuts?.toggleFx || 'Chưa gán';
   DOM.shortcutToggleWindow.value = appConfig.shortcuts?.toggleWindow || 'Chưa gán';
+  DOM.shortcutSetSingMode.value = appConfig.shortcuts?.setSingMode || 'Chưa gán';
+  DOM.shortcutSetVoiceMode.value = appConfig.shortcuts?.setVoiceMode || 'Chưa gán';
 }
 
 export async function saveSettings() {
@@ -60,7 +62,8 @@ export async function saveSettings() {
       delay: parseInt(DOM.presetDelay.value),
       autotune: parseInt(DOM.presetAutotune.value),
       flex: parseInt(DOM.presetFlex.value),
-      micChange: parseInt(DOM.presetMicChange.value)
+      micChange: parseInt(DOM.presetMicChange.value),
+      beatChange: parseInt(DOM.presetBeatChange.value)
     },
     midiMappings: {
       beatVol: parseInt(DOM.mapBeatVol.value),
@@ -85,7 +88,9 @@ export async function saveSettings() {
       toggleMusic: DOM.shortcutToggleMusic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMusic.value,
       toggleMic: DOM.shortcutToggleMic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMic.value,
       toggleFx: DOM.shortcutToggleFx.value === 'Chưa gán' ? '' : DOM.shortcutToggleFx.value,
-      toggleWindow: DOM.shortcutToggleWindow.value === 'Chưa gán' ? '' : DOM.shortcutToggleWindow.value
+      toggleWindow: DOM.shortcutToggleWindow.value === 'Chưa gán' ? '' : DOM.shortcutToggleWindow.value,
+      setSingMode: DOM.shortcutSetSingMode.value === 'Chưa gán' ? '' : DOM.shortcutSetSingMode.value,
+      setVoiceMode: DOM.shortcutSetVoiceMode.value === 'Chưa gán' ? '' : DOM.shortcutSetVoiceMode.value
     }
   };
   

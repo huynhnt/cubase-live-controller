@@ -93,6 +93,8 @@ export const DOM = {
   shortcutToggleMic: document.getElementById('shortcut-toggle-mic'),
   shortcutToggleFx: document.getElementById('shortcut-toggle-fx'),
   shortcutToggleWindow: document.getElementById('shortcut-toggle-window'),
+  shortcutSetSingMode: document.getElementById('shortcut-set-sing'),
+  shortcutSetVoiceMode: document.getElementById('shortcut-set-voice'),
   
   // Voice Presets inputs
   presetReverbLong: document.getElementById('preset-reverb-long'),
@@ -101,6 +103,7 @@ export const DOM = {
   presetAutotune: document.getElementById('preset-autotune'),
   presetFlex: document.getElementById('preset-flex'),
   presetMicChange: document.getElementById('preset-mic-change'),
+  presetBeatChange: document.getElementById('preset-beat-change'),
   
   // Cấu hình Preset
   presetsSystemList: document.getElementById('presets-system-list'),

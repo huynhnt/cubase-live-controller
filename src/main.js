@@ -186,14 +186,17 @@ export function toggleFxMute() {
 // -------------------------------------------------------------
 // CHUYỂN ĐỔI CHẾ ĐỘ HÁT LIVE <=> VOICE ĐỐI THOẠI
 // -------------------------------------------------------------
-export function toggleSingVoiceMode() {
-  if (states.currentMode === 'sing') {
+export function setMode(targetMode) {
+  if (targetMode === states.currentMode) return;
+
+  if (targetMode === 'voice') {
     states.currentMode = 'voice';
     DOM.btnModeToggle.className = 'action-btn btn-blue active';
     DOM.btnModeToggle.style.backgroundColor = 'var(--color-orange)';
     DOM.btnModeToggle.querySelector('.mode-text').innerText = 'VOICE ĐỐI THOẠI';
     DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click để HÁT';
 
+    savedSingingValues.beatVol = parseInt(DOM.sliderBeatVol.value);
     savedSingingValues.micVol = parseInt(DOM.sliderMicVol.value);
     savedSingingValues.reverbLong = parseInt(DOM.sliders.reverbLong.value);
     savedSingingValues.reverbShort = parseInt(DOM.sliders.reverbShort.value);
@@ -219,7 +222,15 @@ export function toggleSingVoiceMode() {
       updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
     });
 
-    let newMicVol = savedSingingValues.micVol + preset.micChange;
+    // Thay đổi âm lượng nhạc theo phần trăm (thang 127 CC)
+    let newBeatVol = savedSingingValues.beatVol + Math.round(127 * ((preset.beatChange ?? -20) / 100));
+    newBeatVol = Math.max(0, Math.min(127, newBeatVol));
+    DOM.sliderBeatVol.value = newBeatVol;
+    updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
+    midi.sendCC(appConfig.midiMappings.beatVol, newBeatVol);
+
+    // Thay đổi âm lượng mic theo phần trăm (thang 127 CC)
+    let newMicVol = savedSingingValues.micVol + Math.round(127 * ((preset.micChange ?? 10) / 100));
     newMicVol = Math.max(0, Math.min(127, newMicVol));
     DOM.sliderMicVol.value = newMicVol;
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
@@ -239,6 +250,9 @@ export function toggleSingVoiceMode() {
     midi.sendCC(appConfig.midiMappings.delay, savedSingingValues.delay);
     midi.sendCC(appConfig.midiMappings.autotune, savedSingingValues.autotune);
     midi.sendCC(appConfig.midiMappings.flex, savedSingingValues.flex);
+    
+    // Trả về âm lượng nhạc và mic ban đầu
+    midi.sendCC(appConfig.midiMappings.beatVol, savedSingingValues.beatVol);
     midi.sendCC(appConfig.midiMappings.micVol, savedSingingValues.micVol);
 
     DOM.sliders.reverbLong.value = savedSingingValues.reverbLong;
@@ -246,16 +260,27 @@ export function toggleSingVoiceMode() {
     DOM.sliders.delay.value = savedSingingValues.delay;
     DOM.sliders.autotune.value = savedSingingValues.autotune;
     DOM.sliders.flex.value = savedSingingValues.flex;
+    
+    DOM.sliderBeatVol.value = savedSingingValues.beatVol;
     DOM.sliderMicVol.value = savedSingingValues.micVol;
 
     Object.keys(DOM.sliders).forEach(key => {
       updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
     });
+    updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
 
     midi.sendCC(appConfig.midiMappings.modeSingVoice, 127);
   }
   autoSaveCurrentStates();
+}
+
+export function toggleSingVoiceMode() {
+  if (states.currentMode === 'sing') {
+    setMode('voice');
+  } else {
+    setMode('sing');
+  }
 }
 
 export function openSettingsPanel() {
@@ -391,7 +416,9 @@ export function setupEventListeners() {
     DOM.shortcutToggleMusic,
     DOM.shortcutToggleMic,
     DOM.shortcutToggleFx,
-    DOM.shortcutToggleWindow
+    DOM.shortcutToggleWindow,
+    DOM.shortcutSetSingMode,
+    DOM.shortcutSetVoiceMode
   ];
   
   shortcutInputs.forEach(input => {
@@ -537,6 +564,10 @@ export async function bootstrap() {
           toggleMicMute();
         } else if (action === 'toggleFx') {
           toggleFxMute();
+        } else if (action === 'setSingMode') {
+          setMode('sing');
+        } else if (action === 'setVoiceMode') {
+          setMode('voice');
         }
       });
     }

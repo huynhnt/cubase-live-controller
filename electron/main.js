@@ -24,7 +24,9 @@ const DEFAULT_CONFIG = {
     toggleMusic: 'Alt+F9',
     toggleMic: 'Alt+F10',
     toggleFx: 'Alt+F11',
-    toggleWindow: 'Alt+F12'
+    toggleWindow: 'Alt+F12',
+    setSingMode: 'Alt+F7',
+    setVoiceMode: 'Alt+F8'
   },
   midiChannel: 1,
   autoOpenProject: false,
@@ -38,7 +40,8 @@ const DEFAULT_CONFIG = {
     delay: 0,
     autotune: 0,
     flex: 0,
-    micChange: 10
+    micChange: 10,
+    beatChange: -20
   },
   midiMappings: {
     beatVol: 20,
@@ -90,7 +93,7 @@ function registerGlobalShortcuts(config) {
   
   if (!config || !config.shortcuts) return;
   
-  const { toggleMusic, toggleMic, toggleFx, toggleWindow } = config.shortcuts;
+  const { toggleMusic, toggleMic, toggleFx, toggleWindow, setSingMode, setVoiceMode } = config.shortcuts;
   
   if (toggleMusic && toggleMusic !== 'Chưa gán') {
     try {
@@ -150,6 +153,32 @@ function registerGlobalShortcuts(config) {
       if (!ok) console.warn(`Không thể đăng ký phím tắt cho Cửa sổ: ${toggleWindow}`);
     } catch (err) {
       console.error(`Lỗi đăng ký phím tắt Cửa sổ (${toggleWindow}):`, err);
+    }
+  }
+  
+  if (setSingMode && setSingMode !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(setSingMode, () => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('shortcut-pressed', 'setSingMode');
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Hát Live: ${setSingMode}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Hát Live (${setSingMode}):`, err);
+    }
+  }
+
+  if (setVoiceMode && setVoiceMode !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(setVoiceMode, () => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('shortcut-pressed', 'setVoiceMode');
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Voice: ${setVoiceMode}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Voice (${setVoiceMode}):`, err);
     }
   }
 }

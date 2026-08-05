@@ -307,8 +307,12 @@
               <input type="number" id="preset-flex" min="0" max="127" value="0">
             </div>
             <div class="preset-item">
-              <label>Tăng Vol Mic</label>
-              <input type="number" id="preset-mic-change" min="-50" max="50" value="10">
+              <label>Thay đổi Vol Mic (%)</label>
+              <input type="number" id="preset-mic-change" min="-100" max="100" value="10">
+            </div>
+            <div class="preset-item">
+              <label>Thay đổi Vol Nhạc (%)</label>
+              <input type="number" id="preset-beat-change" min="-100" max="100" value="-20">
             </div>
           </div>
         </div>
@@ -346,6 +350,20 @@
               <div class="shortcut-input-group">
                 <input type="text" id="shortcut-toggle-window" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
                 <button type="button" class="btn-clear-shortcut" data-target="shortcut-toggle-window" title="Xóa phím tắt">✕</button>
+              </div>
+            </div>
+            <div class="shortcut-item">
+              <label>5. Phím tắt Bật HÁT LIVE (Sing Mode)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-set-sing" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-set-sing" title="Xóa phím tắt">✕</button>
+              </div>
+            </div>
+            <div class="shortcut-item">
+              <label>6. Phím tắt Bật VOICE (Voice Mode)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-set-voice" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-set-voice" title="Xóa phím tắt">✕</button>
               </div>
             </div>
           </div>

@@ -61,6 +61,7 @@ The application supports system-wide global hotkeys for hands-free live streamin
 
 | Function | Default Hotkey | Action |
 | :--- | :---: | :--- |
+| **Toggle Mode** | `Alt+F8` | Toggles Sing/Voice mode (`toggleSingVoiceMode`) |
 | **Toggle Music** | `Alt+F9` | Toggles beat mute (`toggleBeatMute`) |
 | **Toggle Mic** | `Alt+F10` | Toggles mic mute (`toggleMicMute`) |
 | **Toggle Vang** | `Alt+F11` | Toggles reverb/FX mute (`toggleFxMute`) |
@@ -70,7 +71,7 @@ The application supports system-wide global hotkeys for hands-free live streamin
 
 1.  **Main Process (`electron/main.js`)**:
     - Registers hotkeys globally via Electron's `globalShortcut` module.
-    - When a functional hotkey (`toggleMusic`, `toggleMic`, `toggleFx`) is triggered, it sends an IPC event `shortcut-pressed` to the frontend via `mainWindow.webContents.send()`.
+    - When a functional hotkey (`toggleMusic`, `toggleMic`, `toggleFx`, `toggleMode`) is triggered, it sends an IPC event `shortcut-pressed` to the frontend via `mainWindow.webContents.send()`.
     - When `toggleWindow` is triggered, the main process directly manages window state:
       - If minimized -> restores, shows, focuses, and brings to top (`setAlwaysOnTop(true)`).
       - If focused -> minimizes.
@@ -80,3 +81,7 @@ The application supports system-wide global hotkeys for hands-free live streamin
 3.  **Renderer Process (`src/main.js`)**:
     - Subscribes to `window.electronAPI.onShortcutPressed` in `bootstrap()` to receive events and invoke mute toggles.
     - In Settings (`setupEventListeners`), it monitors input fields for `focus` to enter "recording" state. Captures modifiers (`Ctrl`, `Alt`, `Shift`) and main keys via `keydown` event, formatting them into standard Electron Accelerator strings (e.g. `Ctrl+Alt+A`). Saves results to `config.json`.
+    - Handles `toggleSingVoiceMode()`:
+      - Saves pre-toggle volume values (`savedSingingValues.beatVol` and `savedSingingValues.micVol`).
+      - Calculates and applies temporary volume shifts in Voice mode based on percentage values (`preset.beatChange` and `preset.micChange`) of the full CC range (127): `newVol = currentVol + Math.round(127 * (percentage / 100))`, clamped between `0` and `127`.
+      - Restores the original volumes exactly when switching back to Sing mode.

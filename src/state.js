@@ -5,7 +5,9 @@ export const DEFAULT_CONFIG = {
     toggleMusic: 'Alt+F9',
     toggleMic: 'Alt+F10',
     toggleFx: 'Alt+F11',
-    toggleWindow: 'Alt+F12'
+    toggleWindow: 'Alt+F12',
+    setSingMode: 'Alt+F7',
+    setVoiceMode: 'Alt+F8'
   },
   midiChannel: 1,
   autoOpenProject: false,
@@ -19,7 +21,8 @@ export const DEFAULT_CONFIG = {
     delay: 0,
     autotune: 0,
     flex: 0,
-    micChange: 10
+    micChange: 10,
+    beatChange: -20
   },
   midiMappings: {
     beatVol: 20,
@@ -101,6 +104,10 @@ if (!window.electronAPI) {
           callback('toggleFx');
         } else if (e.altKey && e.key === 'F12') {
           console.log('Giả lập phím tắt toggleWindow (Alt+F12)');
+        } else if (e.altKey && e.key === 'F7') {
+          callback('setSingMode');
+        } else if (e.altKey && e.key === 'F8') {
+          callback('setVoiceMode');
         }
       });
     }
@@ -114,6 +121,7 @@ export function setAppConfig(config) {
 }
 
 export let savedSingingValues = {
+  beatVol: 100,
   micVol: 100,
   reverbLong: 24,
   reverbShort: 24,
