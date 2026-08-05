@@ -90,6 +90,12 @@ export function toggleFxPanel() {
       DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
       DOM.btnToneToggle.classList.remove('active');
     }
+    if (states.isSoundboardOpen) {
+      states.isSoundboardOpen = false;
+      DOM.soundboardPanel.classList.add('hidden');
+      DOM.btnSoundboardToggle.innerText = 'Hiệu Ứng ▾';
+      DOM.btnSoundboardToggle.classList.remove('active');
+    }
     
     DOM.fxPanel.classList.remove('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
@@ -127,6 +133,12 @@ export function toggleKeySelector() {
       states.isFxPanelOpen = false;
       DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
       DOM.btnReverbToggle.classList.remove('active');
+    }
+    if (states.isSoundboardOpen) {
+      states.isSoundboardOpen = false;
+      DOM.soundboardPanel.classList.add('hidden');
+      DOM.btnSoundboardToggle.innerText = 'Hiệu Ứng ▾';
+      DOM.btnSoundboardToggle.classList.remove('active');
     }
     
     DOM.fxPanel.classList.remove('hidden');
@@ -315,6 +327,12 @@ export function toggleAboutPanel() {
       DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
       DOM.btnToneToggle.classList.remove('active');
     }
+    if (states.isSoundboardOpen) {
+      states.isSoundboardOpen = false;
+      DOM.soundboardPanel.classList.add('hidden');
+      DOM.btnSoundboardToggle.innerText = 'Hiệu Ứng ▾';
+      DOM.btnSoundboardToggle.classList.remove('active');
+    }
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
     }
@@ -325,6 +343,45 @@ export function toggleAboutPanel() {
   } else {
     DOM.aboutPanel.classList.add('hidden');
     DOM.btnAboutToggle.classList.remove('active');
+    window.electronAPI.resizeWindow('collapsed');
+  }
+}
+
+export function toggleSoundboardPanel() {
+  states.isSoundboardOpen = !states.isSoundboardOpen;
+  
+  if (states.isSoundboardOpen) {
+    if (states.isAboutOpen) {
+      states.isAboutOpen = false;
+      DOM.aboutPanel.classList.add('hidden');
+      DOM.btnAboutToggle.classList.remove('active');
+    }
+    if (states.isFxPanelOpen) {
+      states.isFxPanelOpen = false;
+      DOM.fxPanel.classList.add('hidden');
+      DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
+      DOM.btnReverbToggle.classList.remove('active');
+    }
+    if (states.isKeySelectorOpen) {
+      states.isKeySelectorOpen = false;
+      DOM.keySelectorContainer.classList.add('hidden');
+      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      DOM.btnToneToggle.classList.remove('active');
+    }
+    if (states.isSettingsOpen) {
+      closeSettingsPanelUI();
+    }
+    
+    DOM.soundboardPanel.classList.remove('hidden');
+    DOM.btnSoundboardToggle.innerText = 'Hiệu Ứng ▴';
+    DOM.btnSoundboardToggle.classList.add('active');
+    
+    window.electronAPI.resizeWindow('expanded');
+  } else {
+    DOM.soundboardPanel.classList.add('hidden');
+    DOM.btnSoundboardToggle.innerText = 'Hiệu Ứng ▾';
+    DOM.btnSoundboardToggle.classList.remove('active');
+    
     window.electronAPI.resizeWindow('collapsed');
   }
 }

@@ -48,7 +48,22 @@ export const DEFAULT_CONFIG = {
     "Bolero": { reverbLong: 45, reverbShort: 30, delay: 40, autotune: 15, flex: 60 },
     "Remix": { reverbLong: 15, reverbShort: 10, delay: 15, autotune: 40, flex: 20 },
     "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
-  }
+  },
+  soundboard: [
+    { id: 0, name: 'Tiếng Cười', filePath: '', shortcut: 'num1', color: 'purple' },
+    { id: 1, name: 'Vỗ Tay', filePath: '', shortcut: 'num2', color: 'teal' },
+    { id: 2, name: 'Drum Roll', filePath: '', shortcut: 'num3', color: 'orange' },
+    { id: 3, name: 'Tiếng Chuông', filePath: '', shortcut: 'num4', color: 'red' },
+    { id: 4, name: 'Còi Meme', filePath: '', shortcut: 'Chưa gán', color: 'yellow' },
+    { id: 5, name: 'Kinh Ngạc', filePath: '', shortcut: 'Chưa gán', color: 'blue' },
+    { id: 6, name: 'Tiếng Khóc', filePath: '', shortcut: 'Chưa gán', color: 'pink' },
+    { id: 7, name: 'Thất Bại', filePath: '', shortcut: 'Chưa gán', color: 'grey' },
+    { id: 8, name: 'Wow!', filePath: '', shortcut: 'Chưa gán', color: 'green' },
+    { id: 9, name: 'Yeah!', filePath: '', shortcut: 'Chưa gán', color: 'purple' },
+    { id: 10, name: 'Hồi Hộp', filePath: '', shortcut: 'Chưa gán', color: 'teal' },
+    { id: 11, name: 'Gõ Búa', filePath: '', shortcut: 'Chưa gán', color: 'orange' }
+  ],
+  soundboardAudioOutputLabel: 'Mặc định'
 };
 
 // Giả lập API Electron nếu chạy trên trình duyệt web thông thường
@@ -64,7 +79,9 @@ if (!window.electronAPI) {
         midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
         voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
         presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
-        shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts }
+        shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts },
+        soundboard: loaded.soundboard ? loaded.soundboard : DEFAULT_CONFIG.soundboard,
+        soundboardAudioOutputLabel: loaded.soundboardAudioOutputLabel || DEFAULT_CONFIG.soundboardAudioOutputLabel
       };
     },
     saveConfig: async (config) => {
@@ -73,6 +90,9 @@ if (!window.electronAPI) {
     },
     selectFile: async () => {
       return 'C:\\mock-path\\project.cpr';
+    },
+    selectAudioFile: async () => {
+      return 'C:\\mock-path\\beep.mp3';
     },
     openCubaseProject: async (path) => {
       console.log('Giả lập mở file project:', path);
@@ -110,6 +130,14 @@ if (!window.electronAPI) {
           callback('setVoiceMode');
         }
       });
+    },
+    onPlaySoundboardSlot: (callback) => {
+      console.log('Giả lập đăng ký lắng nghe phím tắt soundboard');
+      window.addEventListener('keydown', (e) => {
+        if (e.key >= '1' && e.key <= '4') {
+          callback(parseInt(e.key) - 1);
+        }
+      });
     }
   };
 }
@@ -140,6 +168,8 @@ export let states = {
   isKeySelectorOpen: false,
   isSettingsOpen: false,
   isAboutOpen: false,
+  isSoundboardOpen: false,
+  isSoundboardEditMode: false,
   activePreset: 'Mặc định',
   presetToDelete: '',
   presetToOverwrite: '',

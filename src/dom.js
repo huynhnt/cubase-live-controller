@@ -128,5 +128,21 @@ export const DOM = {
   
   // Status Bar
   statusIndicator: document.getElementById('status-indicator'),
-  statusText: document.getElementById('status-text')
+  statusText: document.getElementById('status-text'),
+
+  // Soundboard
+  btnSoundboardToggle: document.getElementById('btn-soundboard-toggle'),
+  soundboardPanel: document.getElementById('soundboard-panel'),
+  selectAudioOutput: document.getElementById('select-audio-output'),
+  btnSoundboardEditMode: document.getElementById('btn-soundboard-edit-mode'),
+  soundboardGrid: document.getElementById('soundboard-grid'),
+  soundboardEditModal: document.getElementById('soundboard-edit-modal'),
+  inputSbName: document.getElementById('input-sb-name'),
+  inputSbFile: document.getElementById('input-sb-file'),
+  btnSbSelectFile: document.getElementById('btn-sb-select-file'),
+  inputSbShortcut: document.getElementById('input-sb-shortcut'),
+  btnSbClearShortcut: document.getElementById('btn-sb-clear-shortcut'),
+  selectSbColor: document.getElementById('select-sb-color'),
+  btnSbModalSave: document.getElementById('btn-sb-modal-save'),
+  btnSbModalCancel: document.getElementById('btn-sb-modal-cancel')
 };

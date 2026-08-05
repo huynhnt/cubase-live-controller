@@ -17,7 +17,8 @@ import {
   updateAutoKeyDisplay,
   toggleAboutPanel,
   closeSettingsPanelUI,
-  autoSaveCurrentStates
+  autoSaveCurrentStates,
+  toggleSoundboardPanel
 } from './ui.js';
 import {
   renderPresets,
@@ -32,6 +33,7 @@ import {
   saveSettings,
   cancelSettings
 } from './settings.js';
+import { initSoundboard } from './soundboard.js';
 
 // -------------------------------------------------------------
 // KHỞI TẠO CÁC CỔNG MIDI VÀ KẾT NỐI
@@ -342,6 +344,7 @@ export function setupEventListeners() {
   
   DOM.btnReverbToggle.addEventListener('click', toggleFxPanel);
   DOM.btnToneToggle.addEventListener('click', toggleKeySelector);
+  DOM.btnSoundboardToggle.addEventListener('click', toggleSoundboardPanel);
   
   DOM.btnSaveSettings.addEventListener('click', saveSettings);
   DOM.btnCloseSettings.addEventListener('click', cancelSettings);
@@ -572,6 +575,7 @@ export async function bootstrap() {
       });
     }
     
+    await initSoundboard();
     await initMidi();
   } catch (error) {
     console.error('Lỗi trong quá trình khởi chạy phần mềm:', error);

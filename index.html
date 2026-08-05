@@ -60,6 +60,7 @@
       <div class="control-group actions-group">
         <button id="btn-reverb-toggle" class="action-btn btn-red">Chỉnh Vang ▾</button>
         <button id="btn-tone-toggle" class="action-btn btn-orange">Chọn Tone ▾</button>
+        <button id="btn-soundboard-toggle" class="action-btn btn-pink">Hiệu Ứng ▾</button>
       </div>
     </main>
 
@@ -162,6 +163,25 @@
           </div>
           <button id="btn-add-preset" class="preset-add-btn" title="Lưu cấu hình hiện tại thành Preset mới">+</button>
         </div>
+      </div>
+    </section>
+
+    <!-- Panel Bảng Âm Thanh Soundboard (Mặc định ẩn) -->
+    <section id="soundboard-panel" class="fx-panel hidden">
+      <div class="soundboard-header">
+        <div class="sb-header-left">
+          <span class="sb-title">🔊 BẢNG HIỆU ỨNG ÂM THANH</span>
+          <div class="sb-output-selector">
+            <label for="select-audio-output">Thiết bị phát:</label>
+            <select id="select-audio-output">
+              <option value="Mặc định">Mặc định (Hệ thống)</option>
+            </select>
+          </div>
+        </div>
+        <button id="btn-soundboard-edit-mode" class="sec-btn" style="min-width: 80px; height: 26px; font-size: 9.5px; padding: 0 8px;">Chế độ sửa</button>
+      </div>
+      <div class="soundboard-grid" id="soundboard-grid">
+        <!-- 12 nút bấm sẽ được kết xuất động từ JS -->
       </div>
     </section>
 
@@ -461,6 +481,50 @@
         <div class="modal-footer">
           <button id="btn-overwrite-yes" class="action-btn btn-orange">Ghi Đè</button>
           <button id="btn-overwrite-no" class="sec-btn">Hủy Bỏ</button>
+        </div>
+      </div>
+    </div>
+    <!-- Modal chỉnh sửa cấu hình ô âm thanh (Soundboard Slot Edit) -->
+    <div id="soundboard-edit-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h4 class="modal-title">CẤU HÌNH Ô ÂM THANH</h4>
+        <div class="modal-body">
+          <div class="settings-row" style="margin-bottom: 8px;">
+            <label for="input-sb-name" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Tên hiển thị</label>
+            <input type="text" id="input-sb-name" placeholder="Ví dụ: Vỗ tay, Nhạc meme..." maxlength="15" style="width: 100%; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 11px; padding: 0 8px;">
+          </div>
+          <div class="settings-row project-select-row" style="margin-bottom: 8px;">
+            <label for="input-sb-file" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Tệp âm thanh (.mp3, .wav)</label>
+            <div class="file-picker-group" style="display: flex; gap: 6px;">
+              <input type="text" id="input-sb-file" placeholder="Chưa chọn tệp..." readonly style="flex-grow: 1; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 10px; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <button id="btn-sb-select-file" class="sec-btn" style="height: 28px; font-size: 10px; padding: 0 10px; white-space: nowrap;">Chọn file</button>
+            </div>
+          </div>
+          <div class="settings-row" style="margin-bottom: 8px;">
+            <label for="input-sb-shortcut" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Phím tắt kích hoạt</label>
+            <div class="shortcut-input-group" style="position: relative; display: flex; align-items: center;">
+              <input type="text" id="input-sb-shortcut" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím..." style="width: 100%; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 11px; padding: 0 28px 0 8px;">
+              <button type="button" id="btn-sb-clear-shortcut" class="btn-clear-shortcut" title="Xóa phím tắt" style="position: absolute; right: 6px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 12px; padding: 4px; display: flex; align-items: center; justify-content: center; height: 100%;">✕</button>
+            </div>
+          </div>
+          <div class="settings-row" style="margin-bottom: 8px;">
+            <label for="select-sb-color" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Màu sắc nút</label>
+            <select id="select-sb-color" style="width: 100%; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 11px; padding: 0 6px; outline: none; cursor: pointer;">
+              <option value="purple">Tím (Purple)</option>
+              <option value="teal">Xanh ngọc (Teal)</option>
+              <option value="orange">Cam (Orange)</option>
+              <option value="red">Đỏ (Red)</option>
+              <option value="yellow">Vàng (Yellow)</option>
+              <option value="blue">Xanh dương (Blue)</option>
+              <option value="pink">Hồng (Pink)</option>
+              <option value="green">Xanh lá (Green)</option>
+              <option value="grey">Xám (Grey)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+          <button id="btn-sb-modal-save" class="action-btn btn-blue" style="height: 28px; min-width: 75px; font-size: 11px; padding: 0 12px;">Lưu Lại</button>
+          <button id="btn-sb-modal-cancel" class="sec-btn" style="height: 28px; min-width: 75px; font-size: 11px; padding: 0 12px;">Hủy Bỏ</button>
         </div>
       </div>
     </div>
