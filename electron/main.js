@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut, desktopCapturer } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
@@ -34,6 +34,8 @@ const DEFAULT_CONFIG = {
   opacity: 100,
   scale: 100,
   theme: 'dark',
+  spotifyClientId: '',
+  spotifyClientSecret: '',
   voicePreset: {
     reverbLong: 10,
     reverbShort: 25,
@@ -300,6 +302,22 @@ app.whenReady().then(() => {
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };
+    }
+  });
+
+  // Lấy tiêu đề các cửa sổ trình duyệt đang mở (phục vụ Tier 1 detect tone)
+  ipcMain.handle('get-browser-title', async () => {
+    try {
+      const sources = await desktopCapturer.getSources({ types: ['window'] });
+      // Tìm cửa sổ Chrome/Edge/Firefox có "YouTube" trong tiêu đề
+      const ytWindow = sources.find(s =>
+        /youtube/i.test(s.name) &&
+        /chrome|edge|firefox|brave|opera/i.test(s.name)
+      ) || sources.find(s => /youtube/i.test(s.name));
+      return ytWindow ? ytWindow.name : null;
+    } catch (err) {
+      console.error('Lỗi get-browser-title:', err);
+      return null;
     }
   });
 

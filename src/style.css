@@ -598,6 +598,15 @@ body {
   padding-bottom: 4px;
 }
 
+.settings-hint {
+  font-size: 9px;
+  color: var(--color-text-muted, rgba(255,255,255,0.4));
+  line-height: 1.4;
+}
+.settings-hint strong {
+  color: var(--color-green);
+}
+
 .voice-presets-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

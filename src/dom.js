@@ -87,6 +87,8 @@ export const DOM = {
   chkAutoOpen: document.getElementById('chk-auto-open'),
   sliderOpacity: document.getElementById('slider-opacity'),
   valOpacity: document.getElementById('val-opacity'),
+  inputSpotifyClientId: document.getElementById('input-spotify-client-id'),
+  inputSpotifyClientSecret: document.getElementById('input-spotify-client-secret'),
   
   // Shortcut inputs
   shortcutToggleMusic: document.getElementById('shortcut-toggle-music'),

@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimizeWindow: () => ipcRenderer.send('window-minimize'),
   closeWindow: () => ipcRenderer.send('window-close'),
   resizeWindow: (state) => ipcRenderer.send('window-resize', state),
-  onShortcutPressed: (callback) => ipcRenderer.on('shortcut-pressed', (event, action) => callback(action))
+  onShortcutPressed: (callback) => ipcRenderer.on('shortcut-pressed', (event, action) => callback(action)),
+  getBrowserTitle: () => ipcRenderer.invoke('get-browser-title'),
 });
+

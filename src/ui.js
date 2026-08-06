@@ -1,6 +1,9 @@
 import { DOM } from './dom.js';
 import { states, appConfig, savedSingingValues } from './state.js';
 import { midi } from './midi.js';
+import { parseToneFromTitle, extractSongInfo } from './tone-parser.js';
+import { getKeyFromSpotify, clearSpotifyCache } from './spotify-api.js';
+import { analyzeAudioKey, stopAnalysis } from './audio-analyzer.js';
 
 export function updateSliderFill(slider, fillElement, valElement) {
   if (!slider) return;
@@ -183,42 +186,127 @@ export function initKeySelector() {
   });
   
   if (DOM.btnGetTone) {
-    DOM.btnGetTone.addEventListener('click', () => {
-      // Gửi pulse: 127 rồi 0 sau 50ms để Cubase Generic Remote nhận đúng trigger
-      midi.sendCC(appConfig.midiMappings.getTone ?? 33, 127);
-      setTimeout(() => midi.sendCC(appConfig.midiMappings.getTone ?? 33, 0), 50);
+    DOM.btnGetTone.addEventListener('click', async () => {
+      if (states.isWaitingForAutoKey) {
+        // Huỷ nếu đang phân tích
+        states.isWaitingForAutoKey = false;
+        stopAnalysis();
+        DOM.btnGetTone.innerText = 'Lấy Tone';
+        DOM.btnGetTone.classList.remove('analyzing');
+        DOM.detectedKeyDisplay.innerText = 'Auto-Key: Đã hủy';
+        DOM.detectedKeyDisplay.style.color = '';
+        return;
+      }
+
       states.detectedKey = null;
       states.detectedScale = null;
+      states.detectionMethod = null;
       states.isWaitingForAutoKey = true;
-      
-      DOM.btnGetTone.innerText = 'Đang dò...';
-      DOM.btnGetTone.classList.add('analyzing');
-      
-      DOM.detectedKeyDisplay.innerText = 'Auto-Key: Đang phân tích...';
-      DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
       DOM.btnSendTone.classList.remove('ready-to-send');
-      
-      setTimeout(() => {
-        if (states.isWaitingForAutoKey) {
-          states.isWaitingForAutoKey = false;
-          DOM.btnGetTone.innerText = 'Lấy Tone';
-          DOM.btnGetTone.classList.remove('analyzing');
-          DOM.detectedKeyDisplay.innerText = 'Auto-Key: Hết thời gian dò';
-          DOM.detectedKeyDisplay.style.color = '';
+
+      // ===== TIER 1: Parse tiêu đề trình duyệt =====
+      try {
+        DOM.btnGetTone.innerText = 'Đọc tiêu đề...';
+        DOM.btnGetTone.classList.add('analyzing');
+        DOM.detectedKeyDisplay.innerText = 'Tier 1: Đang đọc tiêu đề...';
+        DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
+
+        let browserTitle = null;
+        if (window.electronAPI.getBrowserTitle) {
+          browserTitle = await window.electronAPI.getBrowserTitle();
         }
-      }, 15000);
+
+        if (browserTitle) {
+          const parsed = parseToneFromTitle(browserTitle);
+          if (parsed) {
+            states.detectedKey = parsed.key;
+            states.detectedScale = parsed.scale;
+            states.detectionMethod = 'title';
+            states.isWaitingForAutoKey = false;
+            DOM.btnGetTone.innerText = 'Lấy Tone';
+            DOM.btnGetTone.classList.remove('analyzing');
+            updateAutoKeyDisplay();
+            return;
+          }
+
+          // ===== TIER 2: Spotify API =====
+          DOM.btnGetTone.innerText = 'Tìm Spotify...';
+          DOM.detectedKeyDisplay.innerText = 'Tier 2: Đang tìm trên Spotify...';
+
+          const { song, artist } = extractSongInfo(browserTitle);
+          const clientId = appConfig.spotifyClientId || '';
+          const clientSecret = appConfig.spotifyClientSecret || '';
+
+          if (clientId && clientSecret && song) {
+            try {
+              const spotifyResult = await getKeyFromSpotify(clientId, clientSecret, song, artist);
+              if (spotifyResult) {
+                states.detectedKey = spotifyResult.key;
+                states.detectedScale = spotifyResult.scale;
+                states.detectionMethod = 'spotify';
+                states.isWaitingForAutoKey = false;
+                DOM.btnGetTone.innerText = 'Lấy Tone';
+                DOM.btnGetTone.classList.remove('analyzing');
+                updateAutoKeyDisplay();
+                return;
+              }
+            } catch (spotifyErr) {
+              console.warn('Spotify thất bại:', spotifyErr.message);
+            }
+          }
+        }
+      } catch (tier12Err) {
+        console.warn('Tier 1-2 lỗi:', tier12Err.message);
+      }
+
+      // ===== TIER 3: Web Audio Analysis =====
+      DOM.btnGetTone.innerText = 'Đang dò... (8s)';
+      DOM.detectedKeyDisplay.innerText = 'Tier 3: Đang phân tích âm thanh...';
+      DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
+
+      try {
+        const audioResult = await analyzeAudioKey(8000, (progress) => {
+          const sec = Math.round(((100 - progress) / 100) * 8);
+          DOM.btnGetTone.innerText = `Dò âm... ${sec}s`;
+        });
+
+        states.detectedKey = audioResult.key;
+        states.detectedScale = audioResult.scale;
+        states.detectionMethod = 'audio';
+        states.isWaitingForAutoKey = false;
+        DOM.btnGetTone.innerText = 'Lấy Tone';
+        DOM.btnGetTone.classList.remove('analyzing');
+        updateAutoKeyDisplay();
+      } catch (audioErr) {
+        // Tất cả 3 tier đều thất bại
+        states.isWaitingForAutoKey = false;
+        DOM.btnGetTone.innerText = 'Lấy Tone';
+        DOM.btnGetTone.classList.remove('analyzing');
+        DOM.detectedKeyDisplay.innerText = `Không tìm được tone: ${audioErr.message}`;
+        DOM.detectedKeyDisplay.style.color = 'var(--color-red, #e74c3c)';
+        setTimeout(() => {
+          DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
+          DOM.detectedKeyDisplay.style.color = '';
+        }, 5000);
+      }
     });
   }
   
   if (DOM.btnSendTone) {
     DOM.btnSendTone.addEventListener('click', () => {
-      midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
-      
+      // Fix: gửi CC key (31) và scale (32) TRƯỚC để Cubase nhận đúng tone
       if (states.detectedKey !== null && states.detectedScale !== null) {
         selectKey(states.detectedKey);
         selectScale(states.detectedScale);
         autoSaveCurrentStates();
       }
+
+      // Fix: gửi trigger sendTone SAU với delay nhỏ + pulse reset về 0
+      // (giống getTone) để Generic Remote nhận đúng
+      setTimeout(() => {
+        midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
+        setTimeout(() => midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 0), 50);
+      }, 30);
       
       DOM.btnSendTone.classList.remove('ready-to-send');
       DOM.btnSendTone.style.background = 'rgba(46, 204, 113, 0.4)';
@@ -250,7 +338,9 @@ export function selectKey(keyIndex, sendMidi = true) {
   updateKeyDisplay();
   
   if (sendMidi) {
-    const ccValue = Math.round((keyIndex / 11) * 127);
+    // Cubase dùng: key = round((cc/127) * 12)
+    // → Ngược lại: cc = round((keyIndex / 12) * 127)
+    const ccValue = Math.round((keyIndex / 12) * 127);
     midi.sendCC(appConfig.midiMappings.autotuneKey ?? 31, ccValue);
   }
 }
@@ -271,7 +361,14 @@ export function selectScale(scaleIndex, sendMidi = true) {
   updateKeyDisplay();
   
   if (sendMidi) {
-    const ccValue = scaleIndex === 0 ? 0 : 127;
+    // Auto-Tune EFX: Chromatic(0) Major(1) NatMinor(2) HarmMinor(3)
+    //                MelMinor(4) Pentatonic(5) PentMinor(6) Blues(7) → N=8
+    // Cubase dùng: scale = round((cc/127) * 8)
+    // → Ngược lại: cc = round((targetIndex / 8) * 127)
+    // Major (index 1) → cc = round(1/8*127) = 16
+    // Natural Minor (index 2) → cc = round(2/8*127) = 32
+    const autoTuneScaleIndex = scaleIndex === 0 ? 1 : 2;
+    const ccValue = Math.round((autoTuneScaleIndex / 8) * 127);
     midi.sendCC(appConfig.midiMappings.autotuneScale ?? 32, ccValue);
   }
 }
@@ -283,16 +380,25 @@ export function updateKeyDisplay() {
 }
 
 export function updateAutoKeyDisplay() {
+  const METHOD_BADGE = {
+    'title':   '📋 Tiêu đề',
+    'spotify': '🎵 Spotify',
+    'audio':   '🎤 Phân tích',
+  };
+
   if (states.detectedKey !== null && states.detectedScale !== null) {
     const keyName = KEY_NAMES[states.detectedKey] || 'C';
     const scaleName = states.detectedScale === 0 ? 'Major' : 'Minor';
-    DOM.detectedKeyDisplay.innerText = `Auto-Key: ${keyName} ${scaleName}`;
+    const badge = states.detectionMethod ? ` — ${METHOD_BADGE[states.detectionMethod] || ''}` : '';
+    DOM.detectedKeyDisplay.innerText = `${keyName} ${scaleName}${badge}`;
     DOM.detectedKeyDisplay.style.color = 'var(--color-green)';
-    
+
     if (states.isWaitingForAutoKey) {
       states.isWaitingForAutoKey = false;
       DOM.btnGetTone.innerText = 'Lấy Tone';
       DOM.btnGetTone.classList.remove('analyzing');
+      DOM.btnSendTone.classList.add('ready-to-send');
+    } else {
       DOM.btnSendTone.classList.add('ready-to-send');
     }
   } else {

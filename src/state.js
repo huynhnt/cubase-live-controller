@@ -15,6 +15,8 @@ export const DEFAULT_CONFIG = {
   opacity: 100,
   scale: 100,
   theme: 'dark',
+  spotifyClientId: '',
+  spotifyClientSecret: '',
   voicePreset: {
     reverbLong: 10,
     reverbShort: 25,
@@ -93,6 +95,10 @@ if (!window.electronAPI) {
         else if (state === 'settings') appEl.style.height = '430px';
       }
     },
+    getBrowserTitle: async () => {
+      // Giả lập: trả về tiêu đề document hiện tại
+      return document.title || null;
+    },
     onShortcutPressed: (callback) => {
       console.log('Giả lập đăng ký lắng nghe phím tắt');
       window.addEventListener('keydown', (e) => {
@@ -147,5 +153,6 @@ export let states = {
   currentScale: 0, // 0 = Major (Trưởng)
   detectedKey: null,
   detectedScale: null,
-  isWaitingForAutoKey: false
+  isWaitingForAutoKey: false,
+  detectionMethod: null, // 'title' | 'spotify' | 'audio' | null
 };

@@ -45,6 +45,9 @@ export function loadConfigToForm() {
   DOM.shortcutToggleWindow.value = appConfig.shortcuts?.toggleWindow || 'Chưa gán';
   DOM.shortcutSetSingMode.value = appConfig.shortcuts?.setSingMode || 'Chưa gán';
   DOM.shortcutSetVoiceMode.value = appConfig.shortcuts?.setVoiceMode || 'Chưa gán';
+
+  if (DOM.inputSpotifyClientId) DOM.inputSpotifyClientId.value = appConfig.spotifyClientId || '';
+  if (DOM.inputSpotifyClientSecret) DOM.inputSpotifyClientSecret.value = appConfig.spotifyClientSecret || '';
 }
 
 export async function saveSettings() {
@@ -91,7 +94,9 @@ export async function saveSettings() {
       toggleWindow: DOM.shortcutToggleWindow.value === 'Chưa gán' ? '' : DOM.shortcutToggleWindow.value,
       setSingMode: DOM.shortcutSetSingMode.value === 'Chưa gán' ? '' : DOM.shortcutSetSingMode.value,
       setVoiceMode: DOM.shortcutSetVoiceMode.value === 'Chưa gán' ? '' : DOM.shortcutSetVoiceMode.value
-    }
+    },
+    spotifyClientId: DOM.inputSpotifyClientId ? DOM.inputSpotifyClientId.value.trim() : (appConfig.spotifyClientId || ''),
+    spotifyClientSecret: DOM.inputSpotifyClientSecret ? DOM.inputSpotifyClientSecret.value.trim() : (appConfig.spotifyClientSecret || ''),
   };
   
   const success = await window.electronAPI.saveConfig(newConfig);
