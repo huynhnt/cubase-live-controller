@@ -184,7 +184,9 @@ export function initKeySelector() {
   
   if (DOM.btnGetTone) {
     DOM.btnGetTone.addEventListener('click', () => {
+      // Gửi pulse: 127 rồi 0 sau 50ms để Cubase Generic Remote nhận đúng trigger
       midi.sendCC(appConfig.midiMappings.getTone ?? 33, 127);
+      setTimeout(() => midi.sendCC(appConfig.midiMappings.getTone ?? 33, 0), 50);
       states.detectedKey = null;
       states.detectedScale = null;
       states.isWaitingForAutoKey = true;
