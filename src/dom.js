@@ -30,7 +30,6 @@ export const DOM = {
   currentKeyDisplay: document.getElementById('current-key-display'),
   detectedKeyDisplay: document.getElementById('detected-key-display'),
   btnGetTone: document.getElementById('btn-get-tone'),
-  btnSendTone: document.getElementById('btn-send-tone'),
   sliders: {
     reverbLong: document.getElementById('slider-reverb-long'),
     reverbShort: document.getElementById('slider-reverb-short'),
@@ -74,12 +73,9 @@ export const DOM = {
   mapDelay: document.getElementById('map-delay'),
   mapAutotune: document.getElementById('map-autotune'),
   mapFlex: document.getElementById('map-flex'),
+  mapModeSingVoice: document.getElementById('map-mode-sing-voice'),
   mapAutotuneKey: document.getElementById('map-autotune-key'),
   mapAutotuneScale: document.getElementById('map-autotune-scale'),
-  mapGetTone: document.getElementById('map-get-tone'),
-  mapSendTone: document.getElementById('map-send-tone'),
-  mapDetectedKey: document.getElementById('map-detected-key'),
-  mapDetectedScale: document.getElementById('map-detected-scale'),
   
   // General inputs
   inputProjectPath: document.getElementById('input-project-path'),

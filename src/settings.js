@@ -19,12 +19,9 @@ export function loadConfigToForm() {
   DOM.mapDelay.value = appConfig.midiMappings.delay;
   DOM.mapAutotune.value = appConfig.midiMappings.autotune;
   DOM.mapFlex.value = appConfig.midiMappings.flex;
+  DOM.mapModeSingVoice.value = appConfig.midiMappings.modeSingVoice ?? 30;
   DOM.mapAutotuneKey.value = appConfig.midiMappings.autotuneKey ?? 31;
   DOM.mapAutotuneScale.value = appConfig.midiMappings.autotuneScale ?? 32;
-  DOM.mapGetTone.value = appConfig.midiMappings.getTone ?? 33;
-  DOM.mapSendTone.value = appConfig.midiMappings.sendTone ?? 34;
-  DOM.mapDetectedKey.value = appConfig.midiMappings.detectedKey ?? 35;
-  DOM.mapDetectedScale.value = appConfig.midiMappings.detectedScale ?? 36;
   
   DOM.inputProjectPath.value = appConfig.projectPath;
   DOM.chkAutoOpen.checked = appConfig.autoOpenProject;
@@ -81,13 +78,9 @@ export async function saveSettings() {
       delay: parseInt(DOM.mapDelay.value),
       autotune: parseInt(DOM.mapAutotune.value),
       flex: parseInt(DOM.mapFlex.value),
-      modeSingVoice: appConfig.midiMappings.modeSingVoice,
+      modeSingVoice: parseInt(DOM.mapModeSingVoice.value),
       autotuneKey: parseInt(DOM.mapAutotuneKey.value),
-      autotuneScale: parseInt(DOM.mapAutotuneScale.value),
-      getTone: parseInt(DOM.mapGetTone.value),
-      sendTone: parseInt(DOM.mapSendTone.value),
-      detectedKey: parseInt(DOM.mapDetectedKey.value),
-      detectedScale: parseInt(DOM.mapDetectedScale.value)
+      autotuneScale: parseInt(DOM.mapAutotuneScale.value)
     },
     shortcuts: {
       toggleMusic: DOM.shortcutToggleMusic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMusic.value,
