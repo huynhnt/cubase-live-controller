@@ -80,7 +80,7 @@ export function setFxMuteUI(isMuted) {
 
 export function toggleFxPanel() {
   states.isFxPanelOpen = !states.isFxPanelOpen;
-  
+
   if (states.isFxPanelOpen) {
     if (states.isAboutOpen) {
       states.isAboutOpen = false;
@@ -93,33 +93,33 @@ export function toggleFxPanel() {
       DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
       DOM.btnToneToggle.classList.remove('active');
     }
-    
+
     DOM.fxPanel.classList.remove('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
     DOM.btnReverbToggle.classList.add('active');
-    
+
     const fxContainer = DOM.fxPanel.querySelector('.fx-container');
     const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
     if (fxContainer) fxContainer.classList.remove('hidden');
     if (presetsContainer) presetsContainer.classList.remove('hidden');
-    
+
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
     }
-    
+
     window.electronAPI.resizeWindow('expanded');
   } else {
     DOM.fxPanel.classList.add('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
     DOM.btnReverbToggle.classList.remove('active');
-    
+
     window.electronAPI.resizeWindow('collapsed');
   }
 }
 
 export function toggleKeySelector() {
   states.isKeySelectorOpen = !states.isKeySelectorOpen;
-  
+
   if (states.isKeySelectorOpen) {
     if (states.isAboutOpen) {
       states.isAboutOpen = false;
@@ -131,34 +131,34 @@ export function toggleKeySelector() {
       DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
       DOM.btnReverbToggle.classList.remove('active');
     }
-    
+
     DOM.fxPanel.classList.remove('hidden');
     DOM.keySelectorContainer.classList.remove('hidden');
     DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
     DOM.btnToneToggle.classList.add('active');
-    
+
     const fxContainer = DOM.fxPanel.querySelector('.fx-container');
     const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
     if (fxContainer) fxContainer.classList.add('hidden');
     if (presetsContainer) presetsContainer.classList.add('hidden');
-    
+
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
     }
-    
+
     window.electronAPI.resizeWindow('expanded_tone_only');
   } else {
     DOM.keySelectorContainer.classList.add('hidden');
     DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
     DOM.btnToneToggle.classList.remove('active');
-    
+
     DOM.fxPanel.classList.add('hidden');
-    
+
     const fxContainer = DOM.fxPanel.querySelector('.fx-container');
     const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
     if (fxContainer) fxContainer.classList.remove('hidden');
     if (presetsContainer) presetsContainer.classList.remove('hidden');
-    
+
     window.electronAPI.resizeWindow('collapsed');
   }
 }
@@ -168,7 +168,7 @@ export const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 
 export function initKeySelector() {
   const keyButtons = DOM.keySelectorContainer.querySelectorAll('.key-btn');
   const scaleButtons = DOM.keySelectorContainer.querySelectorAll('.scale-btn');
-  
+
   keyButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const keyIndex = parseInt(btn.getAttribute('data-key'));
@@ -176,7 +176,7 @@ export function initKeySelector() {
       autoSaveCurrentStates();
     });
   });
-  
+
   scaleButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const scaleIndex = parseInt(btn.getAttribute('data-scale'));
@@ -184,7 +184,7 @@ export function initKeySelector() {
       autoSaveCurrentStates();
     });
   });
-  
+
   if (DOM.btnGetTone) {
     DOM.btnGetTone.addEventListener('click', async () => {
       if (states.isWaitingForAutoKey) {
@@ -291,7 +291,7 @@ export function initKeySelector() {
       }
     });
   }
-  
+
   if (DOM.btnSendTone) {
     DOM.btnSendTone.addEventListener('click', () => {
       // Fix: gửi CC key (31) và scale (32) TRƯỚC để Cubase nhận đúng tone
@@ -307,7 +307,7 @@ export function initKeySelector() {
         midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
         setTimeout(() => midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 0), 50);
       }, 30);
-      
+
       DOM.btnSendTone.classList.remove('ready-to-send');
       DOM.btnSendTone.style.background = 'rgba(46, 204, 113, 0.4)';
       DOM.btnSendTone.style.boxShadow = '0 0 12px var(--color-green)';
@@ -317,14 +317,14 @@ export function initKeySelector() {
       }, 300);
     });
   }
-  
+
   selectKey(states.currentKey, false);
   selectScale(states.currentScale, false);
 }
 
 export function selectKey(keyIndex, sendMidi = true) {
   states.currentKey = keyIndex;
-  
+
   const keyButtons = DOM.keySelectorContainer.querySelectorAll('.key-btn');
   keyButtons.forEach(btn => {
     const btnKey = parseInt(btn.getAttribute('data-key'));
@@ -334,9 +334,9 @@ export function selectKey(keyIndex, sendMidi = true) {
       btn.classList.remove('active');
     }
   });
-  
+
   updateKeyDisplay();
-  
+
   if (sendMidi) {
     // Cubase dùng: key = round((cc/127) * 12)
     // → Ngược lại: cc = round((keyIndex / 12) * 127)
@@ -347,7 +347,7 @@ export function selectKey(keyIndex, sendMidi = true) {
 
 export function selectScale(scaleIndex, sendMidi = true) {
   states.currentScale = scaleIndex;
-  
+
   const scaleButtons = DOM.keySelectorContainer.querySelectorAll('.scale-btn');
   scaleButtons.forEach(btn => {
     const btnScale = parseInt(btn.getAttribute('data-scale'));
@@ -357,9 +357,9 @@ export function selectScale(scaleIndex, sendMidi = true) {
       btn.classList.remove('active');
     }
   });
-  
+
   updateKeyDisplay();
-  
+
   if (sendMidi) {
     // Auto-Tune EFX: Chromatic(0) Major(1) NatMinor(2) HarmMinor(3)
     //                MelMinor(4) Pentatonic(5) PentMinor(6) Blues(7) → N=8
@@ -381,9 +381,9 @@ export function updateKeyDisplay() {
 
 export function updateAutoKeyDisplay() {
   const METHOD_BADGE = {
-    'title':   '📋 Tiêu đề',
-    'spotify': '🎵 Spotify',
-    'audio':   '🎤 Phân tích',
+    'title': '📋',
+    'spotify': '🎵',
+    'audio': '🎤',
   };
 
   if (states.detectedKey !== null && states.detectedScale !== null) {
@@ -409,7 +409,7 @@ export function updateAutoKeyDisplay() {
 
 export function toggleAboutPanel() {
   states.isAboutOpen = !states.isAboutOpen;
-  
+
   if (states.isAboutOpen) {
     if (states.isFxPanelOpen) {
       states.isFxPanelOpen = false;
@@ -426,7 +426,7 @@ export function toggleAboutPanel() {
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
     }
-    
+
     DOM.aboutPanel.classList.remove('hidden');
     DOM.btnAboutToggle.classList.add('active');
     window.electronAPI.resizeWindow('settings');
@@ -447,7 +447,7 @@ export function closeSettingsPanelUI() {
 // Tự động lưu cài đặt
 export async function autoSaveCurrentStates() {
   if (!appConfig) return;
-  
+
   appConfig.lastValues = {
     beatVol: parseInt(DOM.sliderBeatVol.value),
     micVol: parseInt(DOM.sliderMicVol.value),
@@ -464,9 +464,9 @@ export async function autoSaveCurrentStates() {
     currentKey: states.currentKey,
     currentScale: states.currentScale
   };
-  
+
   appConfig.theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
-  
+
   const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
   if (states.activePreset && !defaultPresets.includes(states.activePreset) && appConfig.presets && appConfig.presets[states.activePreset]) {
     appConfig.presets[states.activePreset] = {
@@ -477,6 +477,6 @@ export async function autoSaveCurrentStates() {
       flex: parseInt(DOM.sliders.flex.value)
     };
   }
-  
+
   await window.electronAPI.saveConfig(appConfig);
 }
