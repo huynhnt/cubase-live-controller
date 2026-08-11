@@ -260,13 +260,17 @@ export function initKeySelector() {
       }
 
       // ===== TIER 3: Web Audio Analysis =====
-      DOM.btnGetTone.innerText = 'Đang dò... (8s)';
-      DOM.detectedKeyDisplay.innerText = 'Tier 3: Đang phân tích âm thanh...';
+      DOM.detectedKeyDisplay.innerText = 'Level 3: Đang phân tích âm thanh...';
       DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
 
       try {
-        const audioResult = await analyzeAudioKey(8000, (progress) => {
-          const sec = Math.round(((100 - progress) / 100) * 8);
+        const durationMs = appConfig.audioAnalyzer?.duration ? appConfig.audioAnalyzer.duration * 1000 : 8000;
+        const minFreq = appConfig.audioAnalyzer?.minFreq ?? 27.5;
+        
+        DOM.btnGetTone.innerText = `Đang dò... (${durationMs/1000}s)`;
+        
+        const audioResult = await analyzeAudioKey(durationMs, minFreq, (progress) => {
+          const sec = Math.round(((100 - progress) / 100) * (durationMs / 1000));
           DOM.btnGetTone.innerText = `Dò âm... ${sec}s`;
         });
 

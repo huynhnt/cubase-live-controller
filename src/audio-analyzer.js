@@ -33,13 +33,13 @@ function correlate(chroma, profile) {
 /**
  * Xây dựng chromagram từ dữ liệu FFT tần số
  */
-function buildChroma(freqData, sampleRate, fftSize) {
+function buildChroma(freqData, sampleRate, fftSize, minFreq = 27.5) {
   const chroma = new Array(12).fill(0);
   const binFreq = sampleRate / fftSize;
 
   for (let i = 1; i < freqData.length; i++) {
     const freq = i * binFreq;
-    if (freq < 27.5 || freq > 4186) continue; // Giới hạn dải piano
+    if (freq < minFreq || freq > 4186) continue; // Giới hạn dải tần (cắt nhiễu bass)
 
     const midi = 12 * Math.log2(freq / 440) + 69;
     const pitchClass = ((Math.round(midi) % 12) + 12) % 12;
@@ -84,10 +84,11 @@ export function stopAnalysis() {
  * Capture system audio và phân tích key.
  *
  * @param {number} durationMs - Thời gian phân tích (mặc định 8000ms)
+ * @param {number} minFreq - Tần số thấp nhất để phân tích (mặc định 27.5)
  * @param {function} onProgress - Callback tiến trình (0-100)
  * @returns {Promise<{key: number, scale: number, confidence: number}>}
  */
-export async function analyzeAudioKey(durationMs = 8000, onProgress = null) {
+export async function analyzeAudioKey(durationMs = 8000, minFreq = 27.5, onProgress = null) {
   stopAnalysis(); // Dừng phiên trước nếu còn
 
   // Yêu cầu quyền capture system audio
@@ -98,10 +99,13 @@ export async function analyzeAudioKey(durationMs = 8000, onProgress = null) {
         noiseSuppression: false,
         autoGainControl: false,
       },
-      video: false,
+      video: true, // Bắt buộc phải có video theo chuẩn WebRTC getDisplayMedia
     });
+    
+    // Dừng video track ngay lập tức để tiết kiệm tài nguyên, chỉ giữ lại audio
+    _stream.getVideoTracks().forEach(track => track.stop());
   } catch (err) {
-    throw new Error('Không thể capture âm thanh hệ thống. Hãy chọn "Share system audio" khi được hỏi.');
+    throw new Error('Lỗi capture: ' + err.name + ' - ' + err.message);
   }
 
   // Kiểm tra có audio track không
@@ -134,7 +138,7 @@ export async function analyzeAudioKey(durationMs = 8000, onProgress = null) {
       // Bỏ qua nếu im lặng (< -90dB)
       const maxLevel = Math.max(...freqData);
       if (maxLevel > -90) {
-        const chroma = buildChroma(freqData, _audioCtx.sampleRate, analyser.fftSize);
+        const chroma = buildChroma(freqData, _audioCtx.sampleRate, analyser.fftSize, minFreq);
         for (let i = 0; i < 12; i++) accumulated[i] += chroma[i];
         sampleCount++;
       }

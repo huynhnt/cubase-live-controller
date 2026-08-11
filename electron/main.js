@@ -45,6 +45,10 @@ const DEFAULT_CONFIG = {
     micChange: 10,
     beatChange: -20
   },
+  audioAnalyzer: {
+    duration: 8,
+    minFreq: 27.5
+  },
   midiMappings: {
     beatVol: 20,
     beatMute: 21,
@@ -81,6 +85,7 @@ async function loadConfig() {
       ...DEFAULT_CONFIG,
       ...loaded,
       midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
+      audioAnalyzer: { ...DEFAULT_CONFIG.audioAnalyzer, ...loaded.audioAnalyzer },
       voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
       presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
       shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts }
@@ -213,14 +218,29 @@ function createWindow() {
     }
   });
 
-  // Cho phép phân quyền truy cập Web MIDI trong Electron
+  // Cho phép phân quyền truy cập Web MIDI, Media và Screen Capture trong Electron
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    if (permission === 'midi' || permission === 'midiSysex') return true;
+    if (['midi', 'midiSysex', 'media', 'display-capture'].includes(permission)) return true;
     return false;
   });
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    if (permission === 'midi' || permission === 'midiSysex') callback(true);
+    if (['midi', 'midiSysex', 'media', 'display-capture'].includes(permission)) callback(true);
     else callback(false);
+  });
+
+  // Tự động cấp quyền và chọn màn hình đầu tiên kèm âm thanh hệ thống (loopback)
+  // Tính năng này giúp getDisplayMedia hoạt động mà KHÔNG CẦN hiện popup phức tạp cho người dùng
+  session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
+    desktopCapturer.getSources({ types: ['screen'] }).then((sources) => {
+      if (sources && sources.length > 0) {
+        callback({ video: sources[0], audio: 'loopback' });
+      } else {
+        callback(null);
+      }
+    }).catch(err => {
+      console.error('Lỗi lấy source màn hình:', err);
+      callback(null);
+    });
   });
 
   const isDev = process.argv.includes('--dev');

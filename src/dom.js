@@ -89,6 +89,8 @@ export const DOM = {
   valOpacity: document.getElementById('val-opacity'),
   inputSpotifyClientId: document.getElementById('input-spotify-client-id'),
   inputSpotifyClientSecret: document.getElementById('input-spotify-client-secret'),
+  inputAudioDuration: document.getElementById('input-audio-duration'),
+  inputAudioMinFreq: document.getElementById('input-audio-minfreq'),
   
   // Shortcut inputs
   shortcutToggleMusic: document.getElementById('shortcut-toggle-music'),

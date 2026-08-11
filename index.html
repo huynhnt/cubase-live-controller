@@ -284,6 +284,19 @@
             <label for="slider-opacity">Độ trong suốt cửa sổ: <span id="val-opacity">100%</span></label>
             <input type="range" id="slider-opacity" min="40" max="100" value="100">
           </div>
+          <div class="settings-group-title">Cấu hình Nhận diện Âm thanh (Level 3)</div>
+          <div class="settings-row">
+            <label for="input-audio-duration">Thời gian lấy mẫu (giây) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: 8)</span></label>
+            <input type="number" id="input-audio-duration" min="5" max="30" value="8">
+          </div>
+          <div class="settings-row">
+            <label for="input-audio-minfreq">Lọc nhiễu Bass (Cắt tần số thấp dưới Hz) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: 27.5)</span></label>
+            <input type="number" id="input-audio-minfreq" min="20" max="300" value="27.5">
+          </div>
+          <div class="settings-row" style="margin-top: -5px; margin-bottom: 15px;">
+            <span class="settings-hint" style="color: var(--color-green);">💡 <strong>Mẹo cho nhạc Pop/EDM:</strong> Đặt Thời gian <strong>12s - 15s</strong> và Lọc Bass <strong>100Hz - 150Hz</strong> (để loại bỏ nhiễu tiếng trống/bass), kết quả dò sẽ chính xác hơn đáng kể!</span>
+          </div>
+
           <div class="settings-group-title">Spotify API — Tự động lấy Tone (Tier 2)</div>
           <div class="settings-row">
             <label for="input-spotify-client-id">Client ID</label>
