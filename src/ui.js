@@ -208,7 +208,7 @@ export function initKeySelector() {
       try {
         DOM.btnGetTone.innerText = 'Đọc tiêu đề...';
         DOM.btnGetTone.classList.add('analyzing');
-        DOM.detectedKeyDisplay.innerText = 'Tier 1: Đang đọc tiêu đề...';
+        DOM.detectedKeyDisplay.innerText = '🔍 Tier 1...';
         DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
 
         let browserTitle = null;
@@ -231,7 +231,7 @@ export function initKeySelector() {
 
           // ===== TIER 2: Spotify API =====
           DOM.btnGetTone.innerText = 'Tìm Spotify...';
-          DOM.detectedKeyDisplay.innerText = 'Tier 2: Đang tìm trên Spotify...';
+          DOM.detectedKeyDisplay.innerText = '🎵 Tier 2...';
 
           const { song, artist } = extractSongInfo(browserTitle);
           const clientId = appConfig.spotifyClientId || '';
@@ -260,7 +260,7 @@ export function initKeySelector() {
       }
 
       // ===== TIER 3: Web Audio Analysis =====
-      DOM.detectedKeyDisplay.innerText = 'Level 3: Đang phân tích âm thanh...';
+      DOM.detectedKeyDisplay.innerText = '🎤 Tier 3...';
       DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
 
       try {
