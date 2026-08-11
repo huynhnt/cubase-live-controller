@@ -46,12 +46,9 @@ export function loadConfigToForm() {
   DOM.shortcutSetSingMode.value = appConfig.shortcuts?.setSingMode || 'Chưa gán';
   DOM.shortcutSetVoiceMode.value = appConfig.shortcuts?.setVoiceMode || 'Chưa gán';
 
-  if (DOM.inputSpotifyClientId) DOM.inputSpotifyClientId.value = appConfig.spotifyClientId || '';
-  if (DOM.inputSpotifyClientSecret) DOM.inputSpotifyClientSecret.value = appConfig.spotifyClientSecret || '';
-
   if (appConfig.audioAnalyzer) {
-    DOM.inputAudioDuration.value = appConfig.audioAnalyzer.duration || 8;
-    DOM.inputAudioMinFreq.value = appConfig.audioAnalyzer.minFreq || 27.5;
+    if (DOM.inputAudioDuration) DOM.inputAudioDuration.value = appConfig.audioAnalyzer.duration || 8;
+    if (DOM.inputAudioMinFreq) DOM.inputAudioMinFreq.value = appConfig.audioAnalyzer.minFreq || 27.5;
   }
 }
 
@@ -103,9 +100,7 @@ export async function saveSettings() {
     audioAnalyzer: {
       duration: parseInt(DOM.inputAudioDuration.value) || 8,
       minFreq: parseFloat(DOM.inputAudioMinFreq.value) || 27.5
-    },
-    spotifyClientId: DOM.inputSpotifyClientId ? DOM.inputSpotifyClientId.value.trim() : (appConfig.spotifyClientId || ''),
-    spotifyClientSecret: DOM.inputSpotifyClientSecret ? DOM.inputSpotifyClientSecret.value.trim() : (appConfig.spotifyClientSecret || ''),
+    }
   };
   
   const success = await window.electronAPI.saveConfig(newConfig);

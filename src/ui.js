@@ -2,7 +2,6 @@ import { DOM } from './dom.js';
 import { states, appConfig, savedSingingValues } from './state.js';
 import { midi } from './midi.js';
 import { parseToneFromTitle, extractSongInfo } from './tone-parser.js';
-import { getKeyFromSpotify, clearSpotifyCache } from './spotify-api.js';
 import { analyzeAudioKey, stopAnalysis } from './audio-analyzer.js';
 
 export function updateSliderFill(slider, fillElement, valElement) {
@@ -228,39 +227,13 @@ export function initKeySelector() {
             updateAutoKeyDisplay();
             return;
           }
-
-          // ===== TIER 2: Spotify API =====
-          DOM.btnGetTone.innerText = 'Tìm Spotify...';
-          DOM.detectedKeyDisplay.innerText = '🎵 Tier 2...';
-
-          const { song, artist } = extractSongInfo(browserTitle);
-          const clientId = appConfig.spotifyClientId || '';
-          const clientSecret = appConfig.spotifyClientSecret || '';
-
-          if (clientId && clientSecret && song) {
-            try {
-              const spotifyResult = await getKeyFromSpotify(clientId, clientSecret, song, artist);
-              if (spotifyResult) {
-                states.detectedKey = spotifyResult.key;
-                states.detectedScale = spotifyResult.scale;
-                states.detectionMethod = 'spotify';
-                states.isWaitingForAutoKey = false;
-                DOM.btnGetTone.innerText = 'Lấy Tone';
-                DOM.btnGetTone.classList.remove('analyzing');
-                updateAutoKeyDisplay();
-                return;
-              }
-            } catch (spotifyErr) {
-              console.warn('Spotify thất bại:', spotifyErr.message);
-            }
-          }
         }
-      } catch (tier12Err) {
-        console.warn('Tier 1-2 lỗi:', tier12Err.message);
+      } catch (tier1Err) {
+        console.warn('Tier 1 lỗi:', tier1Err.message);
       }
 
-      // ===== TIER 3: Web Audio Analysis =====
-      DOM.detectedKeyDisplay.innerText = '🎤 Tier 3...';
+      // ===== TIER 2: Web Audio Analysis =====
+      DOM.detectedKeyDisplay.innerText = '🎤 Tier 2...';
       DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
 
       try {
@@ -386,7 +359,6 @@ export function updateKeyDisplay() {
 export function updateAutoKeyDisplay() {
   const METHOD_BADGE = {
     'title': '📋',
-    'spotify': '🎵',
     'audio': '🎤',
   };
 

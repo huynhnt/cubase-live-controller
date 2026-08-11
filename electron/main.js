@@ -32,10 +32,7 @@ const DEFAULT_CONFIG = {
   autoOpenProject: false,
   projectPath: '',
   opacity: 100,
-  scale: 100,
   theme: 'dark',
-  spotifyClientId: '',
-  spotifyClientSecret: '',
   voicePreset: {
     reverbLong: 10,
     reverbShort: 25,
