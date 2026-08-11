@@ -216,12 +216,17 @@ export function initKeySelector() {
         }
 
         if (browserTitle) {
-          const parsed = parseToneFromTitle(browserTitle);
-          if (parsed) {
-            states.detectedKey = parsed.key;
-            states.detectedScale = parsed.scale;
+          const foundTone = parseToneFromTitle(browserTitle);
+          if (foundTone) {
+            states.detectedKey = foundTone.key;
+            states.detectedScale = foundTone.scale;
             states.detectionMethod = 'title';
             states.isWaitingForAutoKey = false;
+            
+            // Tự động áp dụng kết quả
+            selectKey(states.detectedKey);
+            selectScale(states.detectedScale);
+
             DOM.btnGetTone.innerText = 'Lấy Tone';
             DOM.btnGetTone.classList.remove('analyzing');
             updateAutoKeyDisplay();
@@ -250,6 +255,11 @@ export function initKeySelector() {
         states.detectedKey = audioResult.key;
         states.detectedScale = audioResult.scale;
         states.detectionMethod = 'audio';
+        
+        // Tự động áp dụng kết quả
+        selectKey(states.detectedKey);
+        selectScale(states.detectedScale);
+
         states.isWaitingForAutoKey = false;
         DOM.btnGetTone.innerText = 'Lấy Tone';
         DOM.btnGetTone.classList.remove('analyzing');
@@ -271,14 +281,7 @@ export function initKeySelector() {
 
   if (DOM.btnSendTone) {
     DOM.btnSendTone.addEventListener('click', () => {
-      // Fix: gửi CC key (31) và scale (32) TRƯỚC để Cubase nhận đúng tone
-      if (states.detectedKey !== null && states.detectedScale !== null) {
-        selectKey(states.detectedKey);
-        selectScale(states.detectedScale);
-        autoSaveCurrentStates();
-      }
-
-      // Fix: gửi trigger sendTone SAU với delay nhỏ + pulse reset về 0
+      // Gửi trigger sendTone với delay nhỏ + pulse reset về 0
       // (giống getTone) để Generic Remote nhận đúng
       setTimeout(() => {
         midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
