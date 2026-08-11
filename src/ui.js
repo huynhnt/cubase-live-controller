@@ -190,7 +190,7 @@ export function initKeySelector() {
         // Huỷ nếu đang phân tích
         states.isWaitingForAutoKey = false;
         stopAnalysis();
-        DOM.btnGetTone.innerText = 'Lấy Tone';
+        DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
         DOM.btnGetTone.classList.remove('analyzing');
         DOM.detectedKeyDisplay.innerText = 'Auto-Key: Đã hủy';
         DOM.detectedKeyDisplay.style.color = '';
@@ -201,7 +201,6 @@ export function initKeySelector() {
       states.detectedScale = null;
       states.detectionMethod = null;
       states.isWaitingForAutoKey = true;
-      DOM.btnSendTone.classList.remove('ready-to-send');
 
       // ===== TIER 1: Parse tiêu đề trình duyệt =====
       try {
@@ -227,7 +226,7 @@ export function initKeySelector() {
             selectKey(states.detectedKey);
             selectScale(states.detectedScale);
 
-            DOM.btnGetTone.innerText = 'Lấy Tone';
+            DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
             DOM.btnGetTone.classList.remove('analyzing');
             updateAutoKeyDisplay();
             return;
@@ -261,7 +260,7 @@ export function initKeySelector() {
         selectScale(states.detectedScale);
 
         states.isWaitingForAutoKey = false;
-        DOM.btnGetTone.innerText = 'Lấy Tone';
+        DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
         DOM.btnGetTone.classList.remove('analyzing');
         updateAutoKeyDisplay();
       } catch (audioErr) {
@@ -276,25 +275,6 @@ export function initKeySelector() {
           DOM.detectedKeyDisplay.style.color = '';
         }, 5000);
       }
-    });
-  }
-
-  if (DOM.btnSendTone) {
-    DOM.btnSendTone.addEventListener('click', () => {
-      // Gửi trigger sendTone với delay nhỏ + pulse reset về 0
-      // (giống getTone) để Generic Remote nhận đúng
-      setTimeout(() => {
-        midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 127);
-        setTimeout(() => midi.sendCC(appConfig.midiMappings.sendTone ?? 34, 0), 50);
-      }, 30);
-
-      DOM.btnSendTone.classList.remove('ready-to-send');
-      DOM.btnSendTone.style.background = 'rgba(46, 204, 113, 0.4)';
-      DOM.btnSendTone.style.boxShadow = '0 0 12px var(--color-green)';
-      setTimeout(() => {
-        DOM.btnSendTone.style.background = '';
-        DOM.btnSendTone.style.boxShadow = '';
-      }, 300);
     });
   }
 
@@ -376,9 +356,6 @@ export function updateAutoKeyDisplay() {
       states.isWaitingForAutoKey = false;
       DOM.btnGetTone.innerText = 'Lấy Tone';
       DOM.btnGetTone.classList.remove('analyzing');
-      DOM.btnSendTone.classList.add('ready-to-send');
-    } else {
-      DOM.btnSendTone.classList.add('ready-to-send');
     }
   } else {
     DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
