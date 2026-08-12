@@ -60,7 +60,7 @@
       <div class="control-group actions-group">
         <button id="btn-reverb-toggle" class="action-btn btn-red">Chỉnh Vang ▾</button>
         <button id="btn-tone-toggle" class="action-btn btn-orange">Chọn Tone ▾</button>
-        <button id="btn-soundboard-toggle" class="action-btn btn-pink">Hiệu Ứng ▾</button>
+        <button id="btn-soundboard-toggle" class="action-btn btn-pink">Sound FX ▾</button>
       </div>
     </main>
 
@@ -169,7 +169,7 @@
     <section id="soundboard-panel" class="fx-panel hidden">
       <div class="soundboard-header">
         <div class="sb-header-left">
-          <span class="sb-title">🔊 BẢNG HIỆU ỨNG ÂM THANH</span>
+          <span class="sb-title">🔊 BẢNG SOUND FX</span>
           <div class="sb-output-selector">
             <label for="select-audio-output">Thiết bị phát:</label>
             <select id="select-audio-output">
@@ -487,25 +487,25 @@
         <div class="modal-body">
           <div class="settings-row" style="margin-bottom: 8px;">
             <label for="input-sb-name" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Tên hiển thị</label>
-            <input type="text" id="input-sb-name" placeholder="Ví dụ: Vỗ tay, Nhạc meme..." maxlength="15" style="width: 100%; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 11px; padding: 0 8px;">
+            <input type="text" id="input-sb-name" placeholder="Ví dụ: Vỗ tay, Nhạc meme..." maxlength="15" style="width: 100%;">
           </div>
           <div class="settings-row project-select-row" style="margin-bottom: 8px;">
             <label for="input-sb-file" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Tệp âm thanh (.mp3, .wav)</label>
             <div class="file-picker-group" style="display: flex; gap: 6px;">
-              <input type="text" id="input-sb-file" placeholder="Chưa chọn tệp..." readonly style="flex-grow: 1; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 10px; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-              <button id="btn-sb-select-file" class="sec-btn" style="height: 28px; font-size: 10px; padding: 0 10px; white-space: nowrap;">Chọn file</button>
+              <input type="text" id="input-sb-file" placeholder="Chưa chọn tệp..." readonly style="flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <button id="btn-sb-select-file" class="sec-btn" style="white-space: nowrap;">Chọn file</button>
             </div>
           </div>
           <div class="settings-row" style="margin-bottom: 8px;">
             <label for="input-sb-shortcut" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Phím tắt kích hoạt</label>
-            <div class="shortcut-input-group" style="position: relative; display: flex; align-items: center;">
-              <input type="text" id="input-sb-shortcut" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím..." style="width: 100%; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 11px; padding: 0 28px 0 8px;">
-              <button type="button" id="btn-sb-clear-shortcut" class="btn-clear-shortcut" title="Xóa phím tắt" style="position: absolute; right: 6px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 12px; padding: 4px; display: flex; align-items: center; justify-content: center; height: 100%;">✕</button>
+            <div class="shortcut-input-group" style="position: relative; display: flex; align-items: center; width: 100%;">
+              <input type="text" id="input-sb-shortcut" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím..." style="width: 100%; padding-right: 28px;">
+              <button type="button" id="btn-sb-clear-shortcut" class="btn-clear-shortcut" title="Xóa phím tắt" style="position: absolute; right: 6px; background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; height: 100%;">✕</button>
             </div>
           </div>
           <div class="settings-row" style="margin-bottom: 8px;">
             <label for="select-sb-color" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Màu sắc nút</label>
-            <select id="select-sb-color" style="width: 100%; height: 28px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; color: #fff; font-size: 11px; padding: 0 6px; outline: none; cursor: pointer;">
+            <select id="select-sb-color" style="width: 100%; outline: none; cursor: pointer;">
               <option value="purple">Tím (Purple)</option>
               <option value="teal">Xanh ngọc (Teal)</option>
               <option value="orange">Cam (Orange)</option>

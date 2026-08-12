@@ -3,6 +3,7 @@ import { appConfig, states } from './state.js';
 import { autoSaveCurrentStates } from './ui.js';
 
 let currentEditingSlotId = null;
+let currentPlayingAudio = null;
 
 // Khởi tạo Soundboard
 export async function initSoundboard() {
@@ -149,8 +150,15 @@ export async function playSound(slotId) {
   const btn = DOM.soundboardGrid.querySelector(`.sb-btn[data-id="${slotId}"]`);
 
   try {
-    // Tạo đối tượng Audio phát qua custom protocol local-media://
-    const audio = new Audio('local-media://' + slot.filePath);
+    // Dừng âm thanh cũ nếu đang phát
+    if (currentPlayingAudio) {
+      currentPlayingAudio.pause();
+      currentPlayingAudio.currentTime = 0;
+      const playingBtns = DOM.soundboardGrid.querySelectorAll('.sb-btn.playing');
+      playingBtns.forEach(b => b.classList.remove('playing'));
+    }
+    // Tạo đối tượng Audio phát qua custom protocol local-media://, đổi backslash thành slash để tránh lỗi Invalid URL
+    const audio = new Audio('local-media://' + slot.filePath.replace(/\\/g, '/'));
 
     // Tìm deviceId từ nhãn thiết bị đã lưu
     if (appConfig.soundboardAudioOutputLabel && appConfig.soundboardAudioOutputLabel !== 'Mặc định') {
@@ -178,6 +186,7 @@ export async function playSound(slotId) {
     });
 
     await audio.play();
+    currentPlayingAudio = audio;
   } catch (err) {
     console.error('Lỗi khởi tạo âm thanh:', err);
     if (btn) btn.classList.remove('playing');
@@ -212,6 +221,11 @@ function openEditModal(slotId) {
 
   DOM.soundboardEditModal.classList.remove('hidden');
   DOM.inputSbName.focus();
+
+  // Mở rộng cửa sổ để chứa vừa popup
+  if (window.electronAPI) {
+    window.electronAPI.resizeWindow('settings');
+  }
 }
 
 // Cài đặt sự kiện cho modal chỉnh sửa
@@ -321,6 +335,7 @@ function setupModalEvents() {
 
         // Đóng modal
         DOM.soundboardEditModal.classList.add('hidden');
+        if (window.electronAPI) window.electronAPI.resizeWindow('expanded');
 
         // Lưu cấu hình xuống file
         await window.electronAPI.saveConfig(appConfig);
@@ -335,6 +350,7 @@ function setupModalEvents() {
   if (DOM.btnSbModalCancel) {
     DOM.btnSbModalCancel.addEventListener('click', () => {
       DOM.soundboardEditModal.classList.add('hidden');
+      if (window.electronAPI) window.electronAPI.resizeWindow('expanded');
     });
   }
 }

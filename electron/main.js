@@ -75,18 +75,18 @@ const DEFAULT_CONFIG = {
     "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
   },
   soundboard: [
-    { id: 0, name: 'Tiếng Cười', filePath: '', shortcut: 'num1', color: 'purple' },
-    { id: 1, name: 'Vỗ Tay', filePath: '', shortcut: 'num2', color: 'teal' },
-    { id: 2, name: 'Drum Roll', filePath: '', shortcut: 'num3', color: 'orange' },
-    { id: 3, name: 'Tiếng Chuông', filePath: '', shortcut: 'num4', color: 'red' },
-    { id: 4, name: 'Còi Meme', filePath: '', shortcut: 'Chưa gán', color: 'yellow' },
-    { id: 5, name: 'Kinh Ngạc', filePath: '', shortcut: 'Chưa gán', color: 'blue' },
-    { id: 6, name: 'Tiếng Khóc', filePath: '', shortcut: 'Chưa gán', color: 'pink' },
-    { id: 7, name: 'Thất Bại', filePath: '', shortcut: 'Chưa gán', color: 'grey' },
-    { id: 8, name: 'Wow!', filePath: '', shortcut: 'Chưa gán', color: 'green' },
-    { id: 9, name: 'Yeah!', filePath: '', shortcut: 'Chưa gán', color: 'purple' },
-    { id: 10, name: 'Hồi Hộp', filePath: '', shortcut: 'Chưa gán', color: 'teal' },
-    { id: 11, name: 'Gõ Búa', filePath: '', shortcut: 'Chưa gán', color: 'orange' }
+    { id: 0, name: 'Chào Khán Giả', filePath: '', shortcut: 'num1', color: 'blue' },
+    { id: 1, name: 'Tiếng Cười', filePath: '', shortcut: 'num2', color: 'purple' },
+    { id: 2, name: 'Vỗ Tay', filePath: '', shortcut: 'num3', color: 'teal' },
+    { id: 3, name: 'Drum Roll', filePath: '', shortcut: 'num4', color: 'orange' },
+    { id: 4, name: 'Tiếng Chuông', filePath: '', shortcut: 'num5', color: 'red' },
+    { id: 5, name: 'Còi Meme', filePath: '', shortcut: 'Chưa gán', color: 'yellow' },
+    { id: 6, name: 'Kinh Ngạc', filePath: '', shortcut: 'Chưa gán', color: 'blue' },
+    { id: 7, name: 'Tiếng Khóc', filePath: '', shortcut: 'Chưa gán', color: 'pink' },
+    { id: 8, name: 'Thất Bại', filePath: '', shortcut: 'Chưa gán', color: 'grey' },
+    { id: 9, name: 'Wow!', filePath: '', shortcut: 'Chưa gán', color: 'green' },
+    { id: 10, name: 'Hồi Hộp', filePath: '', shortcut: 'Chưa gán', color: 'purple' },
+    { id: 11, name: 'Gõ Búa', filePath: '', shortcut: 'Chưa gán', color: 'teal' }
   ],
   soundboardAudioOutputLabel: 'Mặc định'
 };
@@ -95,6 +95,7 @@ const soundsDir = path.join(app.getPath('userData'), 'sounds');
 const localSoundsDir = path.join(__dirname, 'sounds');
 
 const DEFAULT_SOUNDS = [
+  'welcome.mp3',
   'laughter.mp3',
   'applause.mp3',
   'drumroll.mp3',
@@ -142,19 +143,34 @@ async function loadConfig() {
       soundboardAudioOutputLabel: loaded.soundboardAudioOutputLabel || DEFAULT_CONFIG.soundboardAudioOutputLabel
     };
     
-    const defaultFiles = ['laughter.mp3', 'applause.mp3', 'drumroll.mp3', 'bell.mp3'];
-    for (let i = 0; i < 4; i++) {
+    const userDataPath = app.getPath('userData');
+    
+    const defaultFiles = ['welcome.mp3', 'laughter.mp3', 'applause.mp3', 'drumroll.mp3', 'bell.mp3'];
+    for (let i = 0; i < 5; i++) {
       if (config.soundboard[i] && !config.soundboard[i].filePath) {
-        config.soundboard[i].filePath = path.join(soundsDir, defaultFiles[i]);
+        config.soundboard[i].filePath = `sounds/${defaultFiles[i]}`;
       }
     }
+
+    // Auto-migrate old absolute paths in config to relative paths
+    if (config.soundboard && Array.isArray(config.soundboard)) {
+      config.soundboard.forEach(slot => {
+        if (slot.filePath && slot.filePath.startsWith(userDataPath)) {
+          let relPath = slot.filePath.substring(userDataPath.length);
+          // Loại bỏ dấu slash/backslash ở đầu
+          relPath = relPath.replace(/^[/\\]/, '').replace(/\\/g, '/');
+          slot.filePath = relPath;
+        }
+      });
+    }
+
     return config;
   } catch (error) {
     const config = { ...DEFAULT_CONFIG };
-    const defaultFiles = ['laughter.mp3', 'applause.mp3', 'drumroll.mp3', 'bell.mp3'];
-    for (let i = 0; i < 4; i++) {
+    const defaultFiles = ['welcome.mp3', 'laughter.mp3', 'applause.mp3', 'drumroll.mp3', 'bell.mp3'];
+    for (let i = 0; i < 5; i++) {
       if (config.soundboard[i] && !config.soundboard[i].filePath) {
-        config.soundboard[i].filePath = path.join(soundsDir, defaultFiles[i]);
+        config.soundboard[i].filePath = `sounds/${defaultFiles[i]}`;
       }
     }
     return config;
@@ -359,7 +375,11 @@ app.whenReady().then(() => {
   protocol.handle('local-media', (request) => {
     const urlStr = request.url;
     let filePath = decodeURIComponent(urlStr.replace('local-media://', ''));
-    if (filePath.startsWith('/') && filePath.match(/^\/[a-zA-Z]:/)) {
+    
+    // Nếu là đường dẫn tương đối của âm thanh mặc định (vd: sounds/laughter.mp3)
+    if (filePath.startsWith('sounds/')) {
+      filePath = path.join(app.getPath('userData'), filePath);
+    } else if (filePath.startsWith('/') && filePath.match(/^\/[a-zA-Z]:/)) {
       filePath = filePath.substring(1);
     }
     return net.fetch(pathToFileURL(filePath).toString());
