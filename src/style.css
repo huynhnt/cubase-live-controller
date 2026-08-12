@@ -1622,3 +1622,221 @@ body.light-theme .btn-clear-shortcut:hover {
   background: rgba(231, 76, 60, 0.1);
   color: var(--color-red);
 }
+
+/* Nút màu hồng trong Main Panel */
+.btn-pink {
+  background: #c2185b;
+}
+.btn-pink:hover {
+  background: #d81b60;
+}
+.btn-pink.active {
+  background: #e91e63;
+  box-shadow: 0 0 8px rgba(233, 30, 99, 0.4);
+}
+
+/* Soundboard Panel Styles */
+.soundboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.sb-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sb-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+}
+
+.sb-output-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sb-output-selector label {
+  font-size: 9px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sb-output-selector select {
+  height: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 9px;
+  padding: 0 4px;
+  outline: none;
+  max-width: 200px;
+  cursor: pointer;
+}
+
+.soundboard-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-gap: 8px;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Soundboard Buttons */
+.sb-btn {
+  border: none;
+  border-radius: 6px;
+  height: 60px;
+  color: #ffffff;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sb-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.sb-btn:active {
+  transform: translateY(1px);
+}
+
+.sb-btn.playing {
+  animation: pulse-glow-sb 0.8s infinite alternate;
+}
+
+@keyframes pulse-glow-sb {
+  0% {
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+    transform: scale(0.98);
+  }
+  100% {
+    box-shadow: 0 0 12px currentColor;
+    transform: scale(1.02);
+  }
+}
+
+.sb-btn-name {
+  font-size: 10px;
+  text-align: center;
+  word-break: break-word;
+  max-height: 28px;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.sb-btn-shortcut {
+  font-size: 7.5px;
+  opacity: 0.6;
+  margin-top: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.3px;
+}
+
+.sb-btn-edit-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 8px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.edit-mode-active .sb-btn-edit-indicator {
+  opacity: 0.7;
+}
+
+.edit-mode-active .sb-btn:hover .sb-btn-edit-indicator {
+  opacity: 1;
+}
+
+/* Soundboard Button Color Gradients */
+.sb-purple {
+  background: linear-gradient(135deg, #7d3c98, #8e44ad);
+  color: #fff;
+}
+.sb-purple:hover { background: linear-gradient(135deg, #8e44ad, #a569bd); }
+
+.sb-teal {
+  background: linear-gradient(135deg, #117a65, #16a085);
+  color: #fff;
+}
+.sb-teal:hover { background: linear-gradient(135deg, #16a085, #45b39d); }
+
+.sb-orange {
+  background: linear-gradient(135deg, #ba4a00, #d35400);
+  color: #fff;
+}
+.sb-orange:hover { background: linear-gradient(135deg, #d35400, #e59866); }
+
+.sb-red {
+  background: linear-gradient(135deg, #b03a2e, #cb4335);
+  color: #fff;
+}
+.sb-red:hover { background: linear-gradient(135deg, #cb4335, #ec7063); }
+
+.sb-yellow {
+  background: linear-gradient(135deg, #d35400, #f39c12);
+  color: #fff;
+}
+.sb-yellow:hover { background: linear-gradient(135deg, #f39c12, #f5b041); }
+
+.sb-blue {
+  background: linear-gradient(135deg, #21618c, #2e86c1);
+  color: #fff;
+}
+.sb-blue:hover { background: linear-gradient(135deg, #2e86c1, #5dade2); }
+
+.sb-pink {
+  background: linear-gradient(135deg, #9b1b30, #c2185b);
+  color: #fff;
+}
+.sb-pink:hover { background: linear-gradient(135deg, #c2185b, #e91e63); }
+
+.sb-green {
+  background: linear-gradient(135deg, #1e8449, #27ae60);
+  color: #fff;
+}
+.sb-green:hover { background: linear-gradient(135deg, #27ae60, #58d68d); }
+
+.sb-grey {
+  background: linear-gradient(135deg, #424949, #5d6d7e);
+  color: #fff;
+}
+.sb-grey:hover { background: linear-gradient(135deg, #5d6d7e, #85929e); }
+
+/* Light Theme overrides for Soundboard */
+body.light-theme .sb-title {
+  color: #333333;
+}
+body.light-theme .sb-output-selector select {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #333333;
+}
+body.light-theme .sb-btn {
+  border-color: rgba(0, 0, 0, 0.05);
+}
+body.light-theme #soundboard-panel {
+  background: rgba(0, 0, 0, 0.02);
+}

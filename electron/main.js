@@ -1,10 +1,17 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut, desktopCapturer } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut, desktopCapturer, protocol, net } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
-import { fileURLToPath } from 'url';
+import fsSync from 'fs';
+import https from 'https';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Đăng ký giao thức local-media trước khi app ready
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'local-media', privileges: { bypassCSP: true, secure: true, supportFetchAPI: true, stream: true } }
+]);
 
 let mainWindow = null;
 const configPath = path.join(app.getPath('userData'), 'config.json');
@@ -66,25 +73,103 @@ const DEFAULT_CONFIG = {
     "Bolero": { reverbLong: 45, reverbShort: 30, delay: 40, autotune: 15, flex: 60 },
     "Remix": { reverbLong: 15, reverbShort: 10, delay: 15, autotune: 40, flex: 20 },
     "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
-  }
+  },
+  soundboard: [
+    { id: 0, name: 'Tiếng Cười', filePath: '', shortcut: 'num1', color: 'purple' },
+    { id: 1, name: 'Vỗ Tay', filePath: '', shortcut: 'num2', color: 'teal' },
+    { id: 2, name: 'Drum Roll', filePath: '', shortcut: 'num3', color: 'orange' },
+    { id: 3, name: 'Tiếng Chuông', filePath: '', shortcut: 'num4', color: 'red' },
+    { id: 4, name: 'Còi Meme', filePath: '', shortcut: 'Chưa gán', color: 'yellow' },
+    { id: 5, name: 'Kinh Ngạc', filePath: '', shortcut: 'Chưa gán', color: 'blue' },
+    { id: 6, name: 'Tiếng Khóc', filePath: '', shortcut: 'Chưa gán', color: 'pink' },
+    { id: 7, name: 'Thất Bại', filePath: '', shortcut: 'Chưa gán', color: 'grey' },
+    { id: 8, name: 'Wow!', filePath: '', shortcut: 'Chưa gán', color: 'green' },
+    { id: 9, name: 'Yeah!', filePath: '', shortcut: 'Chưa gán', color: 'purple' },
+    { id: 10, name: 'Hồi Hộp', filePath: '', shortcut: 'Chưa gán', color: 'teal' },
+    { id: 11, name: 'Gõ Búa', filePath: '', shortcut: 'Chưa gán', color: 'orange' }
+  ],
+  soundboardAudioOutputLabel: 'Mặc định'
 };
+
+const soundsDir = path.join(app.getPath('userData'), 'sounds');
+
+const DEFAULT_SOUNDS = [
+  { name: 'laughter.mp3', url: 'https://www.soundjay.com/human/sounds/laughter-3.mp3' },
+  { name: 'applause.mp3', url: 'https://www.soundjay.com/human/sounds/applause-01.mp3' },
+  { name: 'drumroll.mp3', url: 'https://www.soundjay.com/misc/sounds/drum-roll-1.mp3' },
+  { name: 'bell.mp3', url: 'https://www.soundjay.com/clock/sounds/desk-bell-one-time-1.mp3' }
+];
+
+async function ensureDefaultSounds() {
+  try {
+    await fs.mkdir(soundsDir, { recursive: true });
+    for (const s of DEFAULT_SOUNDS) {
+      const dest = path.join(soundsDir, s.name);
+      try {
+        await fs.access(dest);
+      } catch (err) {
+        console.log(`Downloading default sound: ${s.name} from ${s.url}`);
+        await downloadFile(s.url, dest);
+      }
+    }
+  } catch (err) {
+    console.error('Error ensuring default sounds:', err);
+  }
+}
+
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = fsSync.createWriteStream(dest);
+    https.get(url, (response) => {
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to download: ${response.statusCode}`));
+        return;
+      }
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        resolve();
+      });
+    }).on('error', (err) => {
+      fsSync.unlink(dest, () => {});
+      reject(err);
+    });
+  });
+}
 
 async function loadConfig() {
   try {
     const data = await fs.readFile(configPath, 'utf8');
     const loaded = JSON.parse(data);
-    // Tự động trộn cấu hình cũ với các cấu hình mới thêm (như presets và shortcuts) để tránh mất file hoặc thiếu trường
-    return {
+    
+    const config = {
       ...DEFAULT_CONFIG,
       ...loaded,
       midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
       audioAnalyzer: { ...DEFAULT_CONFIG.audioAnalyzer, ...loaded.audioAnalyzer },
       voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
       presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
-      shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts }
+      shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts },
+      soundboard: loaded.soundboard ? loaded.soundboard : DEFAULT_CONFIG.soundboard,
+      soundboardAudioOutputLabel: loaded.soundboardAudioOutputLabel || DEFAULT_CONFIG.soundboardAudioOutputLabel
     };
+    
+    const defaultFiles = ['laughter.mp3', 'applause.mp3', 'drumroll.mp3', 'bell.mp3'];
+    for (let i = 0; i < 4; i++) {
+      if (config.soundboard[i] && !config.soundboard[i].filePath) {
+        config.soundboard[i].filePath = path.join(soundsDir, defaultFiles[i]);
+      }
+    }
+    return config;
   } catch (error) {
-    return DEFAULT_CONFIG;
+    const config = { ...DEFAULT_CONFIG };
+    const defaultFiles = ['laughter.mp3', 'applause.mp3', 'drumroll.mp3', 'bell.mp3'];
+    for (let i = 0; i < 4; i++) {
+      if (config.soundboard[i] && !config.soundboard[i].filePath) {
+        config.soundboard[i].filePath = path.join(soundsDir, defaultFiles[i]);
+      }
+    }
+    return config;
   }
 }
 
@@ -181,6 +266,24 @@ function registerGlobalShortcuts(config) {
       console.error(`Lỗi đăng ký phím tắt Voice (${setVoiceMode}):`, err);
     }
   }
+
+  // Đăng ký phím tắt cho các ô Soundboard
+  if (config && config.soundboard && Array.isArray(config.soundboard)) {
+    config.soundboard.forEach(slot => {
+      if (slot.shortcut && slot.shortcut !== 'Chưa gán') {
+        try {
+          const ok = globalShortcut.register(slot.shortcut, () => {
+            if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+              mainWindow.webContents.send('play-soundboard-slot', slot.id);
+            }
+          });
+          if (!ok) console.warn(`Không thể đăng ký phím tắt cho Soundboard slot ${slot.id}: ${slot.shortcut}`);
+        } catch (err) {
+          console.error(`Lỗi đăng ký phím tắt Soundboard slot ${slot.id} (${slot.shortcut}):`, err);
+        }
+      }
+    });
+  }
 }
 
 async function saveConfig(config) {
@@ -213,11 +316,11 @@ function createWindow() {
 
   // Cho phép phân quyền truy cập Web MIDI, Media và Screen Capture trong Electron
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    if (['midi', 'midiSysex', 'media', 'display-capture'].includes(permission)) return true;
+    if (['midi', 'midiSysex', 'media', 'display-capture', 'audioCapture'].includes(permission)) return true;
     return false;
   });
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    if (['midi', 'midiSysex', 'media', 'display-capture'].includes(permission)) callback(true);
+    if (['midi', 'midiSysex', 'media', 'display-capture', 'audioCapture'].includes(permission)) callback(true);
     else callback(false);
   });
 
@@ -264,6 +367,35 @@ function createWindow() {
 
 // Xử lý các sự kiện IPC từ Renderer
 app.whenReady().then(() => {
+  // Đăng ký handle giao thức local-media
+  protocol.handle('local-media', (request) => {
+    const urlStr = request.url;
+    let filePath = decodeURIComponent(urlStr.replace('local-media://', ''));
+    if (filePath.startsWith('/') && filePath.match(/^\/[a-zA-Z]:/)) {
+      filePath = filePath.substring(1);
+    }
+    return net.fetch(pathToFileURL(filePath).toString());
+  });
+
+  // Đảm bảo có âm thanh mẫu tải về
+  ensureDefaultSounds().catch(err => console.error('Lỗi đảm bảo âm thanh mẫu:', err));
+
+  ipcMain.handle('select-audio-file', async () => {
+    if (!mainWindow) return '';
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Chọn file âm thanh',
+      filters: [
+        { name: 'Audio Files', extensions: ['mp3', 'wav', 'ogg', 'aac', 'm4a'] }
+      ],
+      properties: ['openFile']
+    });
+    
+    if (result.canceled || result.filePaths.length === 0) {
+      return '';
+    }
+    return result.filePaths[0];
+  });
+
   // Lắng nghe resize cửa sổ từ renderer
   ipcMain.on('window-resize', (event, state) => {
     if (!mainWindow) return;
