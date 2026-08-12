@@ -497,10 +497,36 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
   const updateNotification = document.getElementById('update-notification');
   const updateMessage = document.getElementById('update-message');
   const btnInstallUpdate = document.getElementById('btn-install-update');
+  const btnCheckUpdates = document.getElementById('btn-check-updates');
+
+  if (btnCheckUpdates) {
+    btnCheckUpdates.addEventListener('click', () => {
+      let originalText = btnCheckUpdates.innerHTML;
+      btnCheckUpdates.innerHTML = '<span>⏳</span> Đang kiểm tra...';
+      btnCheckUpdates.disabled = true;
+      window.electronAPI.checkForUpdates();
+      
+      // Reset button sau 5s nếu không có phản hồi
+      setTimeout(() => {
+        btnCheckUpdates.innerHTML = originalText;
+        btnCheckUpdates.disabled = false;
+      }, 5000);
+    });
+  }
 
   window.electronAPI.onUpdateAvailable((info) => {
     updateNotification.classList.remove('hidden');
     updateMessage.innerText = 'Có bản cập nhật mới (' + info.version + '). Đang tải về...';
+    if (btnCheckUpdates) {
+      btnCheckUpdates.innerHTML = '<span>✅</span> Đã thấy bản mới!';
+    }
+  });
+
+  window.electronAPI.onUpdateNotAvailable((info) => {
+    if (btnCheckUpdates) {
+      btnCheckUpdates.innerHTML = '<span>✔️</span> Bạn đang dùng bản mới nhất!';
+      btnCheckUpdates.disabled = false;
+    }
   });
 
   window.electronAPI.onUpdateProgress((progressObj) => {

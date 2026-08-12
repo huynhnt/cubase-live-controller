@@ -482,10 +482,15 @@ app.whenReady().then(() => {
 
   // Tự động kiểm tra bản cập nhật
   autoUpdater.autoDownload = true;
+  autoUpdater.forceDevUpdateConfig = true;
   autoUpdater.checkForUpdatesAndNotify();
 
   autoUpdater.on('update-available', (info) => {
     if (mainWindow) mainWindow.webContents.send('update-available', info);
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    if (mainWindow) mainWindow.webContents.send('update-not-available', info);
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
@@ -498,6 +503,10 @@ app.whenReady().then(() => {
 
   ipcMain.on('quit-and-install-update', () => {
     autoUpdater.quitAndInstall(false, true);
+  });
+
+  ipcMain.on('check-for-updates', () => {
+    autoUpdater.checkForUpdatesAndNotify();
   });
 
   createWindow();
