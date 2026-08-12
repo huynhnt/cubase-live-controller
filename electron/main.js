@@ -505,7 +505,15 @@ app.whenReady().then(() => {
   });
 
   autoUpdater.on('error', (err) => {
-    if (mainWindow) mainWindow.webContents.send('update-error', err.message);
+    const isMissingRelease = err.message && (err.message.includes('404') || err.message.includes('406') || err.message.includes('Unable to find latest version'));
+    if (mainWindow) {
+      if (isMissingRelease) {
+        // Suppress and pretend no update is available
+        mainWindow.webContents.send('update-not-available', null);
+      } else {
+        mainWindow.webContents.send('update-error', err.message);
+      }
+    }
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
@@ -523,7 +531,15 @@ app.whenReady().then(() => {
   ipcMain.on('check-for-updates', () => {
     autoUpdater.checkForUpdatesAndNotify().catch(err => {
       console.error("Lỗi kiểm tra cập nhật thủ công:", err.message);
-      if (mainWindow) mainWindow.webContents.send('update-error', "Không tìm thấy thông tin bản cập nhật (latest.yml). Vui lòng phát hành release trên Github trước.");
+      const isMissingRelease = err.message && (err.message.includes('404') || err.message.includes('406') || err.message.includes('Unable to find latest version'));
+      
+      if (mainWindow) {
+        if (isMissingRelease) {
+          mainWindow.webContents.send('update-not-available');
+        } else {
+          mainWindow.webContents.send('update-error', "Lỗi kiểm tra cập nhật: " + err.message);
+        }
+      }
     });
   });
 
