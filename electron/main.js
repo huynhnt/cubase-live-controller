@@ -528,8 +528,15 @@ app.whenReady().then(() => {
     autoUpdater.quitAndInstall(false, true);
   });
 
-  ipcMain.on('check-for-updates', () => {
-    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+  ipcMain.on('check-for-updates', async () => {
+    try {
+      console.log("Main process: Bắt đầu kiểm tra cập nhật thủ công...");
+      const result = await autoUpdater.checkForUpdates();
+      // Nếu không có result (bị cache hoặc return null), giả lập kết quả
+      if (!result) {
+        if (mainWindow) mainWindow.webContents.send('update-not-available');
+      }
+    } catch (err) {
       console.error("Lỗi kiểm tra cập nhật thủ công:", err.message);
       const isMissingRelease = err.message && (err.message.includes('404') || err.message.includes('406') || err.message.includes('Unable to find latest version'));
       
@@ -540,7 +547,7 @@ app.whenReady().then(() => {
           mainWindow.webContents.send('update-error', "Lỗi kiểm tra cập nhật: " + err.message);
         }
       }
-    });
+    }
   });
 
   createWindow();
