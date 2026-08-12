@@ -504,12 +504,16 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
       let originalText = btnCheckUpdates.innerHTML;
       btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang kiểm tra...';
       btnCheckUpdates.disabled = true;
+      
+      // Gọi IPC kiểm tra cập nhật
       window.electronAPI.checkForUpdates();
       
-      // Reset button sau 5s nếu không có phản hồi
+      // Reset sau 5s nếu không có kết quả
       setTimeout(() => {
-        btnCheckUpdates.innerHTML = originalText;
-        btnCheckUpdates.disabled = false;
+        if (btnCheckUpdates.disabled) {
+          btnCheckUpdates.innerHTML = originalText;
+          btnCheckUpdates.disabled = false;
+        }
       }, 5000);
     });
   }
