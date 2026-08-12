@@ -491,3 +491,29 @@ export async function autoSaveCurrentStates() {
 
   await window.electronAPI.saveConfig(appConfig);
 }
+
+// --- AUTO UPDATER UI LOGIC ---
+if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
+  const updateNotification = document.getElementById('update-notification');
+  const updateMessage = document.getElementById('update-message');
+  const btnInstallUpdate = document.getElementById('btn-install-update');
+
+  window.electronAPI.onUpdateAvailable((info) => {
+    updateNotification.classList.remove('hidden');
+    updateMessage.innerText = 'Có bản cập nhật mới (' + info.version + '). Đang tải về...';
+  });
+
+  window.electronAPI.onUpdateProgress((progressObj) => {
+    let percent = Math.round(progressObj.percent);
+    updateMessage.innerText = 'Đang tải bản cập nhật... ' + percent + '%';
+  });
+
+  window.electronAPI.onUpdateDownloaded((info) => {
+    updateMessage.innerText = 'Đã tải xong bản cập nhật (' + info.version + ')!';
+    btnInstallUpdate.classList.remove('hidden');
+  });
+
+  btnInstallUpdate.addEventListener('click', () => {
+    window.electronAPI.quitAndInstallUpdate();
+  });
+}

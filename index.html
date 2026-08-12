@@ -526,6 +526,12 @@
     </div>
   </div>
 
+  <!-- Thông báo cập nhật tự động (Update Notification) -->
+  <div id="update-notification" class="update-notification hidden" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(52, 152, 219, 0.95); color: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 8px; font-size: 11px; backdrop-filter: blur(4px); transition: all 0.3s ease;">
+    <span id="update-message">Đang kiểm tra cập nhật...</span>
+    <button id="btn-install-update" class="hidden" style="background: #fff; color: #3498db; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">Cài đặt & Khởi động lại</button>
+  </div>
+
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

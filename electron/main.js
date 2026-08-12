@@ -4,6 +4,8 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import https from 'https';
 import { fileURLToPath, pathToFileURL } from 'url';
+import electronUpdaterPkg from 'electron-updater';
+const { autoUpdater } = electronUpdaterPkg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -476,6 +478,26 @@ app.whenReady().then(() => {
       console.error('Lỗi get-browser-title:', err);
       return null;
     }
+  });
+
+  // Tự động kiểm tra bản cập nhật
+  autoUpdater.autoDownload = true;
+  autoUpdater.checkForUpdatesAndNotify();
+
+  autoUpdater.on('update-available', (info) => {
+    if (mainWindow) mainWindow.webContents.send('update-available', info);
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    if (mainWindow) mainWindow.webContents.send('update-progress', progressObj);
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    if (mainWindow) mainWindow.webContents.send('update-downloaded', info);
+  });
+
+  ipcMain.on('quit-and-install-update', () => {
+    autoUpdater.quitAndInstall(false, true);
   });
 
   createWindow();

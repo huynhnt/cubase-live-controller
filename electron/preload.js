@@ -10,5 +10,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   resizeWindow: (state) => ipcRenderer.send('window-resize', state),
   onShortcutPressed: (callback) => ipcRenderer.on('shortcut-pressed', (event, action) => callback(action)),
   selectAudioFile: () => ipcRenderer.invoke('select-audio-file'),
-  onPlaySoundboardSlot: (callback) => ipcRenderer.on('play-soundboard-slot', (event, slotId) => callback(slotId))
+  onPlaySoundboardSlot: (callback) => ipcRenderer.on('play-soundboard-slot', (event, slotId) => callback(slotId)),
+  
+  // Auto Updater
+  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, info) => callback(info)),
+  onUpdateProgress: (callback) => ipcRenderer.on('update-progress', (event, progressObj) => callback(progressObj)),
+  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (event, info) => callback(info)),
+  quitAndInstallUpdate: () => ipcRenderer.send('quit-and-install-update')
 });

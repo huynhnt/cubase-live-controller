@@ -18,6 +18,13 @@
   "build": {
     "appId": "com.cubaselivecontroller.app",
     "productName": "Cubase Live Controller",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "huynhnt",
+        "repo": "cubase-live-controller"
+      }
+    ],
     "directories": {
       "output": "release"
     },
@@ -34,5 +41,8 @@
       "electron/**/*",
       "package.json"
     ]
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }
