@@ -10,6 +10,15 @@ const { autoUpdater } = electronUpdaterPkg;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Bắt lỗi Unhandled Promise Rejection để tránh sập app hoặc văng log đỏ (do electron-updater gây ra khi thiếu file release)
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection caught:', reason);
+});
+
+// Thiết lập logger cho autoUpdater để nó tự in log chuẩn thay vì throw unhandled
+autoUpdater.logger = console;
+autoUpdater.logger.transports = { file: { level: "info" } };
+
 // Đăng ký giao thức local-media trước khi app ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'local-media', privileges: { bypassCSP: true, secure: true, supportFetchAPI: true, stream: true } }
