@@ -321,7 +321,11 @@ app.whenReady().then(() => {
   // Lấy tiêu đề các cửa sổ trình duyệt đang mở (phục vụ Tier 1 detect tone)
   ipcMain.handle('get-browser-title', async () => {
     try {
-      const sources = await desktopCapturer.getSources({ types: ['window'] });
+      const sources = await desktopCapturer.getSources({ 
+        types: ['window'],
+        fetchWindowIcons: false,
+        thumbnailSize: { width: 0, height: 0 }
+      });
       // Tìm cửa sổ Chrome/Edge/Firefox có "YouTube" trong tiêu đề
       const ytWindow = sources.find(s =>
         /youtube/i.test(s.name) &&
