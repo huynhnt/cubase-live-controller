@@ -92,49 +92,37 @@ const DEFAULT_CONFIG = {
 };
 
 const soundsDir = path.join(app.getPath('userData'), 'sounds');
+const localSoundsDir = path.join(__dirname, 'sounds');
 
 const DEFAULT_SOUNDS = [
-  { name: 'laughter.mp3', url: 'https://www.soundjay.com/human/sounds/laughter-3.mp3' },
-  { name: 'applause.mp3', url: 'https://www.soundjay.com/human/sounds/applause-01.mp3' },
-  { name: 'drumroll.mp3', url: 'https://www.soundjay.com/misc/sounds/drum-roll-1.mp3' },
-  { name: 'bell.mp3', url: 'https://www.soundjay.com/clock/sounds/desk-bell-one-time-1.mp3' }
+  'laughter.mp3',
+  'applause.mp3',
+  'drumroll.mp3',
+  'bell.mp3'
 ];
 
 async function ensureDefaultSounds() {
   try {
     await fs.mkdir(soundsDir, { recursive: true });
-    for (const s of DEFAULT_SOUNDS) {
-      const dest = path.join(soundsDir, s.name);
+    for (const name of DEFAULT_SOUNDS) {
+      const dest = path.join(soundsDir, name);
       try {
-        await fs.access(dest);
+        await fs.access(dest); // File đã tồn tại ở userdata thì bỏ qua
       } catch (err) {
-        console.log(`Downloading default sound: ${s.name} from ${s.url}`);
-        await downloadFile(s.url, dest);
+        // File chưa có, thử copy từ resource đóng gói (electron/sounds)
+        const src = path.join(localSoundsDir, name);
+        try {
+          await fs.access(src); // Kiểm tra xem dev có để file trong source code không
+          await fs.copyFile(src, dest);
+          console.log(`Đã copy âm thanh mặc định: ${name}`);
+        } catch (srcErr) {
+          console.warn(`Không tìm thấy file nguồn ${src}. Bạn hãy tải file MP3 và ném vào thư mục electron/sounds nhé.`);
+        }
       }
     }
   } catch (err) {
-    console.error('Error ensuring default sounds:', err);
+    console.error('Lỗi khởi tạo âm thanh mặc định:', err);
   }
-}
-
-function downloadFile(url, dest) {
-  return new Promise((resolve, reject) => {
-    const file = fsSync.createWriteStream(dest);
-    https.get(url, (response) => {
-      if (response.statusCode !== 200) {
-        reject(new Error(`Failed to download: ${response.statusCode}`));
-        return;
-      }
-      response.pipe(file);
-      file.on('finish', () => {
-        file.close();
-        resolve();
-      });
-    }).on('error', (err) => {
-      fsSync.unlink(dest, () => {});
-      reject(err);
-    });
-  });
 }
 
 async function loadConfig() {
