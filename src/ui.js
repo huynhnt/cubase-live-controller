@@ -500,22 +500,27 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
   const btnCheckUpdates = document.getElementById('btn-check-updates');
 
   if (btnCheckUpdates) {
-    btnCheckUpdates.addEventListener('click', () => {
-      let originalText = btnCheckUpdates.innerHTML;
-      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang kiểm tra...';
-      btnCheckUpdates.disabled = true;
-      
-      // Gọi IPC kiểm tra cập nhật
-      window.electronAPI.checkForUpdates();
-      
-      // Reset sau 5s nếu không có kết quả
-      setTimeout(() => {
-        if (btnCheckUpdates.disabled) {
-          btnCheckUpdates.innerHTML = originalText;
-          btnCheckUpdates.disabled = false;
+      btnCheckUpdates.addEventListener('click', () => {
+        let originalText = btnCheckUpdates.innerHTML;
+        try {
+          btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang gửi lệnh...';
+          btnCheckUpdates.disabled = true;
+          
+          window.electronAPI.checkForUpdates();
+          
+          setTimeout(() => {
+            if (btnCheckUpdates.disabled) {
+              btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⚠️</span> Timeout không phản hồi';
+              setTimeout(() => {
+                btnCheckUpdates.innerHTML = originalText;
+                btnCheckUpdates.disabled = false;
+              }, 2000);
+            }
+          }, 5000);
+        } catch (err) {
+          btnCheckUpdates.innerHTML = 'Lỗi JS: ' + err.message;
         }
-      }, 5000);
-    });
+      });
   }
 
   window.electronAPI.onUpdateAvailable((info) => {
