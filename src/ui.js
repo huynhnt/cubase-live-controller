@@ -502,7 +502,7 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
   if (btnCheckUpdates) {
     btnCheckUpdates.addEventListener('click', () => {
       let originalText = btnCheckUpdates.innerHTML;
-      btnCheckUpdates.innerHTML = '<span>⏳</span> Đang kiểm tra...';
+      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang kiểm tra...';
       btnCheckUpdates.disabled = true;
       window.electronAPI.checkForUpdates();
       
@@ -518,13 +518,13 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
     updateNotification.classList.remove('hidden');
     updateMessage.innerText = 'Có bản cập nhật mới (' + info.version + '). Đang tải về...';
     if (btnCheckUpdates) {
-      btnCheckUpdates.innerHTML = '<span>✅</span> Đã thấy bản mới!';
+      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✅</span> Đã thấy bản mới!';
     }
   });
 
   window.electronAPI.onUpdateNotAvailable((info) => {
     if (btnCheckUpdates) {
-      btnCheckUpdates.innerHTML = '<span>✔️</span> Bạn đang dùng bản mới nhất!';
+      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✔️</span> Bạn đang dùng bản mới nhất!';
       btnCheckUpdates.disabled = false;
     }
   });
