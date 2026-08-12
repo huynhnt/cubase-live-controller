@@ -33,7 +33,14 @@ Tích hợp bộ điều khiển MIDI kết nối trực tiếp với VST **Anta
 * **Đồng bộ về App:** Khi Auto-Key nhận diện xong, thông số nốt và giọng sẽ tự động truyền về App qua MIDI CC để hiển thị (Ví dụ: `Auto-Key: C# Minor` sáng màu xanh lá), đồng thời nút **[Gửi Tone]** nhấp nháy báo sẵn sàng.
 * **Nút [Gửi Tone]:** Khi bấm, App sẽ phát lệnh gửi tone đã dò được sang tất cả các plugin **Auto-Tune** ở track mic, đồng thời tự động đồng bộ (active sáng đỏ) các nút nốt nhạc thủ công tương ứng trên giao diện App.
 
-### 6. Giao diện Premium & Đa nhiệm
+### 6. Bảng Âm Thanh Pha Trò (Sound FX / Soundboard)
+* Mở rộng bằng nút **Sound FX ▾**.
+* Cung cấp 12 ô gán hiệu ứng âm thanh (mp3, wav) hoạt động độc lập (ví dụ: tiếng vỗ tay, tiếng cười). 
+* Tính năng hoạt động **hoàn toàn Offline** bằng cách copy sẵn các âm thanh mặc định. 
+* Tích hợp cấu hình thiết bị phát Audio Output riêng biệt (để định tuyến âm thanh vào Cubase qua VB-Cable, VoiceMeeter).
+* Hỗ trợ gán phím tắt toàn cục (**Global Shortcuts**) kích hoạt âm thanh ở bất kỳ đâu kể cả khi ứng dụng bị ẩn. 
+
+### 7. Giao diện Premium & Đa nhiệm
 * Hỗ trợ **Chế độ Sáng / Tối (Light/Dark Theme)** linh hoạt.
 * Hỗ trợ chỉnh độ mờ đục (Opacity) của nền ứng dụng để làm dạng cửa sổ bán trong suốt đè lên trên Cubase cực kỳ thời thượng.
 * Thanh chữ chạy (Marquee) dưới chân trang hiển thị thông tin tác giả Hyun Kun đóng góp phi thương mại vì cộng đồng.

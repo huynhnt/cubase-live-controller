@@ -18,6 +18,7 @@
 8. **Tự Động Mở Cubase Project (.cpr):** Cấu hình đường dẫn tệp dự án của bạn để phần mềm tự động kích hoạt Cubase tải project đó lên ngay khi mở tool.
 9. **Cửa Sổ Tiện Ích Cài Đặt (Settings):** Cho phép đổi cổng MIDI In/Out, thay đổi kênh MIDI (MIDI Channel), tùy biến số CC (Control Change) cho từng tính năng, chỉnh độ trong suốt của cửa sổ (Opacity) và thiết lập Preset cho chế độ Voice.
 10. **Bảng Chọn Tone Autotune Thủ Công:** Nhấn nút "Chọn Tone" để xổ hàng 12 phím Key (C đến B) và 2 phím giọng (Trưởng/Thứ) giúp ca sĩ chuyển tone Autotune tức thời ngay trên màn hình app.
+11. **Bảng Hiệu Ứng Âm Thanh (Sound FX):** Cung cấp 12 nút phát các âm thanh meme/hiệu ứng (tiếng cười, vỗ tay...). Hỗ trợ gán phím tắt toàn cục (Global Hotkeys) phát âm thanh khi app ẩn, hoạt động offline và cho phép chọn đường xuất âm thanh (Audio Output) độc lập.
 
 ---
 
