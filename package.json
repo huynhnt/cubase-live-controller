@@ -22,7 +22,8 @@
       {
         "provider": "github",
         "owner": "huynhnt",
-        "repo": "cubase-live-controller"
+        "repo": "cubase-live-controller",
+        "releaseType": "release"
       }
     ],
     "directories": {
