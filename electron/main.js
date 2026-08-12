@@ -15,9 +15,8 @@ process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection caught:', reason);
 });
 
-// Thiết lập logger cho autoUpdater để nó tự in log chuẩn thay vì throw unhandled
-autoUpdater.logger = console;
-autoUpdater.logger.transports = { file: { level: "info" } };
+// Tắt logger để tránh báo lỗi dài ngoằng trên terminal nếu chưa có release trên Github
+autoUpdater.logger = null;
 
 // Đăng ký giao thức local-media trước khi app ready
 protocol.registerSchemesAsPrivileged([
