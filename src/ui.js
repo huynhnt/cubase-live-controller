@@ -70,10 +70,10 @@ export function setFxMuteUI(isMuted) {
   states.fxMuted = isMuted;
   if (isMuted) {
     DOM.btnFxMute.classList.add('muted');
-    DOM.btnFxMute.innerText = 'Bật Vang';
+    DOM.btnFxMute.innerText = 'Bật AutoTune';
   } else {
     DOM.btnFxMute.classList.remove('muted');
-    DOM.btnFxMute.innerText = 'Tắt Vang';
+    DOM.btnFxMute.innerText = 'Tắt AutoTune';
   }
 }
 

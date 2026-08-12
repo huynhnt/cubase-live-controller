@@ -31,7 +31,7 @@
       <div class="control-group buttons-group">
         <button id="btn-beat-mute" class="action-btn btn-green active">Tắt Nhạc</button>
         <button id="btn-mic-mute" class="action-btn btn-green active">Tắt Mic</button>
-        <button id="btn-fx-mute" class="action-btn btn-green active">Tắt Vang</button>
+        <button id="btn-fx-mute" class="action-btn btn-green active">Tắt AutoTune</button>
         <button id="btn-mode-toggle" class="action-btn btn-blue" data-mode="sing">
           <span class="mode-text">HÁT LIVE</span>
           <span class="mode-sub">Click đổi Voice</span>
@@ -95,7 +95,7 @@
         </div>
         <!-- Auto-Tune -->
         <div class="fx-row">
-          <span class="fx-label label-red">AUTO TUNE</span>
+          <span class="fx-label label-red">RETUNE SPEED</span>
           <div class="fx-slider-wrapper">
             <input type="range" id="slider-autotune" class="red" min="0" max="127" value="20">
             <div class="fx-track-fill fill-red"></div>
@@ -104,7 +104,7 @@
         </div>
         <!-- Flex -->
         <div class="fx-row">
-          <span class="fx-label label-blue">FLEX</span>
+          <span class="fx-label label-blue">HUMANIZE</span>
           <div class="fx-slider-wrapper">
             <input type="range" id="slider-flex" class="blue" min="0" max="127" value="50">
             <div class="fx-track-fill fill-blue"></div>
@@ -216,7 +216,7 @@
               <input type="number" id="map-mic-mute" min="0" max="127" value="23">
             </div>
             <div class="mapping-item">
-              <label>Tắt Vang CC</label>
+              <label>Tắt AutoTune CC</label>
               <input type="number" id="map-fx-mute" min="0" max="127" value="24">
             </div>
             <div class="mapping-item">
@@ -232,11 +232,11 @@
               <input type="number" id="map-delay" min="0" max="127" value="27">
             </div>
             <div class="mapping-item">
-              <label>AutoTune CC</label>
+              <label>Retune Speed CC</label>
               <input type="number" id="map-autotune" min="0" max="127" value="28">
             </div>
             <div class="mapping-item">
-              <label>Flex CC</label>
+              <label>Humanize CC</label>
               <input type="number" id="map-flex" min="0" max="127" value="29">
             </div>
             <div class="mapping-item">
@@ -295,11 +295,11 @@
               <input type="number" id="preset-delay" min="0" max="127" value="0">
             </div>
             <div class="preset-item">
-              <label>Autotune</label>
+              <label>Retune Speed</label>
               <input type="number" id="preset-autotune" min="0" max="127" value="0">
             </div>
             <div class="preset-item">
-              <label>Flex (Humanize)</label>
+              <label>Humanize</label>
               <input type="number" id="preset-flex" min="0" max="127" value="0">
             </div>
             <div class="preset-item">
@@ -335,7 +335,7 @@
               </div>
             </div>
             <div class="shortcut-item">
-              <label>3. Tắt/mở Vang (FX Mute)</label>
+              <label>3. Tắt/mở AutoTune</label>
               <div class="shortcut-input-group">
                 <input type="text" id="shortcut-toggle-fx" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
                 <button type="button" class="btn-clear-shortcut" data-target="shortcut-toggle-fx" title="Xóa phím tắt">✕</button>

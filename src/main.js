@@ -127,7 +127,7 @@ export function handleIncomingMidiCC({ cc, value }) {
     setMicMuteUI(isMuted);
   }
   else if (cc === mappings.fxMute) {
-    const isMuted = value >= 64;
+    const isMuted = value < 64;
     setFxMuteUI(isMuted);
   }
   else if (cc === mappings.reverbLong) {
@@ -179,7 +179,7 @@ export function toggleMicMute() {
 export function toggleFxMute() {
   const nextState = !states.fxMuted;
   setFxMuteUI(nextState);
-  midi.sendCC(appConfig.midiMappings.fxMute, nextState ? 127 : 0);
+  midi.sendCC(appConfig.midiMappings.fxMute, nextState ? 0 : 127);
   autoSaveCurrentStates();
 }
 
