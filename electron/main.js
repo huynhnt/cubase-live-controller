@@ -493,6 +493,10 @@ app.whenReady().then(() => {
     if (mainWindow) mainWindow.webContents.send('update-not-available', info);
   });
 
+  autoUpdater.on('error', (err) => {
+    if (mainWindow) mainWindow.webContents.send('update-error', err.message);
+  });
+
   autoUpdater.on('download-progress', (progressObj) => {
     if (mainWindow) mainWindow.webContents.send('update-progress', progressObj);
   });

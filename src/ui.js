@@ -529,6 +529,16 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
     }
   });
 
+  if (window.electronAPI.onUpdateError) {
+    window.electronAPI.onUpdateError((errMessage) => {
+      if (btnCheckUpdates) {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">❌</span> Lỗi kiểm tra!';
+        btnCheckUpdates.disabled = false;
+        console.error('Update error:', errMessage);
+      }
+    });
+  }
+
   window.electronAPI.onUpdateProgress((progressObj) => {
     let percent = Math.round(progressObj.percent);
     updateMessage.innerText = 'Đang tải bản cập nhật... ' + percent + '%';
