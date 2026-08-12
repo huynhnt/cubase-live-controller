@@ -483,7 +483,9 @@ app.whenReady().then(() => {
   // Tự động kiểm tra bản cập nhật
   autoUpdater.autoDownload = true;
   autoUpdater.forceDevUpdateConfig = true;
-  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.checkForUpdatesAndNotify().catch(err => {
+    console.error("Lỗi tự động kiểm tra cập nhật:", err.message);
+  });
 
   autoUpdater.on('update-available', (info) => {
     if (mainWindow) mainWindow.webContents.send('update-available', info);
@@ -510,7 +512,10 @@ app.whenReady().then(() => {
   });
 
   ipcMain.on('check-for-updates', () => {
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdatesAndNotify().catch(err => {
+      console.error("Lỗi kiểm tra cập nhật thủ công:", err.message);
+      if (mainWindow) mainWindow.webContents.send('update-error', "Không tìm thấy thông tin bản cập nhật (latest.yml). Vui lòng phát hành release trên Github trước.");
+    });
   });
 
   createWindow();
