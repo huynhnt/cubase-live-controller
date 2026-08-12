@@ -527,6 +527,14 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
       btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✔️</span> Bạn đang dùng bản mới nhất!';
       btnCheckUpdates.disabled = false;
     }
+    // Show toast notification
+    if (updateNotification && updateMessage) {
+      updateNotification.classList.remove('hidden');
+      updateMessage.innerText = 'Phần mềm của bạn đang là phiên bản mới nhất!';
+      setTimeout(() => {
+        updateNotification.classList.add('hidden');
+      }, 3000);
+    }
   });
 
   if (window.electronAPI.onUpdateError) {
@@ -535,6 +543,14 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
         btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">❌</span> Lỗi kiểm tra!';
         btnCheckUpdates.disabled = false;
         console.error('Update error:', errMessage);
+      }
+      // Show toast notification
+      if (updateNotification && updateMessage) {
+        updateNotification.classList.remove('hidden');
+        updateMessage.innerText = 'Lỗi kiểm tra cập nhật: ' + errMessage;
+        setTimeout(() => {
+          updateNotification.classList.add('hidden');
+        }, 5000);
       }
     });
   }
