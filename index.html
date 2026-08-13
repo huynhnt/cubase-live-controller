@@ -529,47 +529,7 @@
     </div>
   </div>
 
-  <!-- Modal Cập Nhật Ứng Dụng (Update Notification Modal - Draggable) -->
-  <div id="update-notification" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 999999; display: flex; align-items: center; justify-content: center; pointer-events: none;">
-    <div id="update-modal-dialog" class="modal-content" style="pointer-events: auto; width: 480px; max-width: 90vw; background: rgba(20, 24, 33, 0.98); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 12px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9); padding: 0; overflow: hidden; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; gap: 0;">
-      
-      <!-- Modal Header (Vùng kéo thả popup) -->
-      <div id="update-modal-header" style="background: linear-gradient(135deg, rgba(41, 128, 185, 0.4), rgba(142, 68, 173, 0.4)); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.1); cursor: move; user-select: none;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="font-size: 14px;">🚀</span>
-          <span style="font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">CẬP NHẬT ỨNG DỤNG</span>
-        </div>
-        <button id="btn-close-update-x" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; padding: 0 4px; line-height: 1; transition: color 0.2s;" title="Đóng">✕</button>
-      </div>
 
-      <!-- Modal Body -->
-      <div style="padding: 16px 18px; display: flex; flex-direction: column; gap: 12px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <span id="update-version-badge" style="background: rgba(52, 152, 219, 0.2); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.4); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">Bản phát hành mới</span>
-          <span style="font-size: 10px; color: var(--text-secondary);">Cubase Live Controller</span>
-        </div>
-
-        <div id="update-message" style="font-size: 12px; color: #e0e0e0; line-height: 1.5;">
-          Đang kiểm tra bản cập nhật...
-        </div>
-
-        <!-- Thanh phần trăm tiến trình (Progress Bar) -->
-        <div id="update-progress-container" class="hidden" style="width: 100%; margin-top: 4px;">
-          <div style="width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; position: relative;">
-            <div id="update-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #2ecc71, #1abc9c); border-radius: 4px; transition: width 0.2s ease;"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal Footer -->
-      <div style="padding: 12px 18px; background: rgba(0, 0, 0, 0.25); border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
-        <button id="btn-close-update" class="sec-btn" style="height: 30px; padding: 0 14px; font-size: 11px; border-radius: 6px;">Để Sau</button>
-        <button id="btn-start-download" class="action-btn btn-green" style="height: 30px; padding: 0 16px; font-size: 11px; border-radius: 6px; font-weight: 600;">Tải Ngay</button>
-        <button id="btn-install-update" class="action-btn btn-green hidden" style="height: 30px; padding: 0 16px; font-size: 11px; border-radius: 6px; font-weight: 600;">Cài Đặt & Khởi Động Lại</button>
-      </div>
-
-    </div>
-  </div>
 
   <script type="module" src="/src/main.js"></script>
 </body>

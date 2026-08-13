@@ -493,226 +493,52 @@ export async function autoSaveCurrentStates() {
 }
 
 // --- AUTO UPDATER UI LOGIC ---
-// --- AUTO UPDATER UI LOGIC ---
-if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
-  const updateNotification = document.getElementById('update-notification');
-  const updateModalDialog = document.getElementById('update-modal-dialog');
-  const updateModalHeader = document.getElementById('update-modal-header');
-  const updateMessage = document.getElementById('update-message');
-  const updateVersionBadge = document.getElementById('update-version-badge');
-  const updateProgressContainer = document.getElementById('update-progress-container');
-  const updateProgressBar = document.getElementById('update-progress-bar');
-  const btnStartDownload = document.getElementById('btn-start-download');
-  const btnInstallUpdate = document.getElementById('btn-install-update');
-  const btnCloseUpdate = document.getElementById('btn-close-update');
-  const btnCloseUpdateX = document.getElementById('btn-close-update-x');
+// --- AUTO UPDATER MANUAL CHECK BTN IN SETTINGS ---
+if (window.electronAPI && window.electronAPI.checkForUpdates) {
   const btnCheckUpdates = document.getElementById('btn-check-updates');
 
-  // Khôi phục vị trí mặc định ở giữa màn hình cho Popup
-  function resetModalPosition() {
-    if (updateModalDialog) {
-      updateModalDialog.style.transform = 'translate(-50%, -50%)';
-      updateModalDialog.style.left = '50%';
-      updateModalDialog.style.top = '50%';
-    }
-  }
-
-  // Lập trình kéo thả (Draggable) cho Popup Cập nhật
-  if (updateModalDialog && updateModalHeader) {
-    let isDragging = false;
-    let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
-
-    updateModalHeader.addEventListener('mousedown', (e) => {
-      if (e.target.closest('#btn-close-update-x')) return;
-
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-
-      const rect = updateModalDialog.getBoundingClientRect();
-      initialLeft = rect.left;
-      initialTop = rect.top;
-
-      updateModalDialog.style.transform = 'none';
-      updateModalDialog.style.left = `${initialLeft}px`;
-      updateModalDialog.style.top = `${initialTop}px`;
-
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-    });
-
-    function onMouseMove(e) {
-      if (!isDragging) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-
-      let newLeft = initialLeft + dx;
-      let newTop = initialTop + dy;
-
-      const maxLeft = window.innerWidth - updateModalDialog.offsetWidth;
-      const maxTop = window.innerHeight - updateModalDialog.offsetHeight;
-
-      newLeft = Math.max(0, Math.min(newLeft, maxLeft));
-      newTop = Math.max(0, Math.min(newTop, maxTop));
-
-      updateModalDialog.style.left = `${newLeft}px`;
-      updateModalDialog.style.top = `${newTop}px`;
-    }
-
-    function onMouseUp() {
-      isDragging = false;
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    }
-  }
-
-  let lastWindowStateBeforeUpdate = 'collapsed';
-
-  // Nút đóng / để sau popup cập nhật
-  const closeUpdatePopup = () => {
-    if (updateNotification) updateNotification.classList.add('hidden');
-    if (window.electronAPI && window.electronAPI.resizeWindow) {
-      window.electronAPI.resizeWindow(lastWindowStateBeforeUpdate || 'collapsed');
-    }
-  };
-  if (btnCloseUpdate) btnCloseUpdate.addEventListener('click', closeUpdatePopup);
-  if (btnCloseUpdateX) btnCloseUpdateX.addEventListener('click', closeUpdatePopup);
-
-  // Nút đồng ý tải bản cập nhật
-  if (btnStartDownload) {
-    btnStartDownload.addEventListener('click', () => {
-      if (btnStartDownload) btnStartDownload.classList.add('hidden');
-      if (btnCloseUpdate) btnCloseUpdate.classList.add('hidden');
-      if (updateProgressContainer) updateProgressContainer.classList.remove('hidden');
-      if (updateProgressBar) updateProgressBar.style.width = '0%';
-      if (updateMessage) updateMessage.innerText = '⏳ Đang khởi tạo bản tải về...';
-
-      if (window.electronAPI.downloadUpdate) {
-        window.electronAPI.downloadUpdate();
+  if (btnCheckUpdates) {
+    btnCheckUpdates.addEventListener('click', () => {
+      let originalText = btnCheckUpdates.innerHTML;
+      try {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang kiểm tra...';
+        btnCheckUpdates.disabled = true;
+        
+        window.electronAPI.checkForUpdates();
+        
+        setTimeout(() => {
+          if (btnCheckUpdates.disabled) {
+            btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⚠️</span> Không phản hồi';
+            setTimeout(() => {
+              btnCheckUpdates.innerHTML = originalText;
+              btnCheckUpdates.disabled = false;
+            }, 2000);
+          }
+        }, 5000);
+      } catch (err) {
+        btnCheckUpdates.innerHTML = 'Lỗi JS: ' + err.message;
       }
     });
-  }
 
-  // Nút kiểm tra thủ công trong Cài đặt
-  if (btnCheckUpdates) {
-      btnCheckUpdates.addEventListener('click', () => {
-        let originalText = btnCheckUpdates.innerHTML;
-        try {
-          btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang kiểm tra...';
-          btnCheckUpdates.disabled = true;
-          
-          window.electronAPI.checkForUpdates();
-          
-          setTimeout(() => {
-            if (btnCheckUpdates.disabled) {
-              btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⚠️</span> Timeout không phản hồi';
-              setTimeout(() => {
-                btnCheckUpdates.innerHTML = originalText;
-                btnCheckUpdates.disabled = false;
-              }, 2000);
-            }
-          }, 5000);
-        } catch (err) {
-          btnCheckUpdates.innerHTML = 'Lỗi JS: ' + err.message;
-        }
+    if (window.electronAPI.onUpdateAvailable) {
+      window.electronAPI.onUpdateAvailable(() => {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✅</span> Đã thấy bản mới!';
+        btnCheckUpdates.disabled = false;
       });
-  }
-
-  // Sự kiện khi phát hiện có bản cập nhật mới
-  window.electronAPI.onUpdateAvailable((info) => {
-    resetModalPosition();
-    if (window.electronAPI && window.electronAPI.resizeWindow) {
-      window.electronAPI.resizeWindow('update');
     }
-    if (updateNotification) updateNotification.classList.remove('hidden');
-    if (updateVersionBadge) updateVersionBadge.innerText = `Phiên bản mới: v${info.version}`;
-    if (updateMessage) updateMessage.innerText = `🎉 Đã có phiên bản mới v${info.version}. Bạn có muốn tải về nâng cấp ngay bây giờ không?`;
-    
-    if (updateProgressContainer) updateProgressContainer.classList.add('hidden');
-    if (btnStartDownload) btnStartDownload.classList.remove('hidden');
-    if (btnInstallUpdate) btnInstallUpdate.classList.add('hidden');
-    if (btnCloseUpdate) btnCloseUpdate.classList.remove('hidden');
 
-    if (btnCheckUpdates) {
-      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✅</span> Đã thấy bản mới!';
+    if (window.electronAPI.onUpdateNotAvailable) {
+      window.electronAPI.onUpdateNotAvailable(() => {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✔️</span> Bạn đang dùng bản mới nhất!';
+        btnCheckUpdates.disabled = false;
+      });
     }
-  });
 
-  window.electronAPI.onUpdateNotAvailable((info) => {
-    if (btnCheckUpdates) {
-      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✔️</span> Bạn đang dùng bản mới nhất!';
-      btnCheckUpdates.disabled = false;
-    }
-    if (updateNotification && updateMessage) {
-      resetModalPosition();
-      updateNotification.classList.remove('hidden');
-      if (updateVersionBadge) updateVersionBadge.innerText = `Đã cập nhật mới nhất`;
-      updateMessage.innerText = 'Phần mềm của bạn đang sử dụng phiên bản mới nhất!';
-      if (updateProgressContainer) updateProgressContainer.classList.add('hidden');
-      if (btnStartDownload) btnStartDownload.classList.add('hidden');
-      if (btnInstallUpdate) btnInstallUpdate.classList.add('hidden');
-      if (btnCloseUpdate) btnCloseUpdate.classList.add('hidden');
-
-      setTimeout(() => {
-        updateNotification.classList.add('hidden');
-      }, 3000);
-    }
-  });
-
-  if (window.electronAPI.onUpdateError) {
-    window.electronAPI.onUpdateError((errMessage) => {
-      if (btnCheckUpdates) {
+    if (window.electronAPI.onUpdateError) {
+      window.electronAPI.onUpdateError(() => {
         btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">❌</span> Lỗi kiểm tra!';
         btnCheckUpdates.disabled = false;
-        console.error('Update error:', errMessage);
-      }
-      if (updateNotification && updateMessage) {
-        resetModalPosition();
-        updateNotification.classList.remove('hidden');
-        if (updateVersionBadge) updateVersionBadge.innerText = `Lỗi cập nhật`;
-        updateMessage.innerText = 'Lỗi kiểm tra cập nhật: ' + errMessage;
-        if (updateProgressContainer) updateProgressContainer.classList.add('hidden');
-        if (btnStartDownload) btnStartDownload.classList.add('hidden');
-        if (btnInstallUpdate) btnInstallUpdate.classList.add('hidden');
-        if (btnCloseUpdate) btnCloseUpdate.classList.remove('hidden');
-      }
-    });
-  }
-
-  // Sự kiện khi đang tải tiến trình (%)
-  window.electronAPI.onUpdateProgress((progressObj) => {
-    if (updateNotification) updateNotification.classList.remove('hidden');
-    if (updateProgressContainer) updateProgressContainer.classList.remove('hidden');
-    
-    let percent = Math.round(progressObj.percent);
-    let speed = (progressObj.bytesPerSecond / (1024 * 1024)).toFixed(1);
-
-    if (updateProgressBar) updateProgressBar.style.width = `${percent}%`;
-    if (updateMessage) {
-      updateMessage.innerText = `⏳ Đang tải bản mới... ${percent}% (${speed} MB/s)`;
+      });
     }
-    if (btnStartDownload) btnStartDownload.classList.add('hidden');
-    if (btnInstallUpdate) btnInstallUpdate.classList.add('hidden');
-    if (btnCloseUpdate) btnCloseUpdate.classList.add('hidden');
-  });
-
-  // Sự kiện khi tải xong
-  window.electronAPI.onUpdateDownloaded((info) => {
-    if (updateNotification) updateNotification.classList.remove('hidden');
-    if (updateProgressContainer) updateProgressContainer.classList.remove('hidden');
-    if (updateProgressBar) updateProgressBar.style.width = '100%';
-    
-    if (updateVersionBadge) updateVersionBadge.innerText = `v${info.version} sẵn sàng`;
-    if (updateMessage) updateMessage.innerText = '✅ Đã tải xong bản cập nhật v' + info.version + '! Bạn có muốn cài đặt ngay?';
-    
-    if (btnStartDownload) btnStartDownload.classList.add('hidden');
-    if (btnInstallUpdate) btnInstallUpdate.classList.remove('hidden');
-    if (btnCloseUpdate) btnCloseUpdate.classList.remove('hidden');
-  });
-
-  if (btnInstallUpdate) {
-    btnInstallUpdate.addEventListener('click', () => {
-      window.electronAPI.quitAndInstallUpdate();
-    });
   }
 }
