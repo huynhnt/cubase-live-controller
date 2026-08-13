@@ -140,6 +140,11 @@ body.web-mode .app-container {
   color: #ffffff;
 }
 
+.control-btn.active {
+  background: rgba(46, 204, 113, 0.2);
+  color: var(--color-green);
+}
+
 .control-btn.btn-close:hover {
   background: var(--color-red);
   color: #ffffff;

@@ -178,6 +178,7 @@ export let states = {
   isAboutOpen: false,
   isSoundboardOpen: false,
   isSoundboardEditMode: false,
+  isPinned: true,
   activePreset: 'Mặc định',
   presetToDelete: '',
   presetToOverwrite: '',

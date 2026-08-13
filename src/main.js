@@ -342,6 +342,15 @@ export function setupEventListeners() {
     }
   });
   DOM.btnAboutToggle.addEventListener('click', toggleAboutPanel);
+  DOM.btnPinToggle.addEventListener('click', () => {
+    states.isPinned = !states.isPinned;
+    if (states.isPinned) {
+      DOM.btnPinToggle.classList.add('active');
+    } else {
+      DOM.btnPinToggle.classList.remove('active');
+    }
+    window.electronAPI.togglePin(states.isPinned);
+  });
   DOM.btnCloseAbout.addEventListener('click', () => {
     if (states.isAboutOpen) {
       toggleAboutPanel();
@@ -612,6 +621,17 @@ export async function bootstrap() {
           setMode('sing');
         } else if (action === 'setVoiceMode') {
           setMode('voice');
+        }
+      });
+    }
+
+    if (window.electronAPI.onPinStateChanged) {
+      window.electronAPI.onPinStateChanged((isPinned) => {
+        states.isPinned = isPinned;
+        if (isPinned) {
+          DOM.btnPinToggle.classList.add('active');
+        } else {
+          DOM.btnPinToggle.classList.remove('active');
         }
       });
     }

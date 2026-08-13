@@ -6,6 +6,7 @@ export const DOM = {
   get btnClose() { return document.getElementById('btn-close'); },
   get btnSettingsToggle() { return document.getElementById('btn-settings-toggle'); },
   get btnAboutToggle() { return document.getElementById('btn-about-toggle'); },
+  get btnPinToggle() { return document.getElementById('btn-pin-toggle'); },
   get btnThemeToggle() { return document.getElementById('btn-theme-toggle'); },
   
   // Nút chức năng chính

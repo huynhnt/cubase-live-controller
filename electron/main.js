@@ -240,13 +240,8 @@ function registerGlobalShortcuts(config) {
         if (mainWindow && !mainWindow.isDestroyed()) {
           if (mainWindow.isMinimized()) {
             mainWindow.restore();
-            mainWindow.focus();
-            mainWindow.setAlwaysOnTop(true, 'screen-saver');
-          } else if (mainWindow.isFocused()) {
-            mainWindow.minimize();
           } else {
-            mainWindow.focus();
-            mainWindow.setAlwaysOnTop(true, 'screen-saver');
+            mainWindow.minimize();
           }
         }
       });
@@ -449,6 +444,16 @@ app.whenReady().then(() => {
 
   ipcMain.on('window-close', () => {
     app.quit();
+  });
+
+  ipcMain.on('window-toggle-pin', (event, isPinned) => {
+    if (mainWindow) {
+      if (isPinned) {
+        mainWindow.setAlwaysOnTop(true, 'screen-saver');
+      } else {
+        mainWindow.setAlwaysOnTop(false);
+      }
+    }
   });
 
   ipcMain.handle('load-config', async () => {
