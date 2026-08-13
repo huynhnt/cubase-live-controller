@@ -160,14 +160,14 @@
           <button class="key-btn active" data-key="0">C</button>
           <button class="key-btn" data-key="1">C#</button>
           <button class="key-btn" data-key="2">D</button>
-          <button class="key-btn" data-key="3">D#</button>
+          <button class="key-btn" data-key="3">Eb</button>
           <button class="key-btn" data-key="4">E</button>
           <button class="key-btn" data-key="5">F</button>
           <button class="key-btn" data-key="6">F#</button>
           <button class="key-btn" data-key="7">G</button>
           <button class="key-btn" data-key="8">G#</button>
           <button class="key-btn" data-key="9">A</button>
-          <button class="key-btn" data-key="10">A#</button>
+          <button class="key-btn" data-key="10">Bb</button>
           <button class="key-btn" data-key="11">B</button>
         </div>
         <div class="divider-line"></div>
@@ -227,6 +227,13 @@
             <label for="input-midi-channel">Kênh MIDI (MIDI Channel)</label>
             <input type="number" id="input-midi-channel" min="1" max="16" value="1">
           </div>
+          <div class="settings-row">
+            <label for="select-autotune-version">Phiên bản Auto-Tune</label>
+            <select id="select-autotune-version">
+              <option value="pro">Auto-Tune Pro</option>
+              <option value="efx">Auto-Tune EFX</option>
+            </select>
+          </div>
         </div>
 
         <!-- Tab 2: Ánh xạ MIDI CC -->
@@ -281,9 +288,35 @@
               <input type="number" id="map-autotune-scale" min="0" max="127" value="32">
             </div>
           </div>
+
+          <div class="settings-group-title" style="margin-top: 15px;">Tùy chỉnh Giá trị MIDI cho Auto-Tune Pro (Nếu bị nhận sai Tông)</div>
+          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
+            Mỗi phiên bản Auto-Tune có bộ giá trị khác nhau. Kéo 2 thanh trượt dưới đây, nhìn vào Auto-Tune trong Cubase xem số bao nhiêu tương ứng với chữ gì, rồi nhập số đó vào ô bên dưới (cách nhau dấu phẩy).
+          </p>
+          
+          <div style="background: rgba(46, 204, 113, 0.1); padding: 10px; border-radius: 6px; margin-bottom: 12px; border: 1px solid rgba(46, 204, 113, 0.3);">
+            <div style="font-size: 11px; font-weight: bold; color: var(--color-green); margin-bottom: 8px;">🎯 CÔNG CỤ DÒ SỐ TRỰC TIẾP</div>
+            <div class="settings-row" style="margin-bottom: 8px;">
+              <label for="scanner-key" style="font-size: 11px; width: 80px;">Kéo thử Key: <span id="val-scanner-key" style="color: var(--color-blue); font-weight: bold;">0</span></label>
+              <input type="range" id="scanner-key" min="0" max="127" value="0" style="flex: 1;">
+            </div>
+            <div class="settings-row">
+              <label for="scanner-scale" style="font-size: 11px; width: 80px;">Kéo thử Scale: <span id="val-scanner-scale" style="color: var(--color-blue); font-weight: bold;">0</span></label>
+              <input type="range" id="scanner-scale" min="0" max="127" value="0" style="flex: 1;">
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <label for="input-custom-keys">Giá trị cho 12 Tông (C, C#, D, Eb, E, F, F#, G, G#, A, Bb, B)</label>
+            <input type="text" id="input-custom-keys" style="width: 100%;" value="0, 12, 24, 35, 47, 58, 70, 82, 93, 104, 125, 127">
+          </div>
+          <div class="settings-row">
+            <label for="input-custom-scales">Giá trị cho 2 Scale (Trưởng, Thứ)</label>
+            <input type="text" id="input-custom-scales" style="width: 100%;" value="0, 5">
+          </div>
         </div>
 
-        <!-- Tab 3: Cài đặt chung & presets -->
+        <!-- Tab 3: Cấu hình chung & presets -->
         <div id="tab-general" class="tab-content">
           <div class="settings-row project-select-row">
             <label>Cubase Project File (.cpr)</label>

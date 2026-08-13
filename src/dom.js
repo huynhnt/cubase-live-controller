@@ -69,6 +69,7 @@ export const DOM = {
   get selectMidiOut() { return document.getElementById('select-midi-out'); },
   get selectMidiIn() { return document.getElementById('select-midi-in'); },
   get inputMidiChannel() { return document.getElementById('input-midi-channel'); },
+  get selectAutotuneVersion() { return document.getElementById('select-autotune-version'); },
   
   // Mapping inputs
   get mapBeatVol() { return document.getElementById('map-beat-vol'); },
@@ -85,6 +86,13 @@ export const DOM = {
   get mapAutotuneKey() { return document.getElementById('map-autotune-key'); },
   get mapAutotuneScale() { return document.getElementById('map-autotune-scale'); },
   
+  get inputCustomKeys() { return document.getElementById('input-custom-keys'); },
+  get inputCustomScales() { return document.getElementById('input-custom-scales'); },
+  get scannerKey() { return document.getElementById('scanner-key'); },
+  get scannerScale() { return document.getElementById('scanner-scale'); },
+  get valScannerKey() { return document.getElementById('val-scanner-key'); },
+  get valScannerScale() { return document.getElementById('val-scanner-scale'); },
+
   // General inputs
   get inputProjectPath() { return document.getElementById('input-project-path'); },
   get btnSelectProject() { return document.getElementById('btn-select-project'); },

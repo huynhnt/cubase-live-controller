@@ -153,7 +153,11 @@ if (!window.electronAPI) {
 export let appConfig = null;
 
 export function setAppConfig(config) {
-  appConfig = config;
+  if (!appConfig) {
+    appConfig = config;
+  } else {
+    Object.assign(appConfig, config);
+  }
 }
 
 export let savedSingingValues = {

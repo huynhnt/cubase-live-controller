@@ -22,6 +22,14 @@ export function loadConfigToForm() {
   if (DOM.mapModeSingVoice) DOM.mapModeSingVoice.value = appConfig.midiMappings?.modeSingVoice ?? 30;
   if (DOM.mapAutotuneKey) DOM.mapAutotuneKey.value = appConfig.midiMappings?.autotuneKey ?? 31;
   if (DOM.mapAutotuneScale) DOM.mapAutotuneScale.value = appConfig.midiMappings?.autotuneScale ?? 32;
+
+  if (DOM.selectAutotuneVersion) DOM.selectAutotuneVersion.value = appConfig.autotuneVersion || 'efx';
+  if (DOM.inputCustomKeys) {
+    DOM.inputCustomKeys.value = (appConfig.customAutotuneKeys || [0, 12, 24, 35, 47, 58, 70, 82, 93, 104, 125, 127]).join(', ');
+  }
+  if (DOM.inputCustomScales) {
+    DOM.inputCustomScales.value = (appConfig.customAutotuneScales || [0, 5]).join(', ');
+  }
   
   if (DOM.inputProjectPath) DOM.inputProjectPath.value = appConfig.projectPath || '';
   if (DOM.chkAutoOpen) DOM.chkAutoOpen.checked = !!appConfig.autoOpenProject;
@@ -69,6 +77,9 @@ export async function saveSettings() {
     midiOutPort: newMidiOutPort,
     midiInPort: newMidiInPort,
     midiChannel: parseInt(DOM.inputMidiChannel?.value) || (appConfig.midiChannel ?? 1),
+    autotuneVersion: DOM.selectAutotuneVersion?.value || 'efx',
+    customAutotuneKeys: (DOM.inputCustomKeys?.value || '').split(',').map(v => parseInt(v.trim()) || 0),
+    customAutotuneScales: (DOM.inputCustomScales?.value || '').split(',').map(v => parseInt(v.trim()) || 0),
     autoOpenProject: DOM.chkAutoOpen ? DOM.chkAutoOpen.checked : (appConfig.autoOpenProject ?? false),
     projectPath: DOM.inputProjectPath?.value ?? (appConfig.projectPath ?? ''),
     opacity: parseInt(DOM.sliderOpacity?.value) || (appConfig.opacity ?? 85),

@@ -442,6 +442,19 @@ export function setupEventListeners() {
     midi.sendCC(appConfig.midiMappings.flex, e.target.value);
   });
 
+  if (DOM.scannerKey && DOM.valScannerKey) {
+    DOM.scannerKey.addEventListener('input', (e) => {
+      DOM.valScannerKey.innerText = e.target.value;
+      midi.sendCC(appConfig.midiMappings.autotuneKey ?? 31, e.target.value);
+    });
+  }
+  if (DOM.scannerScale && DOM.valScannerScale) {
+    DOM.scannerScale.addEventListener('input', (e) => {
+      DOM.valScannerScale.innerText = e.target.value;
+      midi.sendCC(appConfig.midiMappings.autotuneScale ?? 32, e.target.value);
+    });
+  }
+
   DOM.sliderBeatVol.addEventListener('change', autoSaveCurrentStates);
   DOM.sliderMicVol.addEventListener('change', autoSaveCurrentStates);
   DOM.sliders.reverbLong.addEventListener('change', autoSaveCurrentStates);

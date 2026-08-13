@@ -155,9 +155,24 @@ export function toggleKeySelector() {
   }
 }
 
-export const KEY_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+export const KEY_NAMES_MAJOR = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+export const KEY_NAMES_MINOR = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+
+export function updateKeyButtonsText() {
+  if (!DOM.keySelectorContainer) return;
+  const isMajor = states.currentScale === 0;
+  const names = isMajor ? KEY_NAMES_MAJOR : KEY_NAMES_MINOR;
+  const keyButtons = DOM.keySelectorContainer.querySelectorAll('.key-btn');
+  keyButtons.forEach(btn => {
+    const k = parseInt(btn.getAttribute('data-key'));
+    if (!isNaN(k) && names[k]) {
+      btn.innerText = names[k];
+    }
+  });
+}
 
 export function initKeySelector() {
+  updateKeyButtonsText();
   const keyButtons = DOM.keySelectorContainer.querySelectorAll('.key-btn');
   const scaleButtons = DOM.keySelectorContainer.querySelectorAll('.scale-btn');
 
@@ -291,15 +306,21 @@ export function selectKey(keyIndex, sendMidi = true) {
   updateKeyDisplay();
 
   if (sendMidi) {
-    // Cubase dùng: key = round((cc/127) * 12)
-    // → Ngược lại: cc = round((keyIndex / 12) * 127)
-    const ccValue = Math.round((keyIndex / 12) * 127);
+    let ccValue = 0;
+    if (appConfig.autotuneVersion === 'pro') {
+      const keysArray = appConfig.customAutotuneKeys || [0, 12, 24, 35, 47, 58, 70, 82, 93, 104, 125, 127];
+      ccValue = keysArray[keyIndex] !== undefined ? keysArray[keyIndex] : Math.round((keyIndex / 12) * 127);
+    } else {
+      ccValue = Math.round((keyIndex / 12) * 127);
+    }
     midi.sendCC(appConfig.midiMappings.autotuneKey ?? 31, ccValue);
+    updateKeyDisplay();
   }
 }
 
 export function selectScale(scaleIndex, sendMidi = true) {
   states.currentScale = scaleIndex;
+  updateKeyButtonsText();
 
   const scaleButtons = DOM.keySelectorContainer.querySelectorAll('.scale-btn');
   scaleButtons.forEach(btn => {
@@ -314,21 +335,24 @@ export function selectScale(scaleIndex, sendMidi = true) {
   updateKeyDisplay();
 
   if (sendMidi) {
-    // Auto-Tune EFX: Chromatic(0) Major(1) NatMinor(2) HarmMinor(3)
-    //                MelMinor(4) Pentatonic(5) PentMinor(6) Blues(7) → N=8
-    // Cubase dùng: scale = round((cc/127) * 8)
-    // → Ngược lại: cc = round((targetIndex / 8) * 127)
-    // Major (index 1) → cc = round(1/8*127) = 16
-    // Natural Minor (index 2) → cc = round(2/8*127) = 32
-    const autoTuneScaleIndex = scaleIndex === 0 ? 1 : 2;
-    const ccValue = Math.round((autoTuneScaleIndex / 8) * 127);
+    let ccValue = 0;
+    if (appConfig.autotuneVersion === 'pro') {
+      const scalesArray = appConfig.customAutotuneScales || [0, 5];
+      ccValue = scalesArray[scaleIndex] !== undefined ? scalesArray[scaleIndex] : (scaleIndex === 0 ? 0 : 5);
+    } else {
+      const autoTuneScaleIndex = scaleIndex === 0 ? 1 : 2;
+      ccValue = Math.round((autoTuneScaleIndex / 8) * 127);
+    }
     midi.sendCC(appConfig.midiMappings.autotuneScale ?? 32, ccValue);
+    updateKeyDisplay();
   }
 }
 
 export function updateKeyDisplay() {
-  const keyName = KEY_NAMES[states.currentKey] || 'C';
-  const scaleName = states.currentScale === 0 ? 'Trưởng (Major)' : 'Thứ (Minor)';
+  const isMajor = states.currentScale === 0;
+  const names = isMajor ? KEY_NAMES_MAJOR : KEY_NAMES_MINOR;
+  const keyName = names[states.currentKey] || 'C';
+  const scaleName = isMajor ? 'Trưởng (Major)' : 'Thứ (Minor)';
   DOM.currentKeyDisplay.innerText = `${keyName} ${scaleName}`;
 }
 
@@ -339,8 +363,10 @@ export function updateAutoKeyDisplay() {
   };
 
   if (states.detectedKey !== null && states.detectedScale !== null) {
-    const keyName = KEY_NAMES[states.detectedKey] || 'C';
-    const scaleName = states.detectedScale === 0 ? 'Major' : 'Minor';
+    const isMajor = states.detectedScale === 0;
+    const names = isMajor ? KEY_NAMES_MAJOR : KEY_NAMES_MINOR;
+    const keyName = names[states.detectedKey] || 'C';
+    const scaleName = isMajor ? 'Major' : 'Minor';
     const badge = states.detectionMethod ? ` — ${METHOD_BADGE[states.detectionMethod] || ''}` : '';
     DOM.detectedKeyDisplay.innerText = `${keyName} ${scaleName}${badge}`;
     DOM.detectedKeyDisplay.style.color = 'var(--color-green)';
