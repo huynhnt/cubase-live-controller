@@ -505,6 +505,10 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.handle('get-app-version', () => {
+    return app.getVersion();
+  });
+
   let updateWindow = null;
 
   function createUpdateWindow(info) {

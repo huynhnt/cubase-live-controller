@@ -577,6 +577,15 @@ export async function bootstrap() {
     
     await initSoundboard();
     await initMidi();
+    
+    if (window.electronAPI && window.electronAPI.getAppVersion) {
+      window.electronAPI.getAppVersion().then(version => {
+        const titleEl = document.querySelector('.app-title');
+        if (titleEl && version) {
+          titleEl.innerText = `CUBASE LIVE CONTROLLER ${version}`;
+        }
+      });
+    }
   } catch (error) {
     console.error('Lỗi trong quá trình khởi chạy phần mềm:', error);
     alert('Có lỗi xảy ra khi khởi động giao diện điều khiển: ' + error.message);
