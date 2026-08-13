@@ -202,7 +202,7 @@ export function initKeySelector() {
         stopAnalysis();
         DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
         DOM.btnGetTone.classList.remove('analyzing');
-        DOM.detectedKeyDisplay.innerText = 'Auto-Key: Đã hủy';
+        DOM.detectedKeyDisplay.innerText = 'Smart Tone: Đã hủy';
         DOM.detectedKeyDisplay.style.color = '';
         return;
       }
@@ -281,7 +281,7 @@ export function initKeySelector() {
         DOM.detectedKeyDisplay.innerText = `Không tìm được tone: ${audioErr.message}`;
         DOM.detectedKeyDisplay.style.color = 'var(--color-red, #e74c3c)';
         setTimeout(() => {
-          DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
+          DOM.detectedKeyDisplay.innerText = 'Smart Tone: Chưa rõ';
           DOM.detectedKeyDisplay.style.color = '';
         }, 5000);
       }
@@ -368,7 +368,7 @@ export function updateAutoKeyDisplay() {
       DOM.btnGetTone.classList.remove('analyzing');
     }
   } else {
-    DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
+    DOM.detectedKeyDisplay.innerText = 'Smart Tone: Chưa rõ';
     DOM.detectedKeyDisplay.style.color = '';
   }
 }
