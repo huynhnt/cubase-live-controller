@@ -40,12 +40,12 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "package.json",
-      "Cubase_Live_Controller_Generic_Remote.xml"
+      "package.json"
     ],
     "extraFiles": [
-      "Cubase_Live_Controller_Generic_Remote.xml",
-      "release/Huong_Dan_Su_Dung.md"
+      "1.Huong_Dan_Su_Dung.md",
+      "2.Cubase_Live_Controller_Generic_Remote.xml",
+      "3.LiveStream.cpr"
     ]
   },
   "dependencies": {

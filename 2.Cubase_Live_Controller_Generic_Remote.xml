@@ -13,8 +13,6 @@
 <ctrl><name>Flex</name><stat>176</stat><chan>0</chan><addr>29</addr><max>127</max><flags>1</flags></ctrl>
 <ctrl><name>Autotune Key</name><stat>176</stat><chan>0</chan><addr>31</addr><max>127</max><flags>1</flags></ctrl>
 <ctrl><name>Autotune Scale</name><stat>176</stat><chan>0</chan><addr>32</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Get Tone</name><stat>176</stat><chan>0</chan><addr>33</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Send Tone</name><stat>176</stat><chan>0</chan><addr>34</addr><max>127</max><flags>1</flags></ctrl>
 </ctrltable>
 <bank name="Cubase Live Controller Bank">
 <entry ctrl="Vol Nhac">
@@ -52,12 +50,6 @@
 </entry>
 <entry ctrl="Autotune Scale">
 <value><device>VST Mixer</device><chan>1</chan><name>inserts/slot1:param3</name><flags>0</flags></value>
-</entry>
-<entry ctrl="Get Tone">
-<value><device>VST Mixer</device><chan>1819440227</chan><tag>1</tag><flags>0</flags></value>
-</entry>
-<entry ctrl="Send Tone">
-<value><device>VST Mixer</device><chan>1819440227</chan><tag>1</tag><flags>0</flags></value>
 </entry>
 </bank>
 </remotedescription>
