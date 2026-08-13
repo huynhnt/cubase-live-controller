@@ -383,6 +383,14 @@ function createWindow() {
     }, 1500);
   });
 
+  // Mở các liên kết web bên ngoài (Facebook, GitHub,...) bằng trình duyệt mặc định của hệ thống
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
