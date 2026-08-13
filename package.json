@@ -1,6 +1,6 @@
 {
   "name": "cubase-live-controller",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Overlay control panel for Cubase using Web MIDI API",
   "main": "electron/main.js",
   "type": "module",
