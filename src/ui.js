@@ -565,8 +565,12 @@ if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
   }
 
   window.electronAPI.onUpdateProgress((progressObj) => {
+    if (updateNotification) updateNotification.classList.remove('hidden');
     let percent = Math.round(progressObj.percent);
-    updateMessage.innerText = 'Đang tải bản cập nhật... ' + percent + '%';
+    let speed = (progressObj.bytesPerSecond / (1024 * 1024)).toFixed(1);
+    if (updateMessage) {
+      updateMessage.innerText = `Đang tải bản mới... ${percent}% (${speed} MB/s)`;
+    }
   });
 
   window.electronAPI.onUpdateDownloaded((info) => {

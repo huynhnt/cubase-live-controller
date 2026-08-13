@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   closeWindow: () => ipcRenderer.send('window-close'),
   resizeWindow: (state) => ipcRenderer.send('window-resize', state),
   onShortcutPressed: (callback) => ipcRenderer.on('shortcut-pressed', (event, action) => callback(action)),
+  getBrowserTitle: () => ipcRenderer.invoke('get-browser-title'),
   selectAudioFile: () => ipcRenderer.invoke('select-audio-file'),
   onPlaySoundboardSlot: (callback) => ipcRenderer.on('play-soundboard-slot', (event, slotId) => callback(slotId)),
   

@@ -15,8 +15,8 @@ process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection caught:', reason);
 });
 
-// Tắt logger để tránh báo lỗi dài ngoằng trên terminal nếu chưa có release trên Github
-autoUpdater.logger = null;
+// Bật logger để hiển thị log cập nhật trên terminal khi chạy dev/electron
+autoUpdater.logger = console;
 
 // Đăng ký giao thức local-media trước khi app ready
 protocol.registerSchemesAsPrivileged([
@@ -372,6 +372,14 @@ function createWindow() {
         console.error('Không thể mở Cubase Project tự động:', err);
       }
     }
+
+    // Tự động kiểm tra bản cập nhật khi giao diện UI đã sẵn sàng
+    setTimeout(() => {
+      console.log('[AutoUpdater] Bắt đầu tự động kiểm tra bản cập nhật trên GitHub...');
+      autoUpdater.checkForUpdatesAndNotify().catch(err => {
+        console.error("[AutoUpdater] Lỗi tự động kiểm tra cập nhật:", err.message);
+      });
+    }, 1500);
   });
 
   mainWindow.on('closed', () => {
@@ -488,22 +496,22 @@ app.whenReady().then(() => {
     }
   });
 
-  // Tự động kiểm tra bản cập nhật
+  // Cấu hình kiểm tra bản cập nhật
   autoUpdater.autoDownload = true;
   autoUpdater.forceDevUpdateConfig = true;
-  autoUpdater.checkForUpdatesAndNotify().catch(err => {
-    console.error("Lỗi tự động kiểm tra cập nhật:", err.message);
-  });
 
   autoUpdater.on('update-available', (info) => {
+    console.log('[AutoUpdater] Tìm thấy bản cập nhật mới:', info.version);
     if (mainWindow) mainWindow.webContents.send('update-available', info);
   });
 
   autoUpdater.on('update-not-available', (info) => {
+    console.log('[AutoUpdater] Không có bản cập nhật mới. Bạn đang chạy phiên bản mới nhất (hoặc trùng version với GitHub).');
     if (mainWindow) mainWindow.webContents.send('update-not-available', info);
   });
 
   autoUpdater.on('error', (err) => {
+    console.error('[AutoUpdater] Báo lỗi:', err.message);
     const isMissingRelease = err.message && (err.message.includes('404') || err.message.includes('406') || err.message.includes('Unable to find latest version'));
     if (mainWindow) {
       if (isMissingRelease) {
