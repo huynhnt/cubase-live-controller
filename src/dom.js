@@ -26,6 +26,7 @@ export const DOM = {
   
   // Panel chỉnh vang & sliders
   fxPanel: document.getElementById('fx-panel'),
+  keySelectorPanel: document.getElementById('key-selector-panel'),
   keySelectorContainer: document.getElementById('key-selector-container'),
   currentKeyDisplay: document.getElementById('current-key-display'),
   detectedKeyDisplay: document.getElementById('detected-key-display'),

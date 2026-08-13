@@ -27,6 +27,7 @@
         <span class="app-title">CUBASE LIVE CONTROLLER 1.0.2</span>
       </div>
       <div class="window-controls">
+        <button id="btn-pwa-install" class="control-btn pwa-btn hidden" title="Cài đặt phần mềm Web PWA">📲 Cài PWA</button>
         <button id="btn-theme-toggle" class="control-btn" title="Chuyển chế độ Sáng / Tối">🌙</button>
         <button id="btn-about-toggle" class="control-btn" title="Giới thiệu & Liên hệ">ℹ️</button>
         <button id="btn-settings-toggle" class="control-btn" title="Cài đặt">⚙️</button>
@@ -123,8 +124,28 @@
         </div>
       </div>
 
-      <!-- Bảng chọn Tone thủ công cho Autotune -->
-      <div class="key-selector-container hidden" id="key-selector-container" style="flex: 1; display: flex; align-items: center; justify-content: flex-start;">
+      <!-- Hàng Preset giọng hát nổi (Được chia nhóm Mặc định và Cá nhân) -->
+      <div class="presets-container">
+        <div class="presets-group system-group">
+          <span class="presets-group-title">MẪU HỆ THỐNG:</span>
+          <div class="presets-list-wrapper" id="presets-system-list">
+            <!-- Render các nút mặc định -->
+          </div>
+        </div>
+        <div class="presets-divider-line"></div>
+        <div class="presets-group custom-group">
+          <span class="presets-group-title">MẪU CÁ NHÂN:</span>
+          <div class="presets-list-wrapper" id="presets-custom-list">
+            <!-- Render các nút tự tạo -->
+          </div>
+          <button id="btn-add-preset" class="preset-add-btn" title="Lưu cấu hình hiện tại thành Preset mới">+</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bảng chọn Tone thủ công cho Autotune -->
+    <section id="key-selector-panel" class="fx-panel hidden">
+      <div class="key-selector-container" id="key-selector-container" style="flex: 1; display: flex; align-items: center; justify-content: flex-start;">
         <div class="autokey-group" style="justify-content: center; margin-right: 12px; height: 100%;">
           <button id="btn-get-tone" class="autokey-btn" style="height: 40px; padding: 0 15px; background: var(--color-blue);">Smart Tone</button>
         </div>
@@ -152,24 +173,6 @@
         <div class="scales-list">
           <button class="scale-btn active" data-scale="0">Trưởng (Major)</button>
           <button class="scale-btn" data-scale="1">Thứ (Minor)</button>
-        </div>
-      </div>
-
-      <!-- Hàng Preset giọng hát nổi (Được chia nhóm Mặc định và Cá nhân) -->
-      <div class="presets-container">
-        <div class="presets-group system-group">
-          <span class="presets-group-title">MẪU HỆ THỐNG:</span>
-          <div class="presets-list-wrapper" id="presets-system-list">
-            <!-- Render các nút mặc định -->
-          </div>
-        </div>
-        <div class="presets-divider-line"></div>
-        <div class="presets-group custom-group">
-          <span class="presets-group-title">MẪU CÁ NHÂN:</span>
-          <div class="presets-list-wrapper" id="presets-custom-list">
-            <!-- Render các nút tự tạo -->
-          </div>
-          <button id="btn-add-preset" class="preset-add-btn" title="Lưu cấu hình hiện tại thành Preset mới">+</button>
         </div>
       </div>
     </section>

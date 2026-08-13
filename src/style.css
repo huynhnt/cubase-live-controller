@@ -43,6 +43,15 @@ body {
   height: 100vh;
 }
 
+body.web-mode {
+  background: radial-gradient(circle at top, #141820 0%, #08090c 100%);
+  overflow: auto;
+}
+
+body.web-mode .app-container {
+  height: auto !important;
+}
+
 /* Container chính của ứng dụng - Giao diện Glassmorphism */
 .app-container {
   background: rgba(var(--bg-color-rgb), var(--bg-opacity));
@@ -110,6 +119,20 @@ body {
   justify-content: center;
   border-radius: 4px;
   transition: all 0.15s ease;
+}
+
+.control-btn.pwa-btn {
+  width: auto;
+  padding: 0 8px;
+  background: var(--accent-green);
+  color: #000;
+  font-weight: 700;
+  font-size: 9px;
+  border-radius: 4px;
+}
+.control-btn.pwa-btn:hover {
+  background: #34d399;
+  color: #000;
 }
 
 .control-btn:hover {

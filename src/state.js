@@ -67,6 +67,7 @@ export const DEFAULT_CONFIG = {
 // Giả lập API Electron nếu chạy trên trình duyệt web thông thường
 if (!window.electronAPI) {
   console.warn("Đang chạy ở môi trường ngoài Electron. Kích hoạt chế độ giả lập.");
+  document.body.classList.add('web-mode');
   window.electronAPI = {
     loadConfig: async () => {
       const data = localStorage.getItem('cubase_live_config');
@@ -106,9 +107,14 @@ if (!window.electronAPI) {
       console.log('Giả lập thay đổi kích thước:', state);
       const appEl = document.getElementById('app');
       if (appEl) {
-        if (state === 'collapsed') appEl.style.height = '95px';
-        else if (state === 'expanded') appEl.style.height = '310px';
-        else if (state === 'settings') appEl.style.height = '430px';
+        if (document.body.classList.contains('web-mode')) {
+          appEl.style.height = 'auto';
+        } else {
+          if (state === 'collapsed') appEl.style.height = '95px';
+          else if (state === 'expanded') appEl.style.height = '310px';
+          else if (state === 'expanded_tone_only') appEl.style.height = '165px';
+          else if (state === 'settings') appEl.style.height = '520px';
+        }
       }
     },
     getBrowserTitle: async () => {

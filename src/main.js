@@ -346,6 +346,23 @@ export function setupEventListeners() {
   DOM.btnToneToggle.addEventListener('click', toggleKeySelector);
   DOM.btnSoundboardToggle.addEventListener('click', toggleSoundboardPanel);
   
+  let deferredPwaPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPwaPrompt = e;
+    const btnPwa = document.getElementById('btn-pwa-install');
+    if (btnPwa) {
+      btnPwa.classList.remove('hidden');
+      btnPwa.addEventListener('click', () => {
+        btnPwa.classList.add('hidden');
+        if (deferredPwaPrompt) {
+          deferredPwaPrompt.prompt();
+          deferredPwaPrompt = null;
+        }
+      });
+    }
+  });
+
   DOM.btnSaveSettings.addEventListener('click', saveSettings);
   DOM.btnCloseSettings.addEventListener('click', cancelSettings);
   

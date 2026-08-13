@@ -88,7 +88,7 @@ export function toggleFxPanel() {
     }
     if (states.isKeySelectorOpen) {
       states.isKeySelectorOpen = false;
-      DOM.keySelectorContainer.classList.add('hidden');
+      if (DOM.keySelectorPanel) DOM.keySelectorPanel.classList.add('hidden');
       DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
       DOM.btnToneToggle.classList.remove('active');
     }
@@ -101,11 +101,6 @@ export function toggleFxPanel() {
     DOM.fxPanel.classList.remove('hidden');
     DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
     DOM.btnReverbToggle.classList.add('active');
-
-    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
-    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
-    if (fxContainer) fxContainer.classList.remove('hidden');
-    if (presetsContainer) presetsContainer.classList.remove('hidden');
 
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
@@ -132,6 +127,7 @@ export function toggleKeySelector() {
     }
     if (states.isFxPanelOpen) {
       states.isFxPanelOpen = false;
+      DOM.fxPanel.classList.add('hidden');
       DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
       DOM.btnReverbToggle.classList.remove('active');
     }
@@ -141,15 +137,9 @@ export function toggleKeySelector() {
       DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
-    DOM.fxPanel.classList.remove('hidden');
-    DOM.keySelectorContainer.classList.remove('hidden');
+    if (DOM.keySelectorPanel) DOM.keySelectorPanel.classList.remove('hidden');
     DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
     DOM.btnToneToggle.classList.add('active');
-
-    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
-    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
-    if (fxContainer) fxContainer.classList.add('hidden');
-    if (presetsContainer) presetsContainer.classList.add('hidden');
 
     if (states.isSettingsOpen) {
       closeSettingsPanelUI();
@@ -157,16 +147,9 @@ export function toggleKeySelector() {
 
     window.electronAPI.resizeWindow('expanded_tone_only');
   } else {
-    DOM.keySelectorContainer.classList.add('hidden');
+    if (DOM.keySelectorPanel) DOM.keySelectorPanel.classList.add('hidden');
     DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
     DOM.btnToneToggle.classList.remove('active');
-
-    DOM.fxPanel.classList.add('hidden');
-
-    const fxContainer = DOM.fxPanel.querySelector('.fx-container');
-    const presetsContainer = DOM.fxPanel.querySelector('.presets-container');
-    if (fxContainer) fxContainer.classList.remove('hidden');
-    if (presetsContainer) presetsContainer.classList.remove('hidden');
 
     window.electronAPI.resizeWindow('collapsed');
   }
