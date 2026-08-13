@@ -1,0 +1,38 @@
+{
+  "title": "Cubase Live Controller Architectural Overview & System Blueprints",
+  "summary": "Curated knowledge item documenting Cubase Live Controller architecture, Web MIDI CC contract, Smart Tone engine, state persistence, Soundboard hotkeys, dual-window Electron model, and electron-builder packaging rules.",
+  "createdAt": "2026-08-13T15:53:00.000Z",
+  "updatedAt": "2026-08-13T15:53:00.000Z",
+  "author": "Antigravity Assistant",
+  "tags": [
+    "cubase",
+    "electron",
+    "web-midi",
+    "smart-tone",
+    "auto-updater",
+    "soundboard",
+    "architecture"
+  ],
+  "references": [
+    {
+      "title": "Main Process Entry Point",
+      "path": "d:/Working/AI/cubase tools/electron/main.js"
+    },
+    {
+      "title": "Preload ContextBridge API",
+      "path": "d:/Working/AI/cubase tools/electron/preload.cjs"
+    },
+    {
+      "title": "Web MIDI Engine",
+      "path": "d:/Working/AI/cubase tools/src/midi.js"
+    },
+    {
+      "title": "UI State Management",
+      "path": "d:/Working/AI/cubase tools/src/state.js"
+    },
+    {
+      "title": "Cubase Generic Remote XML Map",
+      "path": "d:/Working/AI/cubase tools/2.Cubase_Live_Controller_Generic_Remote.xml"
+    }
+  ]
+}
