@@ -31,7 +31,8 @@ const WINDOW_SIZES = {
   collapsed: { width: 960, height: 95 },
   expanded: { width: 960, height: 310 },
   expanded_tone_only: { width: 960, height: 165 },
-  settings: { width: 960, height: 430 }
+  settings: { width: 960, height: 430 },
+  update: { width: 960, height: 230 }
 };
 
 const DEFAULT_CONFIG = {
@@ -496,9 +497,16 @@ app.whenReady().then(() => {
     }
   });
 
-  // Cấu hình kiểm tra bản cập nhật
-  autoUpdater.autoDownload = true;
+  // Cấu hình kiểm tra bản cập nhật (Không tự động tải mà chờ người dùng bấm Tải)
+  autoUpdater.autoDownload = false;
   autoUpdater.forceDevUpdateConfig = true;
+
+  ipcMain.on('download-update', () => {
+    console.log('[AutoUpdater] Người dùng đồng ý tải bản cập nhật...');
+    autoUpdater.downloadUpdate().catch(err => {
+      console.error('[AutoUpdater] Lỗi bắt đầu tải cập nhật:', err.message);
+    });
+  });
 
   autoUpdater.on('update-available', (info) => {
     console.log('[AutoUpdater] Tìm thấy bản cập nhật mới:', info.version);
