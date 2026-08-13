@@ -95,7 +95,7 @@ export function toggleFxPanel() {
     if (states.isSoundboardOpen) {
       states.isSoundboardOpen = false;
       DOM.soundboardPanel.classList.add('hidden');
-      DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+      DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
     DOM.fxPanel.classList.remove('hidden');
@@ -138,7 +138,7 @@ export function toggleKeySelector() {
     if (states.isSoundboardOpen) {
       states.isSoundboardOpen = false;
       DOM.soundboardPanel.classList.add('hidden');
-      DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+      DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
     DOM.fxPanel.classList.remove('hidden');
@@ -392,7 +392,7 @@ export function toggleAboutPanel() {
     if (states.isSoundboardOpen) {
       states.isSoundboardOpen = false;
       DOM.soundboardPanel.classList.add('hidden');
-      DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+      DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
     if (states.isSettingsOpen) {
@@ -435,13 +435,13 @@ export function toggleSoundboardPanel() {
     }
     
     DOM.soundboardPanel.classList.remove('hidden');
-    DOM.btnSoundboardToggle.innerText = 'Sound FX ▴';
+    DOM.btnSoundboardToggle.innerText = 'FX ▴';
     DOM.btnSoundboardToggle.classList.add('active');
     
     window.electronAPI.resizeWindow('expanded');
   } else {
     DOM.soundboardPanel.classList.add('hidden');
-    DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+    DOM.btnSoundboardToggle.innerText = 'FX ▾';
     DOM.btnSoundboardToggle.classList.remove('active');
     
     window.electronAPI.resizeWindow('collapsed');
