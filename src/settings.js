@@ -5,43 +5,43 @@ import { closeSettingsPanelUI } from './ui.js';
 import { connectMidi } from './main.js';
 
 export function loadConfigToForm() {
-  DOM.selectMidiOut.value = appConfig.midiOutPort;
-  DOM.selectMidiIn.value = appConfig.midiInPort;
-  DOM.inputMidiChannel.value = appConfig.midiChannel;
+  if (DOM.selectMidiOut) DOM.selectMidiOut.value = appConfig.midiOutPort || '';
+  if (DOM.selectMidiIn) DOM.selectMidiIn.value = appConfig.midiInPort || '';
+  if (DOM.inputMidiChannel) DOM.inputMidiChannel.value = appConfig.midiChannel || 1;
   
-  DOM.mapBeatVol.value = appConfig.midiMappings.beatVol;
-  DOM.mapBeatMute.value = appConfig.midiMappings.beatMute;
-  DOM.mapMicVol.value = appConfig.midiMappings.micVol;
-  DOM.mapMicMute.value = appConfig.midiMappings.micMute;
-  DOM.mapFxMute.value = appConfig.midiMappings.fxMute;
-  DOM.mapReverbLong.value = appConfig.midiMappings.reverbLong;
-  DOM.mapReverbShort.value = appConfig.midiMappings.reverbShort;
-  DOM.mapDelay.value = appConfig.midiMappings.delay;
-  DOM.mapAutotune.value = appConfig.midiMappings.autotune;
-  DOM.mapFlex.value = appConfig.midiMappings.flex;
-  DOM.mapModeSingVoice.value = appConfig.midiMappings.modeSingVoice ?? 30;
-  DOM.mapAutotuneKey.value = appConfig.midiMappings.autotuneKey ?? 31;
-  DOM.mapAutotuneScale.value = appConfig.midiMappings.autotuneScale ?? 32;
+  if (DOM.mapBeatVol) DOM.mapBeatVol.value = appConfig.midiMappings?.beatVol ?? 20;
+  if (DOM.mapBeatMute) DOM.mapBeatMute.value = appConfig.midiMappings?.beatMute ?? 21;
+  if (DOM.mapMicVol) DOM.mapMicVol.value = appConfig.midiMappings?.micVol ?? 22;
+  if (DOM.mapMicMute) DOM.mapMicMute.value = appConfig.midiMappings?.micMute ?? 23;
+  if (DOM.mapFxMute) DOM.mapFxMute.value = appConfig.midiMappings?.fxMute ?? 24;
+  if (DOM.mapReverbLong) DOM.mapReverbLong.value = appConfig.midiMappings?.reverbLong ?? 25;
+  if (DOM.mapReverbShort) DOM.mapReverbShort.value = appConfig.midiMappings?.reverbShort ?? 26;
+  if (DOM.mapDelay) DOM.mapDelay.value = appConfig.midiMappings?.delay ?? 27;
+  if (DOM.mapAutotune) DOM.mapAutotune.value = appConfig.midiMappings?.autotune ?? 28;
+  if (DOM.mapFlex) DOM.mapFlex.value = appConfig.midiMappings?.flex ?? 29;
+  if (DOM.mapModeSingVoice) DOM.mapModeSingVoice.value = appConfig.midiMappings?.modeSingVoice ?? 30;
+  if (DOM.mapAutotuneKey) DOM.mapAutotuneKey.value = appConfig.midiMappings?.autotuneKey ?? 31;
+  if (DOM.mapAutotuneScale) DOM.mapAutotuneScale.value = appConfig.midiMappings?.autotuneScale ?? 32;
   
-  DOM.inputProjectPath.value = appConfig.projectPath;
-  DOM.chkAutoOpen.checked = appConfig.autoOpenProject;
-  DOM.sliderOpacity.value = appConfig.opacity;
-  DOM.valOpacity.innerText = appConfig.opacity + '%';
+  if (DOM.inputProjectPath) DOM.inputProjectPath.value = appConfig.projectPath || '';
+  if (DOM.chkAutoOpen) DOM.chkAutoOpen.checked = !!appConfig.autoOpenProject;
+  if (DOM.sliderOpacity) DOM.sliderOpacity.value = appConfig.opacity ?? 85;
+  if (DOM.valOpacity) DOM.valOpacity.innerText = (appConfig.opacity ?? 85) + '%';
   
-  DOM.presetReverbLong.value = appConfig.voicePreset.reverbLong;
-  DOM.presetReverbShort.value = appConfig.voicePreset.reverbShort;
-  DOM.presetDelay.value = appConfig.voicePreset.delay;
-  DOM.presetAutotune.value = appConfig.voicePreset.autotune ?? 0;
-  DOM.presetFlex.value = appConfig.voicePreset.flex ?? 0;
-  DOM.presetMicChange.value = appConfig.voicePreset.micChange ?? appConfig.voicePreset.micVolChange ?? 10;
-  DOM.presetBeatChange.value = appConfig.voicePreset.beatChange ?? -20;
+  if (DOM.presetReverbLong) DOM.presetReverbLong.value = appConfig.voicePreset?.reverbLong ?? 0;
+  if (DOM.presetReverbShort) DOM.presetReverbShort.value = appConfig.voicePreset?.reverbShort ?? 0;
+  if (DOM.presetDelay) DOM.presetDelay.value = appConfig.voicePreset?.delay ?? 0;
+  if (DOM.presetAutotune) DOM.presetAutotune.value = appConfig.voicePreset?.autotune ?? 0;
+  if (DOM.presetFlex) DOM.presetFlex.value = appConfig.voicePreset?.flex ?? 0;
+  if (DOM.presetMicChange) DOM.presetMicChange.value = appConfig.voicePreset?.micChange ?? appConfig.voicePreset?.micVolChange ?? 10;
+  if (DOM.presetBeatChange) DOM.presetBeatChange.value = appConfig.voicePreset?.beatChange ?? -20;
   
-  DOM.shortcutToggleMusic.value = appConfig.shortcuts?.toggleMusic || 'Chưa gán';
-  DOM.shortcutToggleMic.value = appConfig.shortcuts?.toggleMic || 'Chưa gán';
-  DOM.shortcutToggleFx.value = appConfig.shortcuts?.toggleFx || 'Chưa gán';
-  DOM.shortcutToggleWindow.value = appConfig.shortcuts?.toggleWindow || 'Chưa gán';
-  DOM.shortcutSetSingMode.value = appConfig.shortcuts?.setSingMode || 'Chưa gán';
-  DOM.shortcutSetVoiceMode.value = appConfig.shortcuts?.setVoiceMode || 'Chưa gán';
+  if (DOM.shortcutToggleMusic) DOM.shortcutToggleMusic.value = appConfig.shortcuts?.toggleMusic || 'Chưa gán';
+  if (DOM.shortcutToggleMic) DOM.shortcutToggleMic.value = appConfig.shortcuts?.toggleMic || 'Chưa gán';
+  if (DOM.shortcutToggleFx) DOM.shortcutToggleFx.value = appConfig.shortcuts?.toggleFx || 'Chưa gán';
+  if (DOM.shortcutToggleWindow) DOM.shortcutToggleWindow.value = appConfig.shortcuts?.toggleWindow || 'Chưa gán';
+  if (DOM.shortcutSetSingMode) DOM.shortcutSetSingMode.value = appConfig.shortcuts?.setSingMode || 'Chưa gán';
+  if (DOM.shortcutSetVoiceMode) DOM.shortcutSetVoiceMode.value = appConfig.shortcuts?.setVoiceMode || 'Chưa gán';
 
   if (appConfig.audioAnalyzer) {
     if (DOM.inputAudioDuration) DOM.inputAudioDuration.value = appConfig.audioAnalyzer.duration || 8;
@@ -50,59 +50,75 @@ export function loadConfigToForm() {
 }
 
 export async function saveSettings() {
+  let newMidiOutPort = appConfig.midiOutPort || '';
+  if (DOM.selectMidiOut) {
+    if (DOM.selectMidiOut.options.length > 1 || DOM.selectMidiOut.value !== '') {
+      newMidiOutPort = DOM.selectMidiOut.value;
+    }
+  }
+
+  let newMidiInPort = appConfig.midiInPort || '';
+  if (DOM.selectMidiIn) {
+    if (DOM.selectMidiIn.options.length > 1 || DOM.selectMidiIn.value !== '') {
+      newMidiInPort = DOM.selectMidiIn.value;
+    }
+  }
+
   const newConfig = {
     ...appConfig,
-    midiOutPort: DOM.selectMidiOut.value,
-    midiInPort: DOM.selectMidiIn.value,
-    midiChannel: parseInt(DOM.inputMidiChannel.value),
-    autoOpenProject: DOM.chkAutoOpen.checked,
-    projectPath: DOM.inputProjectPath.value,
-    opacity: parseInt(DOM.sliderOpacity.value),
+    midiOutPort: newMidiOutPort,
+    midiInPort: newMidiInPort,
+    midiChannel: parseInt(DOM.inputMidiChannel?.value) || (appConfig.midiChannel ?? 1),
+    autoOpenProject: DOM.chkAutoOpen ? DOM.chkAutoOpen.checked : (appConfig.autoOpenProject ?? false),
+    projectPath: DOM.inputProjectPath?.value ?? (appConfig.projectPath ?? ''),
+    opacity: parseInt(DOM.sliderOpacity?.value) || (appConfig.opacity ?? 85),
     voicePreset: {
-      reverbLong: parseInt(DOM.presetReverbLong.value),
-      reverbShort: parseInt(DOM.presetReverbShort.value),
-      delay: parseInt(DOM.presetDelay.value),
-      autotune: parseInt(DOM.presetAutotune.value),
-      flex: parseInt(DOM.presetFlex.value),
-      micChange: parseInt(DOM.presetMicChange.value),
-      beatChange: parseInt(DOM.presetBeatChange.value)
+      reverbLong: parseInt(DOM.presetReverbLong?.value) || 0,
+      reverbShort: parseInt(DOM.presetReverbShort?.value) || 0,
+      delay: parseInt(DOM.presetDelay?.value) || 0,
+      autotune: parseInt(DOM.presetAutotune?.value) || 0,
+      flex: parseInt(DOM.presetFlex?.value) || 0,
+      micChange: parseInt(DOM.presetMicChange?.value) || 10,
+      beatChange: parseInt(DOM.presetBeatChange?.value) || -20
     },
     midiMappings: {
-      beatVol: parseInt(DOM.mapBeatVol.value),
-      beatMute: parseInt(DOM.mapBeatMute.value),
-      micVol: parseInt(DOM.mapMicVol.value),
-      micMute: parseInt(DOM.mapMicMute.value),
-      fxMute: parseInt(DOM.mapFxMute.value),
-      reverbLong: parseInt(DOM.mapReverbLong.value),
-      reverbShort: parseInt(DOM.mapReverbShort.value),
-      delay: parseInt(DOM.mapDelay.value),
-      autotune: parseInt(DOM.mapAutotune.value),
-      flex: parseInt(DOM.mapFlex.value),
-      modeSingVoice: parseInt(DOM.mapModeSingVoice.value),
-      autotuneKey: parseInt(DOM.mapAutotuneKey.value),
-      autotuneScale: parseInt(DOM.mapAutotuneScale.value)
+      beatVol: parseInt(DOM.mapBeatVol?.value) || 20,
+      beatMute: parseInt(DOM.mapBeatMute?.value) || 21,
+      micVol: parseInt(DOM.mapMicVol?.value) || 22,
+      micMute: parseInt(DOM.mapMicMute?.value) || 23,
+      fxMute: parseInt(DOM.mapFxMute?.value) || 24,
+      reverbLong: parseInt(DOM.mapReverbLong?.value) || 25,
+      reverbShort: parseInt(DOM.mapReverbShort?.value) || 26,
+      delay: parseInt(DOM.mapDelay?.value) || 27,
+      autotune: parseInt(DOM.mapAutotune?.value) || 28,
+      flex: parseInt(DOM.mapFlex?.value) || 29,
+      modeSingVoice: parseInt(DOM.mapModeSingVoice?.value) || 30,
+      autotuneKey: parseInt(DOM.mapAutotuneKey?.value) || 31,
+      autotuneScale: parseInt(DOM.mapAutotuneScale?.value) || 32
     },
     shortcuts: {
-      toggleMusic: DOM.shortcutToggleMusic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMusic.value,
-      toggleMic: DOM.shortcutToggleMic.value === 'Chưa gán' ? '' : DOM.shortcutToggleMic.value,
-      toggleFx: DOM.shortcutToggleFx.value === 'Chưa gán' ? '' : DOM.shortcutToggleFx.value,
-      toggleWindow: DOM.shortcutToggleWindow.value === 'Chưa gán' ? '' : DOM.shortcutToggleWindow.value,
-      setSingMode: DOM.shortcutSetSingMode.value === 'Chưa gán' ? '' : DOM.shortcutSetSingMode.value,
-      setVoiceMode: DOM.shortcutSetVoiceMode.value === 'Chưa gán' ? '' : DOM.shortcutSetVoiceMode.value
+      toggleMusic: DOM.shortcutToggleMusic?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleMusic?.value ?? ''),
+      toggleMic: DOM.shortcutToggleMic?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleMic?.value ?? ''),
+      toggleFx: DOM.shortcutToggleFx?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleFx?.value ?? ''),
+      toggleWindow: DOM.shortcutToggleWindow?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleWindow?.value ?? ''),
+      setSingMode: DOM.shortcutSetSingMode?.value === 'Chưa gán' ? '' : (DOM.shortcutSetSingMode?.value ?? ''),
+      setVoiceMode: DOM.shortcutSetVoiceMode?.value === 'Chưa gán' ? '' : (DOM.shortcutSetVoiceMode?.value ?? '')
     },
     audioAnalyzer: {
-      duration: parseInt(DOM.inputAudioDuration.value) || 8,
-      minFreq: parseFloat(DOM.inputAudioMinFreq.value) || 27.5
+      duration: parseInt(DOM.inputAudioDuration?.value) || 8,
+      minFreq: parseFloat(DOM.inputAudioMinFreq?.value) || 27.5
     }
   };
   
   const success = await window.electronAPI.saveConfig(newConfig);
   if (success) {
     setAppConfig(newConfig);
-    
-    midi.setChannel(appConfig.midiChannel);
+    midi.setChannel(newConfig.midiChannel);
     connectMidi();
-    DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
+    if (typeof populateMidiPorts === 'function') {
+      populateMidiPorts();
+    }
+    DOM.app.style.setProperty('--bg-opacity', newConfig.opacity / 100);
     
     closeSettingsPanelUI();
     

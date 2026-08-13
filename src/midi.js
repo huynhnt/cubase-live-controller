@@ -17,6 +17,11 @@ class MidiEngine {
       throw new Error('Trình duyệt hoặc Electron không hỗ trợ Web MIDI API.');
     }
     this.midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+    this.midiAccess.onstatechange = (e) => {
+      if (typeof window.onMidiStateChange === 'function') {
+        window.onMidiStateChange(e);
+      }
+    };
     return this.midiAccess;
   }
 

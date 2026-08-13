@@ -91,28 +91,37 @@ export function stopAnalysis() {
 export async function analyzeAudioKey(durationMs = 8000, minFreq = 27.5, onProgress = null) {
   stopAnalysis(); // Dừng phiên trước nếu còn
 
-  // Yêu cầu quyền capture system audio
+  // Ưu tiên dùng getUserMedia (Microphone / Soundcard) để KHÔNG HIỆN POPUP CHIA SẺ MÀN HÌNH
   try {
-    _stream = await navigator.mediaDevices.getDisplayMedia({
+    _stream = await navigator.mediaDevices.getUserMedia({
       audio: { 
         echoCancellation: false,
         noiseSuppression: false,
         autoGainControl: false,
-      },
-      video: true, // Bắt buộc phải có video theo chuẩn WebRTC getDisplayMedia
+      }
     });
-    
-    // Dừng video track ngay lập tức để tiết kiệm tài nguyên, chỉ giữ lại audio
-    _stream.getVideoTracks().forEach(track => track.stop());
-  } catch (err) {
-    throw new Error('Lỗi capture: ' + err.name + ' - ' + err.message);
+  } catch (micErr) {
+    console.warn('Không lấy được micro/soundcard, thử fallback getDisplayMedia:', micErr);
+    try {
+      _stream = await navigator.mediaDevices.getDisplayMedia({
+        audio: { 
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        },
+        video: true,
+      });
+      _stream.getVideoTracks().forEach(track => track.stop());
+    } catch (displayErr) {
+      throw new Error('Lỗi truy cập âm thanh: ' + displayErr.message);
+    }
   }
 
   // Kiểm tra có audio track không
   const audioTracks = _stream.getAudioTracks();
   if (audioTracks.length === 0) {
     stopAnalysis();
-    throw new Error('Không có audio track. Hãy bật "Share system audio" khi chọn màn hình.');
+    throw new Error('Không nhận được tín hiệu âm thanh.');
   }
 
   _audioCtx = new AudioContext();

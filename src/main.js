@@ -43,6 +43,11 @@ export async function initMidi() {
     updateStatus('Đang khởi tạo MIDI...');
     await midi.initialize();
     
+    window.onMidiStateChange = () => {
+      populateMidiPorts();
+      connectMidi();
+    };
+    
     populateMidiPorts();
     
     midi.setChannel(appConfig.midiChannel);
@@ -61,22 +66,40 @@ export function populateMidiPorts() {
   DOM.selectMidiOut.innerHTML = '<option value="">-- Chưa kết nối --</option>';
   DOM.selectMidiIn.innerHTML = '<option value="">-- Chưa kết nối --</option>';
   
+  let foundSavedOut = false;
   outs.forEach(port => {
     const opt = document.createElement('option');
     opt.value = port.name;
     opt.innerText = port.name;
     DOM.selectMidiOut.appendChild(opt);
+    if (port.name === appConfig.midiOutPort) foundSavedOut = true;
   });
+
+  if (appConfig.midiOutPort && !foundSavedOut) {
+    const opt = document.createElement('option');
+    opt.value = appConfig.midiOutPort;
+    opt.innerText = `${appConfig.midiOutPort} (Đã lưu)`;
+    DOM.selectMidiOut.appendChild(opt);
+  }
   
+  let foundSavedIn = false;
   ins.forEach(port => {
     const opt = document.createElement('option');
     opt.value = port.name;
     opt.innerText = port.name;
     DOM.selectMidiIn.appendChild(opt);
+    if (port.name === appConfig.midiInPort) foundSavedIn = true;
   });
+
+  if (appConfig.midiInPort && !foundSavedIn) {
+    const opt = document.createElement('option');
+    opt.value = appConfig.midiInPort;
+    opt.innerText = `${appConfig.midiInPort} (Đã lưu)`;
+    DOM.selectMidiIn.appendChild(opt);
+  }
   
-  DOM.selectMidiOut.value = appConfig.midiOutPort;
-  DOM.selectMidiIn.value = appConfig.midiInPort;
+  DOM.selectMidiOut.value = appConfig.midiOutPort || '';
+  DOM.selectMidiIn.value = appConfig.midiInPort || '';
 }
 
 export function connectMidi() {
@@ -298,6 +321,7 @@ export function openSettingsPanel() {
   
   window.electronAPI.resizeWindow('settings');
   
+  populateMidiPorts();
   loadConfigToForm();
 }
 
