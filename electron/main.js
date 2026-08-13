@@ -15,8 +15,8 @@ process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection caught:', reason);
 });
 
-// Tắt logger để tránh báo lỗi dài ngoằng trên terminal nếu chưa có release trên Github
-autoUpdater.logger = null;
+// Bật logger để hiển thị log cập nhật trên terminal khi chạy dev/electron
+autoUpdater.logger = console;
 
 // Đăng ký giao thức local-media trước khi app ready
 protocol.registerSchemesAsPrivileged([
@@ -31,7 +31,8 @@ const WINDOW_SIZES = {
   collapsed: { width: 960, height: 95 },
   expanded: { width: 960, height: 310 },
   expanded_tone_only: { width: 960, height: 165 },
-  settings: { width: 960, height: 430 }
+  settings: { width: 960, height: 430 },
+  update: { width: 960, height: 230 }
 };
 
 const DEFAULT_CONFIG = {
@@ -372,6 +373,22 @@ function createWindow() {
         console.error('Không thể mở Cubase Project tự động:', err);
       }
     }
+
+    // Tự động kiểm tra bản cập nhật khi giao diện UI đã sẵn sàng
+    setTimeout(() => {
+      console.log('[AutoUpdater] Bắt đầu tự động kiểm tra bản cập nhật trên GitHub...');
+      autoUpdater.checkForUpdatesAndNotify().catch(err => {
+        console.error("[AutoUpdater] Lỗi tự động kiểm tra cập nhật:", err.message);
+      });
+    }, 1500);
+  });
+
+  // Mở các liên kết web bên ngoài (Facebook, GitHub,...) bằng trình duyệt mặc định của hệ thống
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
   });
 
   mainWindow.on('closed', () => {
@@ -488,26 +505,79 @@ app.whenReady().then(() => {
     }
   });
 
-  // Tự động kiểm tra bản cập nhật
-  autoUpdater.autoDownload = true;
+  let updateWindow = null;
+
+  function createUpdateWindow(info) {
+    if (updateWindow && !updateWindow.isDestroyed()) {
+      updateWindow.focus();
+      return;
+    }
+
+    updateWindow = new BrowserWindow({
+      width: 440,
+      height: 210,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      resizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      skipTaskbar: false,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.cjs'),
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    });
+
+    const updateHtmlPath = path.join(__dirname, 'update-window.html');
+    updateWindow.loadFile(updateHtmlPath);
+
+    updateWindow.webContents.on('did-finish-load', () => {
+      if (updateWindow && !updateWindow.isDestroyed()) {
+        updateWindow.webContents.send('update-available', info);
+      }
+    });
+
+    updateWindow.on('closed', () => {
+      updateWindow = null;
+    });
+  }
+
+  // Cấu hình kiểm tra bản cập nhật (Không tự động tải mà chờ người dùng bấm Tải)
+  autoUpdater.autoDownload = false;
   autoUpdater.forceDevUpdateConfig = true;
-  autoUpdater.checkForUpdatesAndNotify().catch(err => {
-    console.error("Lỗi tự động kiểm tra cập nhật:", err.message);
+
+  ipcMain.on('download-update', () => {
+    console.log('[AutoUpdater] Người dùng đồng ý tải bản cập nhật...');
+    autoUpdater.downloadUpdate().catch(err => {
+      console.error('[AutoUpdater] Lỗi bắt đầu tải cập nhật:', err.message);
+    });
+  });
+
+  ipcMain.on('close-update-window', () => {
+    if (updateWindow && !updateWindow.isDestroyed()) {
+      updateWindow.close();
+      updateWindow = null;
+    }
   });
 
   autoUpdater.on('update-available', (info) => {
-    if (mainWindow) mainWindow.webContents.send('update-available', info);
+    console.log('[AutoUpdater] Tìm thấy bản cập nhật mới:', info.version);
+    createUpdateWindow(info);
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('update-available', info);
   });
 
   autoUpdater.on('update-not-available', (info) => {
-    if (mainWindow) mainWindow.webContents.send('update-not-available', info);
+    console.log('[AutoUpdater] Không có bản cập nhật mới. Bạn đang chạy phiên bản mới nhất (hoặc trùng version với GitHub).');
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('update-not-available', info);
   });
 
   autoUpdater.on('error', (err) => {
+    console.error('[AutoUpdater] Báo lỗi:', err.message);
     const isMissingRelease = err.message && (err.message.includes('404') || err.message.includes('406') || err.message.includes('Unable to find latest version'));
-    if (mainWindow) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
       if (isMissingRelease) {
-        // Suppress and pretend no update is available
         mainWindow.webContents.send('update-not-available', null);
       } else {
         mainWindow.webContents.send('update-error', err.message);
@@ -516,11 +586,13 @@ app.whenReady().then(() => {
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
-    if (mainWindow) mainWindow.webContents.send('update-progress', progressObj);
+    if (updateWindow && !updateWindow.isDestroyed()) updateWindow.webContents.send('update-progress', progressObj);
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('update-progress', progressObj);
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    if (mainWindow) mainWindow.webContents.send('update-downloaded', info);
+    if (updateWindow && !updateWindow.isDestroyed()) updateWindow.webContents.send('update-downloaded', info);
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('update-downloaded', info);
   });
 
   ipcMain.on('quit-and-install-update', () => {

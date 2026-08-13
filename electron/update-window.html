@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cập Nhật Ứng Dụng</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background: transparent;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .update-card {
+      width: 100%;
+      height: 100%;
+      background: rgba(20, 24, 33, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .update-header {
+      background: linear-gradient(135deg, rgba(41, 128, 185, 0.5), rgba(142, 68, 173, 0.5));
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      -webkit-app-region: drag; /* Kéo thả toàn bộ cửa sổ ứng dụng Windows bằng header! */
+    }
+
+    .update-header button {
+      -webkit-app-region: no-drag;
+    }
+
+    .update-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+    }
+
+    .update-footer {
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn {
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .btn-green {
+      background: #2ecc71;
+      color: #fff;
+    }
+
+    .btn-green:hover {
+      background: #27ae60;
+    }
+
+    .btn-sec {
+      background: rgba(255, 255, 255, 0.15);
+      color: #e0e0e0;
+    }
+
+    .btn-sec:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71, #1abc9c);
+      border-radius: 4px;
+      transition: width 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="update-card">
+    <!-- Header (Vùng kéo thả cửa sổ tự do trên Desktop) -->
+    <div class="update-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 14px;">🚀</span>
+        <span style="font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">CẬP NHẬT ỨNG DỤNG</span>
+      </div>
+      <button id="btn-close-x" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 14px; padding: 0 4px; line-height: 1;" title="Đóng">✕</button>
+    </div>
+
+    <!-- Nội dung chính -->
+    <div class="update-body">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span id="update-badge" style="background: rgba(52, 152, 219, 0.25); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.4); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">Phiên bản mới</span>
+        <span style="font-size: 10px; color: #888;">Cubase Live Controller</span>
+      </div>
+
+      <div id="update-message" style="font-size: 12px; color: #e0e0e0; line-height: 1.5;">
+        Đang kiểm tra bản cập nhật...
+      </div>
+
+      <!-- Progress bar -->
+      <div id="progress-container" class="progress-container hidden">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+    </div>
+
+    <!-- Hàng nút hành động -->
+    <div class="update-footer">
+      <button id="btn-close" class="btn btn-sec">Để Sau</button>
+      <button id="btn-start" class="btn btn-green">Tải Ngay</button>
+      <button id="btn-install" class="btn btn-green hidden">Cài Đặt & Khởi Động Lại</button>
+    </div>
+  </div>
+
+  <script>
+    const updateMessage = document.getElementById('update-message');
+    const updateBadge = document.getElementById('update-badge');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const btnStart = document.getElementById('btn-start');
+    const btnInstall = document.getElementById('btn-install');
+    const btnClose = document.getElementById('btn-close');
+    const btnCloseX = document.getElementById('btn-close-x');
+
+    const closeWindow = () => {
+      if (window.electronAPI && window.electronAPI.closeUpdateWindow) {
+        window.electronAPI.closeUpdateWindow();
+      }
+    };
+
+    if (btnClose) btnClose.addEventListener('click', closeWindow);
+    if (btnCloseX) btnCloseX.addEventListener('click', closeWindow);
+
+    if (btnStart) {
+      btnStart.addEventListener('click', () => {
+        btnStart.classList.add('hidden');
+        btnClose.classList.add('hidden');
+        progressContainer.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        updateMessage.innerText = '⏳ Đang khởi tạo bản tải về...';
+        if (window.electronAPI && window.electronAPI.downloadUpdate) {
+          window.electronAPI.downloadUpdate();
+        }
+      });
+    }
+
+    if (btnInstall) {
+      btnInstall.addEventListener('click', () => {
+        if (window.electronAPI && window.electronAPI.quitAndInstallUpdate) {
+          window.electronAPI.quitAndInstallUpdate();
+        }
+      });
+    }
+
+    if (window.electronAPI) {
+      if (window.electronAPI.onUpdateAvailable) {
+        window.electronAPI.onUpdateAvailable((info) => {
+          updateBadge.innerText = `Phiên bản mới: v${info.version}`;
+          updateMessage.innerText = `🎉 Đã có phiên bản mới v${info.version}. Bạn có muốn tải về nâng cấp ngay bây giờ không?`;
+          progressContainer.classList.add('hidden');
+          btnStart.classList.remove('hidden');
+          btnInstall.classList.add('hidden');
+          btnClose.classList.remove('hidden');
+        });
+      }
+
+      if (window.electronAPI.onUpdateProgress) {
+        window.electronAPI.onUpdateProgress((progressObj) => {
+          progressContainer.classList.remove('hidden');
+          let percent = Math.round(progressObj.percent);
+          let speed = (progressObj.bytesPerSecond / (1024 * 1024)).toFixed(1);
+          progressBar.style.width = `${percent}%`;
+          updateMessage.innerText = `⏳ Đang tải bản mới... ${percent}% (${speed} MB/s)`;
+          btnStart.classList.add('hidden');
+          btnInstall.classList.add('hidden');
+          btnClose.classList.add('hidden');
+        });
+      }
+
+      if (window.electronAPI.onUpdateDownloaded) {
+        window.electronAPI.onUpdateDownloaded((info) => {
+          progressContainer.classList.remove('hidden');
+          progressBar.style.width = '100%';
+          updateBadge.innerText = `v${info.version} sẵn sàng`;
+          updateMessage.innerText = `✅ Đã tải xong bản v${info.version}! Bạn có muốn cài đặt ngay bây giờ không?`;
+          btnStart.classList.add('hidden');
+          btnInstall.classList.remove('hidden');
+          btnClose.classList.remove('hidden');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

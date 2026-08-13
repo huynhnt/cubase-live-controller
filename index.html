@@ -60,7 +60,7 @@
       <div class="control-group actions-group">
         <button id="btn-reverb-toggle" class="action-btn btn-red">Chỉnh Vang ▾</button>
         <button id="btn-tone-toggle" class="action-btn btn-orange">Chọn Tone ▾</button>
-        <button id="btn-soundboard-toggle" class="action-btn btn-pink">Sound FX ▾</button>
+        <button id="btn-soundboard-toggle" class="action-btn btn-pink">FX ▾</button>
       </div>
     </main>
 
@@ -117,13 +117,13 @@
       <!-- Bảng chọn Tone thủ công cho Autotune -->
       <div class="key-selector-container hidden" id="key-selector-container" style="flex: 1; display: flex; align-items: center; justify-content: flex-start;">
         <div class="autokey-group" style="justify-content: center; margin-right: 12px; height: 100%;">
-          <button id="btn-get-tone" class="autokey-btn" style="height: 40px; padding: 0 15px; background: var(--color-blue);">Auto-Key</button>
+          <button id="btn-get-tone" class="autokey-btn" style="height: 40px; padding: 0 15px; background: var(--color-blue);">Smart Tone</button>
         </div>
         <div class="divider-line"></div>
         <div class="key-label-wrapper">
           <span class="key-label">TÔNG AUTOTUNE:</span>
           <span id="current-key-display" class="key-display">C Major</span>
-          <span id="detected-key-display" class="detected-key-display">Auto-Key: Chưa rõ</span>
+          <span id="detected-key-display" class="detected-key-display">Smart Tone: Chưa rõ</span>
         </div>
         <div class="keys-list" style="margin-left: auto;">
           <button class="key-btn active" data-key="0">C</button>
@@ -416,7 +416,11 @@
               </div>
               <div class="contact-item">
                 <span class="contact-icon">🌐</span>
-                <span class="contact-text">Facebook: <strong>Hyun Kun</strong></span>
+                <span class="contact-text">Facebook: <a href="https://www.facebook.com/hyun.cool" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: underline; font-weight: 600;">facebook.com/hyun.cool</a></span>
+              </div>
+              <div class="contact-item">
+                <span class="contact-icon">📦</span>
+                <span class="contact-text">GitHub: <a href="https://github.com/huynhnt/cubase-live-controller" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: underline; font-weight: 600;">Cubase Live Controller</a></span>
               </div>
             </div>
           </div>
@@ -440,7 +444,7 @@
         <span class="status-text" id="status-text">Đang tải cấu hình...</span>
       </div>
       <div class="header-marquee-container footer-marquee">
-        <span class="header-marquee-text">🎁 Ứng dụng hỗ trợ hát live stream trên nền Cubase - Phiên bản cộng đồng chia sẻ bởi Hyun Kun (Zalo/Phone: 0793360016) - Facebook: Hyun Kun 🎁</span>
+        <span class="header-marquee-text">🎁 Ứng dụng hỗ trợ hát live stream trên nền Cubase - Phiên bản cộng đồng chia sẻ bởi Hyun Kun (Zalo/Phone: 0793360016) - Facebook: facebook.com/hyun.cool - GitHub: github.com/huynhnt/cubase-live-controller 🎁</span>
       </div>
     </footer>
     <!-- Modal nhập tên Preset tự thiết kế (Thay thế prompt() bị lỗi trên Electron) -->
@@ -529,11 +533,7 @@
     </div>
   </div>
 
-  <!-- Thông báo cập nhật tự động (Update Notification) -->
-  <div id="update-notification" class="update-notification hidden" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(52, 152, 219, 0.95); color: #fff; padding: 8px 12px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; gap: 8px; font-size: 11px; backdrop-filter: blur(4px); transition: all 0.3s ease;">
-    <span id="update-message">Đang kiểm tra cập nhật...</span>
-    <button id="btn-install-update" class="hidden" style="background: #fff; color: #3498db; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">Cài đặt & Khởi động lại</button>
-  </div>
+
 
   <script type="module" src="/src/main.js"></script>
 </body>

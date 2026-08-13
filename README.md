@@ -4,28 +4,37 @@
 
 ---
 
-## 🚀 Các Tính Năng Chính (Giai đoạn 1)
+## 🚀 Các Tính Năng Nổi Bật
 
-1. **Overlay Luôn Nổi (Always-on-top):** Luôn hiển thị trên cùng, đè lên trình duyệt Web Chrome/Edge khi đang phát YouTube.
-2. **Tắt/Mở và Chỉnh Âm Lượng Nhạc (Beat):** Slider & Nút Toggle Mute Nhạc gửi tín hiệu MIDI CC tức thời.
-3. **Tắt/Mở và Chỉnh Âm Lượng Mic:** Slider & Nút Toggle Mute Mic.
-4. **Tắt/Mở Nhanh Hiệu Ứng (Vang/FX):** Giúp ngắt nhanh echo/delay chỉ bằng 1 click.
-5. **Bảng Chỉnh Vang Xổ Xuống (FX Panel):** Nhấn nút "Chỉnh Vang" sẽ mở rộng giao diện điều khiển 5 thông số chi tiết: `Vang Dài`, `Vang Ngắn`, `Delay`, `Auto-Tune`, `Flex`.
-6. **Chuyển Chế Độ Nhanh (Hát Live <=> Nói Chuyện/Voice):** 
+1. **Overlay Luôn Nổi (Always-on-top):** Luôn hiển thị trên cùng, đè lên trình duyệt Web Chrome/Edge/Brave khi đang phát YouTube.
+2. **Thanh Trượt Âm Lượng Mở Rộng (Vol Nhạc & Vol Mic):** Thiết kế tối ưu không gian cho 2 thanh trượt `Vol Nhạc` và `Vol Mic` có độ dài rộng rãi, giúp thao tác kéo chỉnh âm lượng chuẩn xác và mượt mà.
+3. **Tắt/Mở Nhanh Các Luồng Âm Thanh:** Nút Mute Nhạc, Mute Mic và Mute AutoTune/FX tức thời qua lệnh MIDI CC.
+4. **Bảng Chỉnh Vang Xổ Xuống (FX Panel):** Điều khiển 5 thông số vang/hiệu ứng chi tiết: `Vang Dài`, `Vang Ngắn`, `Delay`, `Auto-Tune`, `Flex`.
+5. **Chuyển Chế Độ Nhanh (Hát Live ↔ Voice Đối Thoại):** 
    - Nhấn nút **HÁT LIVE** sẽ chuyển sang **VOICE ĐỐI THOẠI**.
    - Tự động tắt vang, giảm/tăng âm lượng Mic theo cấu hình cài đặt sẵn để trò chuyện ấm giọng và rõ ràng hơn. Click lại sẽ khôi phục chính xác các thông số cũ để tiếp tục hát.
-7. **Đồng Bộ 2 Chiều (2-way Sync):** Khi bạn kéo âm lượng hoặc bật/tắt trong Cubase, thanh trượt trên phần mềm tự động di chuyển theo để đồng bộ trạng thái thực tế.
-8. **Tự Động Mở Cubase Project (.cpr):** Cấu hình đường dẫn tệp dự án của bạn để phần mềm tự động kích hoạt Cubase tải project đó lên ngay khi mở tool.
-9. **Cửa Sổ Tiện Ích Cài Đặt (Settings):** Cho phép đổi cổng MIDI In/Out, thay đổi kênh MIDI (MIDI Channel), tùy biến số CC (Control Change) cho từng tính năng, chỉnh độ trong suốt của cửa sổ (Opacity) và thiết lập Preset cho chế độ Voice.
-10. **Bảng Chọn Tone Autotune Thủ Công:** Nhấn nút "Chọn Tone" để xổ hàng 12 phím Key (C đến B) và 2 phím giọng (Trưởng/Thứ) giúp ca sĩ chuyển tone Autotune tức thời ngay trên màn hình app.
-11. **Bảng Hiệu Ứng Âm Thanh (Sound FX):** Cung cấp 12 nút phát các âm thanh meme/hiệu ứng (tiếng cười, vỗ tay...). Hỗ trợ gán phím tắt toàn cục (Global Hotkeys) phát âm thanh khi app ẩn, hoạt động offline và cho phép chọn đường xuất âm thanh (Audio Output) độc lập.
+6. **Bảng Chọn Tone Autotune Thủ Công & Dò Smart Tone:**
+   - Tích hợp công nghệ dò Tone thông minh độc quyền (**Smart Tone**) giúp tự động phân tích và xác định chuẩn xác Tone bài hát.
+   - Hàng 12 phím Key (C đến B) và 2 phím giọng (Trưởng/Thứ) ép/chuyển tone Autotune tức thời.
+   - Hỗ trợ nút **Smart Tone** (Dò Tone tự động) và Nút **Gửi Tone** trực tiếp vào plugin Auto-Tune cắm trên Cubase.
+7. **Bảng Hiệu Ứng Âm Thanh (Sound FX / Soundboard):**
+   - Cung cấp 12 nút phát âm thanh hiệu ứng (tiếng cười, vỗ tay, hiệu ứng meme...).
+   - Hỗ trợ gán phím tắt toàn cục (Global Hotkeys) để phát âm thanh ngay cả khi ứng dụng ẩn dưới khay hệ thống.
+   - Tự chọn cổng xuất âm thanh (Audio Output) độc lập.
+8. **Đồng Bộ 2 Chiều Thực Thời (2-way Sync):** Khi bạn kéo âm lượng hoặc bật/tắt trong Cubase, thanh trượt trên phần mềm tự động di chuyển theo để đồng bộ trạng thái thực tế.
+9. **Tự Động Cập Nhật Thông Minh (Auto-Updater via GitHub):**
+   - Tự động kiểm tra phiên bản mới mỗi khi mở ứng dụng.
+   - Cửa sổ Popup Cập Nhật độc lập (Floating OS Window), kéo thả tự do trên Windows Desktop.
+   - Xác nhận trước khi tải (Nút **Tải Ngay** / **Để Sau**), hiển thị tiến trình `%` và tốc độ tải MB/s thời gian thực, cài đặt 1-click.
+10. **Tự Động Mở Cubase Project (.cpr):** Cấu hình đường dẫn tệp dự án của bạn để phần mềm tự động kích hoạt Cubase tải project đó lên ngay khi mở ứng dụng.
+11. **Đóng Gói Kèm Tệp Cấu Hình & Hướng Dẫn (`extraFiles`):** Bộ cài đặt `.exe` tự động đính kèm sẵn tệp `Cubase_Live_Controller_Generic_Remote.xml` và `Huong_Dan_Su_Dung.md` vào thư mục cài đặt gốc.
 
 ---
 
 ## 🛠️ Hướng Dẫn Cài Đặt (Cho Lần Đầu Tiên)
 
 ### Bước 1: Khởi tạo các thư viện
-Mở Command Prompt / Powershell tại thư mục dự án và chạy lệnh sau để cài đặt Electron và Vite:
+Mở Command Prompt / Powershell tại thư mục dự án và chạy lệnh sau để cài đặt các phụ thuộc:
 ```bash
 npm install
 ```
@@ -42,10 +51,11 @@ npm install
 1. Mở Cubase lên.
 2. Vào Menu **Studio** -> **Studio Setup...**
 3. Ở góc trên bên trái cửa sổ Studio Setup, nhấn nút **`+` (Add Device)** -> Chọn **Generic Remote**.
-4. Chọn cấu hình cho thiết bị:
+4. Nạp cấu hình mẫu: Nhấn nút **Import** và chọn tệp `Cubase_Live_Controller_Generic_Remote.xml` (được đính kèm sẵn trong thư mục cài đặt).
+5. Chọn cấu hình cho thiết bị:
    - **MIDI Input:** Chọn cổng MIDI ảo bạn vừa tạo ở loopMIDI (ví dụ: `loopMIDI Port 1`).
    - **MIDI Output:** Chọn cổng MIDI ảo tương ứng (để Cubase gửi ngược tín hiệu về giúp đồng bộ 2 chiều).
-5. Ở bảng cấu hình phía trên (Upper Table), map các thông số CC tương ứng:
+6. Ở bảng cấu hình phía trên (Upper Table), map các thông số CC tương ứng:
    - **Beat Volume:** CC `20`
    - **Beat Mute:** CC `21`
    - **Mic Volume:** CC `22`
@@ -59,10 +69,10 @@ npm install
    - **Sing/Voice Mode Toggle:** CC `30`
    - **Autotune Key:** CC `31`
    - **Autotune Scale:** CC `32`
-   - **Lấy Tone (Auto-Key):** CC `33`
-   - **Gửi Tone (Auto-Key):** CC `34`
-6. Ở bảng cấu hình phía dưới (Lower Table), chọn hành động tương ứng trong Mixer Cubase cho mỗi dòng (ví dụ: CC 20 điều khiển Fader Volume của track tên "Beat", CC 22 điều khiển Fader Volume của track tên "Mic"..., CC 31 điều khiển tham số Key và CC 32 điều khiển tham số Scale của plugin Auto-Tune cắm ở insert, CC 33 kích hoạt nút dò/reset và CC 34 kích hoạt nút Send to Auto-Tune của plugin Auto-Key cắm ở insert).
-7. Nhấn **Apply** và **OK**.
+   - **Dò Tone (Smart Tone):** CC `33`
+   - **Gửi Tone (Smart Tone):** CC `34`
+7. Ở bảng cấu hình phía dưới (Lower Table), chọn hành động tương ứng trong Mixer Cubase cho mỗi dòng (ví dụ: CC 20 điều khiển Fader Volume của track "Beat", CC 22 điều khiển Fader Volume của track "Mic"..., CC 31 điều khiển Key và CC 32 điều khiển Scale của plugin Auto-Tune, CC 33 kích hoạt nút dò tone Smart Tone và CC 34 kích hoạt nút Send/Gửi Tone sang Auto-Tune).
+8. Nhấn **Apply** và **OK**.
 
 ---
 
@@ -89,6 +99,13 @@ Dành cho lập trình viên muốn thử nghiệm và sửa đổi trực tiế
    ```bash
    npm run electron -- --dev
    ```
+
+### Cách 3: Đóng gói thành bộ cài đặt Windows (.exe)
+Để tạo tệp cài đặt `.exe` thương mại / chia sẻ cho người dùng khác:
+```bash
+npm run dist
+```
+Tệp `.exe` cài đặt sẽ được sinh ra tự động tại thư mục `release/`.
 
 ---
 

@@ -27,11 +27,11 @@
 * Gồm 12 phím nốt nhạc tròn (`C` đến `B`) và 2 phím giọng (`Trưởng/Major` - `Thứ/Minor`) giúp thay đổi tông bài hát nhanh chóng trên Auto-Tune.
 * Tự động lưu trữ tone hát gần nhất và tự động nạp lại khi khởi động ứng dụng.
 
-### 5. Đồng bộ hóa Tự động từ Auto-Key sang Auto-Tune
-Tích hợp bộ điều khiển MIDI kết nối trực tiếp với VST **Antares Auto-Key** trên track nhạc nền:
-* **Nút [Lấy Tone]:** Khi bấm, nút nhấp nháy cam **"Đang dò..."** để kích hoạt Auto-Key dò tông bài hát tự động.
-* **Đồng bộ về App:** Khi Auto-Key nhận diện xong, thông số nốt và giọng sẽ tự động truyền về App qua MIDI CC để hiển thị (Ví dụ: `Auto-Key: C# Minor` sáng màu xanh lá), đồng thời nút **[Gửi Tone]** nhấp nháy báo sẵn sàng.
-* **Nút [Gửi Tone]:** Khi bấm, App sẽ phát lệnh gửi tone đã dò được sang tất cả các plugin **Auto-Tune** ở track mic, đồng thời tự động đồng bộ (active sáng đỏ) các nút nốt nhạc thủ công tương ứng trên giao diện App.
+### 5. Công nghệ Dò Tone Thông Minh (Smart Tone)
+Tích hợp thuật toán công nghệ dò Tone thông minh độc quyền (**Smart Tone**) phân tích âm thanh bài hát trực tiếp:
+* **Nút [Smart Tone]:** Khi bấm, nút nhấp nháy cam **"Đang dò..."** để kích hoạt công nghệ Smart Tone phân tích và xác định tông bài hát tự động.
+* **Hiển thị & Báo kết quả:** Khi phân tích xong, thông số nốt và giọng sẽ tự động hiển thị trên App (Ví dụ: `Smart Tone: C# Minor` sáng màu xanh lá), đồng thời nút **[Gửi Tone]** nhấp nháy báo sẵn sàng.
+* **Nút [Gửi Tone]:** Khi bấm, App sẽ phát lệnh gửi tone đã dò được sang tất cả các plugin **Auto-Tune** ở track mic trên Cubase, đồng thời tự động đồng bộ các nút nốt nhạc thủ công tương ứng trên giao diện App.
 
 ### 6. Bảng Âm Thanh Pha Trò (Sound FX / Soundboard)
 * Mở rộng bằng nút **Sound FX ▾**.

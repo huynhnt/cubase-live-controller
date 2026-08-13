@@ -95,7 +95,7 @@ export function toggleFxPanel() {
     if (states.isSoundboardOpen) {
       states.isSoundboardOpen = false;
       DOM.soundboardPanel.classList.add('hidden');
-      DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+      DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
     DOM.fxPanel.classList.remove('hidden');
@@ -138,7 +138,7 @@ export function toggleKeySelector() {
     if (states.isSoundboardOpen) {
       states.isSoundboardOpen = false;
       DOM.soundboardPanel.classList.add('hidden');
-      DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+      DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
     DOM.fxPanel.classList.remove('hidden');
@@ -202,7 +202,7 @@ export function initKeySelector() {
         stopAnalysis();
         DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
         DOM.btnGetTone.classList.remove('analyzing');
-        DOM.detectedKeyDisplay.innerText = 'Auto-Key: Đã hủy';
+        DOM.detectedKeyDisplay.innerText = 'Smart Tone: Đã hủy';
         DOM.detectedKeyDisplay.style.color = '';
         return;
       }
@@ -281,7 +281,7 @@ export function initKeySelector() {
         DOM.detectedKeyDisplay.innerText = `Không tìm được tone: ${audioErr.message}`;
         DOM.detectedKeyDisplay.style.color = 'var(--color-red, #e74c3c)';
         setTimeout(() => {
-          DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
+          DOM.detectedKeyDisplay.innerText = 'Smart Tone: Chưa rõ';
           DOM.detectedKeyDisplay.style.color = '';
         }, 5000);
       }
@@ -368,7 +368,7 @@ export function updateAutoKeyDisplay() {
       DOM.btnGetTone.classList.remove('analyzing');
     }
   } else {
-    DOM.detectedKeyDisplay.innerText = 'Auto-Key: Chưa rõ';
+    DOM.detectedKeyDisplay.innerText = 'Smart Tone: Chưa rõ';
     DOM.detectedKeyDisplay.style.color = '';
   }
 }
@@ -392,7 +392,7 @@ export function toggleAboutPanel() {
     if (states.isSoundboardOpen) {
       states.isSoundboardOpen = false;
       DOM.soundboardPanel.classList.add('hidden');
-      DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+      DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
     if (states.isSettingsOpen) {
@@ -435,13 +435,13 @@ export function toggleSoundboardPanel() {
     }
     
     DOM.soundboardPanel.classList.remove('hidden');
-    DOM.btnSoundboardToggle.innerText = 'Sound FX ▴';
+    DOM.btnSoundboardToggle.innerText = 'FX ▴';
     DOM.btnSoundboardToggle.classList.add('active');
     
     window.electronAPI.resizeWindow('expanded');
   } else {
     DOM.soundboardPanel.classList.add('hidden');
-    DOM.btnSoundboardToggle.innerText = 'Sound FX ▾';
+    DOM.btnSoundboardToggle.innerText = 'FX ▾';
     DOM.btnSoundboardToggle.classList.remove('active');
     
     window.electronAPI.resizeWindow('collapsed');
@@ -493,88 +493,52 @@ export async function autoSaveCurrentStates() {
 }
 
 // --- AUTO UPDATER UI LOGIC ---
-if (window.electronAPI && window.electronAPI.onUpdateAvailable) {
-  const updateNotification = document.getElementById('update-notification');
-  const updateMessage = document.getElementById('update-message');
-  const btnInstallUpdate = document.getElementById('btn-install-update');
+// --- AUTO UPDATER MANUAL CHECK BTN IN SETTINGS ---
+if (window.electronAPI && window.electronAPI.checkForUpdates) {
   const btnCheckUpdates = document.getElementById('btn-check-updates');
 
   if (btnCheckUpdates) {
-      btnCheckUpdates.addEventListener('click', () => {
-        let originalText = btnCheckUpdates.innerHTML;
-        try {
-          btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang gửi lệnh...';
-          btnCheckUpdates.disabled = true;
-          
-          window.electronAPI.checkForUpdates();
-          
-          setTimeout(() => {
-            if (btnCheckUpdates.disabled) {
-              btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⚠️</span> Timeout không phản hồi';
-              setTimeout(() => {
-                btnCheckUpdates.innerHTML = originalText;
-                btnCheckUpdates.disabled = false;
-              }, 2000);
-            }
-          }, 5000);
-        } catch (err) {
-          btnCheckUpdates.innerHTML = 'Lỗi JS: ' + err.message;
-        }
-      });
-  }
-
-  window.electronAPI.onUpdateAvailable((info) => {
-    updateNotification.classList.remove('hidden');
-    updateMessage.innerText = 'Có bản cập nhật mới (' + info.version + '). Đang tải về...';
-    if (btnCheckUpdates) {
-      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✅</span> Đã thấy bản mới!';
-    }
-  });
-
-  window.electronAPI.onUpdateNotAvailable((info) => {
-    if (btnCheckUpdates) {
-      btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✔️</span> Bạn đang dùng bản mới nhất!';
-      btnCheckUpdates.disabled = false;
-    }
-    // Show toast notification
-    if (updateNotification && updateMessage) {
-      updateNotification.classList.remove('hidden');
-      updateMessage.innerText = 'Phần mềm của bạn đang là phiên bản mới nhất!';
-      setTimeout(() => {
-        updateNotification.classList.add('hidden');
-      }, 3000);
-    }
-  });
-
-  if (window.electronAPI.onUpdateError) {
-    window.electronAPI.onUpdateError((errMessage) => {
-      if (btnCheckUpdates) {
-        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">❌</span> Lỗi kiểm tra!';
-        btnCheckUpdates.disabled = false;
-        console.error('Update error:', errMessage);
-      }
-      // Show toast notification
-      if (updateNotification && updateMessage) {
-        updateNotification.classList.remove('hidden');
-        updateMessage.innerText = 'Lỗi kiểm tra cập nhật: ' + errMessage;
+    btnCheckUpdates.addEventListener('click', () => {
+      let originalText = btnCheckUpdates.innerHTML;
+      try {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⏳</span> Đang kiểm tra...';
+        btnCheckUpdates.disabled = true;
+        
+        window.electronAPI.checkForUpdates();
+        
         setTimeout(() => {
-          updateNotification.classList.add('hidden');
+          if (btnCheckUpdates.disabled) {
+            btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">⚠️</span> Không phản hồi';
+            setTimeout(() => {
+              btnCheckUpdates.innerHTML = originalText;
+              btnCheckUpdates.disabled = false;
+            }, 2000);
+          }
         }, 5000);
+      } catch (err) {
+        btnCheckUpdates.innerHTML = 'Lỗi JS: ' + err.message;
       }
     });
+
+    if (window.electronAPI.onUpdateAvailable) {
+      window.electronAPI.onUpdateAvailable(() => {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✅</span> Đã thấy bản mới!';
+        btnCheckUpdates.disabled = false;
+      });
+    }
+
+    if (window.electronAPI.onUpdateNotAvailable) {
+      window.electronAPI.onUpdateNotAvailable(() => {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">✔️</span> Bạn đang dùng bản mới nhất!';
+        btnCheckUpdates.disabled = false;
+      });
+    }
+
+    if (window.electronAPI.onUpdateError) {
+      window.electronAPI.onUpdateError(() => {
+        btnCheckUpdates.innerHTML = '<span style="font-size: 14px;">❌</span> Lỗi kiểm tra!';
+        btnCheckUpdates.disabled = false;
+      });
+    }
   }
-
-  window.electronAPI.onUpdateProgress((progressObj) => {
-    let percent = Math.round(progressObj.percent);
-    updateMessage.innerText = 'Đang tải bản cập nhật... ' + percent + '%';
-  });
-
-  window.electronAPI.onUpdateDownloaded((info) => {
-    updateMessage.innerText = 'Đã tải xong bản cập nhật (' + info.version + ')!';
-    btnInstallUpdate.classList.remove('hidden');
-  });
-
-  btnInstallUpdate.addEventListener('click', () => {
-    window.electronAPI.quitAndInstallUpdate();
-  });
 }
