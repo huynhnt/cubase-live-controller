@@ -108,5 +108,5 @@ Communication between the app and Cubase operates over Web MIDI via **loopMIDI**
 
 ## 📚 Reference Documents
 For detailed sub-system implementations, consult:
-- [Architecture & IPC Specifications](file:///.agents/skills/cubase-live-controller/references/architecture.md)
-- [MIDI & Cubase Generic Remote Guide](file:///.agents/skills/cubase-live-controller/references/midi-guide.md)
+- [Architecture & IPC Specifications](references/architecture.md)
+- [MIDI & Cubase Generic Remote Guide](references/midi-guide.md)
