@@ -241,12 +241,12 @@ function registerGlobalShortcuts(config) {
           if (mainWindow.isMinimized()) {
             mainWindow.restore();
             mainWindow.focus();
-            mainWindow.setAlwaysOnTop(true);
+            mainWindow.setAlwaysOnTop(true, 'screen-saver');
           } else if (mainWindow.isFocused()) {
             mainWindow.minimize();
           } else {
             mainWindow.focus();
-            mainWindow.setAlwaysOnTop(true);
+            mainWindow.setAlwaysOnTop(true, 'screen-saver');
           }
         }
       });
@@ -328,6 +328,9 @@ function createWindow() {
       nodeIntegration: false
     }
   });
+
+  // Force the window to stay on top of fullscreen apps (like YouTube, games)
+  mainWindow.setAlwaysOnTop(true, 'screen-saver');
 
   // Cho phép phân quyền truy cập Web MIDI, Media và Screen Capture trong Electron
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
