@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hướng Dẫn Sử Dụng - Cubase Live Controller</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-green: #10b981;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-orange: #f97316;
+      --accent-red: #ef4444;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      padding-bottom: 60px;
+    }
+
+    .header-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      font-size: 24px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-green);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 20px;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(59, 130, 246, 0.15));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #10b981, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      max-width: 680px;
+      margin: 0 auto 20px auto;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+      margin-bottom: 12px;
+    }
+
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .feature-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .feature-item h4 {
+      font-size: 15px;
+      color: var(--accent-green);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feature-item p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .step-list {
+      list-style: none;
+      counter-reset: step-counter;
+    }
+
+    .step-list li {
+      counter-increment: step-counter;
+      position: relative;
+      padding-left: 44px;
+      margin-bottom: 20px;
+    }
+
+    .step-list li::before {
+      content: counter(step-counter);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      background: var(--accent-blue);
+      color: #fff;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .step-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    th {
+      background: #0f172a;
+      color: var(--text-primary);
+      font-weight: 600;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    .cc-badge {
+      font-family: monospace;
+      font-size: 12px;
+      background: rgba(139, 92, 246, 0.2);
+      color: var(--accent-purple);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .code-block {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 13px;
+      color: var(--accent-green);
+      margin: 8px 0;
+      display: inline-block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      border-top: 1px solid var(--border-color);
+      margin-top: 40px;
+    }
+
+    footer a {
+      color: var(--accent-blue);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="header-nav">
+    <a href="index.html" class="brand">
+      <span class="brand-icon">🎛️</span>
+      <span>Cubase Live Controller</span>
+    </a>
+    <div class="nav-actions">
+      <a href="index.html" class="btn btn-primary">🎛️ Mở Web Controller</a>
+      <a href="https://github.com/huynhnt/cubase-live-controller/releases" target="_blank" class="btn btn-secondary">📥 Tải Bản Desktop App (.exe)</a>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- Hero Section -->
+    <div class="hero-banner">
+      <span class="badge">🎁 PHIÊN BẢN CỘNG ĐỒNG - HYUN KUN</span>
+      <h1 class="hero-title">HƯỚNG DẪN SỬ DỤNG & KẾT NỐI CUBASE</h1>
+      <p class="hero-subtitle">
+        Cubase Live Controller là ứng dụng tối ưu hóa dành cho hát livestream và thu âm online trên Cubase. Hỗ trợ điều khiển 2 chiều thời gian thực thông qua tín hiệu Web MIDI.
+      </p>
+    </div>
+
+    <!-- Tính năng nổi bật -->
+    <section class="section-card">
+      <h2 class="section-title">🌟 CÁC TÍNH NĂNG NỔI BẬT</h2>
+      <div class="feature-grid">
+        <div class="feature-item">
+          <h4>🎚️ Đồng Bộ 2 Chiều Thời Gian Thực</h4>
+          <p>Điều khiển Vol Nhạc, Vol Mic, Mute Nhạc/Mic/Vang độc lập. Trạng thái nút bấm tự động đồng bộ thời gian thực giữa Cubase và Web App.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎤 Chế Độ Hát Live & Voice Đối Thoại</h4>
+          <p>Chuyển đổi 1-click giữa Hát Live (đầy đủ vang/autotune) và Voice Đối thoại (tắt vang nhưng giữ 1 lượng vang siêu nhỏ tự nhiên).</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎼 Dò Tone Thông Minh (Smart Tone)</h4>
+          <p>Tự động phân tích tên bài hát Karaoke trên Youtube hoặc tần số âm thanh để gửi thẳng Key & Scale (Major/Minor) sang Auto-Tune trên Cubase.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎹 Bảng Phím Nốt Autotune Ngang</h4>
+          <p>Gồm 12 phím nốt nhạc tròn (C -> B) và 2 giọng (Trưởng/Thứ) giúp thay đổi tông bài hát nhanh chóng ngay lập tức.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎛️ Tùy Chỉnh Vang Chi Tiết (FX Panel)</h4>
+          <p>5 thanh trượt chi tiết: Vang Dài, Vang Ngắn, Delay, Autotune, Flex. Tích hợp sẵn bộ Preset giọng Bolero, Pop, Remix...</p>
+        </div>
+        <div class="feature-item">
+          <h4>🔊 Soundboard Âm Thanh Pha Trò</h4>
+          <p>12 ô gán hiệu ứng âm thanh (tiếng cười, vỗ tay...) phát trực tiếp offline ra thiết bị đầu ra mong muốn.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hướng dẫn cài đặt & Kết nối -->
+    <section class="section-card">
+      <h2 class="section-title">🛠️ HƯỚNG DẪN CÀI ĐẶT & KẾT NỐI CUBASE</h2>
+      
+      <ol class="step-list">
+        <li>
+          <div class="step-title">Bước 1: Cài đặt cổng MIDI ảo loopMIDI</div>
+          <div class="step-desc">
+            Tải phần mềm miễn phí <a href="https://www.tobias-erichsen.de/software/loopmidi.html" target="_blank" style="color: var(--accent-blue);">loopMIDI</a>. Mở phần mềm và nhấn nút <strong><code>+</code></strong> để tạo cổng MIDI ảo tên là: <span class="code-block">loopMIDI Port</span>
+          </div>
+        </li>
+        <li>
+          <div class="step-title">Bước 2: Nạp XML cấu hình Generic Remote vào Cubase</div>
+          <div class="step-desc">
+            Trong Cubase: Mở <strong>Studio</strong> -> <strong>Studio Setup</strong> (hoặc Devices Setup) -> Nhấn nút <strong><code>+</code></strong> chọn <strong>Generic Remote</strong>.<br>
+            - <strong>MIDI Input:</strong> Chọn <span class="code-block">loopMIDI Port</span><br>
+            - <strong>MIDI Output:</strong> Chọn <span class="code-block">loopMIDI Port</span><br>
+            - Nhấn nút <strong>Import</strong> và chọn file <a href="https://github.com/huynhnt/cubase-live-controller/blob/master/2.Cubase_Live_Controller_Generic_Remote.xml" target="_blank" style="color: var(--accent-blue); font-weight: 600;">Cubase_Live_Controller_Generic_Remote.xml</a> đi kèm. Bấm <strong>Apply -> OK</strong>.
+          </div>
+        </li>
+        <li>
+          <div class="step-title">Bước 3: Đặt tên Track trong Cubase</div>
+          <div class="step-desc">
+            Để lệnh MIDI ánh xạ chính xác:<br>
+            - Đổi tên track chứa Nhạc nền thành: <span class="code-block">Beat</span><br>
+            - Đổi tên track chứa Micro thành: <span class="code-block">Mic</span><br>
+            - Đặt plugin <strong>Auto-Tune Pro (phiên bản có MIDI)</strong> ở ô Insert 1 trên track <strong>Mic</strong>.
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- Bảng ánh xạ MIDI CC -->
+    <section class="section-card">
+      <h2 class="section-title">⚙️ DANH SÁCH BẢNG ÁNH XẠ MIDI CC MẶC ĐỊNH</h2>
+      <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 12px;">
+        Các cổng CC này có thể linh hoạt thay đổi trong mục <strong>Cài đặt ⚙️</strong> của ứng dụng:
+      </p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Chức năng</th>
+              <th>Cổng CC</th>
+              <th>Giá trị tín hiệu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Âm lượng Nhạc (Beat Volume)</strong></td>
+              <td><span class="cc-badge">CC 20</span></td>
+              <td>0 (Mute) - 127 (Max)</td>
+            </tr>
+            <tr>
+              <td><strong>Bật/Tắt Nhạc (Beat Mute)</strong></td>
+              <td><span class="cc-badge">CC 21</span></td>
+              <td>>=64 (Tắt) / &lt;64 (Mở)</td>
+            </tr>
+            <tr>
+              <td><strong>Âm lượng Mic (Mic Volume)</strong></td>
+              <td><span class="cc-badge">CC 22</span></td>
+              <td>0 - 127</td>
+            </tr>
+            <tr>
+              <td><strong>Bật/Tắt Mic (Mic Mute)</strong></td>
+              <td><span class="cc-badge">CC 23</span></td>
+              <td>>=64 (Tắt) / &lt;64 (Mở)</td>
+            </tr>
+            <tr>
+              <td><strong>Bật/Tắt AutoTune (FX Mute)</strong></td>
+              <td><span class="cc-badge">CC 24</span></td>
+              <td>>=64 (Tắt) / &lt;64 (Mở)</td>
+            </tr>
+            <tr>
+              <td><strong>Vang Dài (Reverb Long)</strong></td>
+              <td><span class="cc-badge">CC 25</span></td>
+              <td>0 - 127</td>
+            </tr>
+            <tr>
+              <td><strong>Vang Ngắn (Reverb Short)</strong></td>
+              <td><span class="cc-badge">CC 26</span></td>
+              <td>0 - 127</td>
+            </tr>
+            <tr>
+              <td><strong>Delay</strong></td>
+              <td><span class="cc-badge">CC 27</span></td>
+              <td>0 - 127</td>
+            </tr>
+            <tr>
+              <td><strong>Auto-tune</strong></td>
+              <td><span class="cc-badge">CC 28</span></td>
+              <td>0 - 127</td>
+            </tr>
+            <tr>
+              <td><strong>Flex</strong></td>
+              <td><span class="cc-badge">CC 29</span></td>
+              <td>0 - 127</td>
+            </tr>
+            <tr>
+              <td><strong>Chế độ Hát / Voice</strong></td>
+              <td><span class="cc-badge">CC 30</span></td>
+              <td>127 (Hát Live) / 0 (Voice Đối thoại)</td>
+            </tr>
+            <tr>
+              <td><strong>Tông Autotune (Key)</strong></td>
+              <td><span class="cc-badge">CC 31</span></td>
+              <td>Chia đều 0 - 127 cho 12 nốt nhạc</td>
+            </tr>
+            <tr>
+              <td><strong>Điệu Autotune (Scale)</strong></td>
+              <td><span class="cc-badge">CC 32</span></td>
+              <td>0 (Trưởng / Major) / 127 (Thứ / Minor)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Tác giả -->
+    <section class="section-card" style="text-align: center;">
+      <h2 class="section-title" style="justify-content: center;">❤️ TÁC GIẢ & THÔNG TIN LIÊN HỆ</h2>
+      <p style="font-size: 15px; font-weight: 600; color: var(--accent-green); margin-bottom: 8px;">Hyun Kun (Hyun Cool)</p>
+      <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 16px;">Phát triển ứng dụng hoàn toàn miễn phí, dành tặng cộng đồng livestream & hát karaoke thu âm Cubase Việt Nam.</p>
+      <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 13.5px;">
+        <span>📱 Zalo/Phone: <strong>0793360016</strong></span>
+        <span>📧 Email: <strong>Vina.knights@gmail.com</strong></span>
+        <span>🌐 Facebook: <a href="https://www.facebook.com/hyun.cool" target="_blank" style="color: var(--accent-blue);">hyun.cool</a></span>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Cubase Live Controller - Phiên bản cộng đồng chia sẻ bởi Hyun Kun.</p>
+  </footer>
+
+</body>
+</html>
