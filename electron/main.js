@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import https from 'https';
+import { execFile } from 'child_process';
 import { fileURLToPath, pathToFileURL } from 'url';
 import electronUpdaterPkg from 'electron-updater';
 const { autoUpdater } = electronUpdaterPkg;
@@ -448,8 +449,8 @@ app.whenReady().then(() => {
 
   ipcMain.on('play-pause-media', () => {
     try {
-      const execPath = require('path').join(__dirname, 'PlayPause.exe');
-      require('child_process').execFile(execPath, (err) => {
+      const execPath = path.join(__dirname, 'PlayPause.exe');
+      execFile(execPath, (err) => {
         if (err) console.error('Lỗi khi chạy PlayPause.exe:', err);
       });
     } catch (err) {
