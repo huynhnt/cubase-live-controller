@@ -35,6 +35,7 @@ export function loadConfigToForm() {
   if (DOM.chkAutoOpen) DOM.chkAutoOpen.checked = !!appConfig.autoOpenProject;
   if (DOM.sliderOpacity) DOM.sliderOpacity.value = appConfig.opacity ?? 85;
   if (DOM.valOpacity) DOM.valOpacity.innerText = (appConfig.opacity ?? 85) + '%';
+  if (DOM.inputCustomAppTarget) DOM.inputCustomAppTarget.value = appConfig.customAppTarget || 'YouTube';
   
   if (DOM.presetReverbLong) DOM.presetReverbLong.value = appConfig.voicePreset?.reverbLong ?? 0;
   if (DOM.presetReverbShort) DOM.presetReverbShort.value = appConfig.voicePreset?.reverbShort ?? 0;
@@ -84,6 +85,7 @@ export async function saveSettings() {
     autoOpenProject: DOM.chkAutoOpen ? DOM.chkAutoOpen.checked : (appConfig.autoOpenProject ?? false),
     projectPath: DOM.inputProjectPath?.value ?? (appConfig.projectPath ?? ''),
     opacity: parseInt(DOM.sliderOpacity?.value) || (appConfig.opacity ?? 85),
+    customAppTarget: DOM.inputCustomAppTarget?.value || 'YouTube',
     voicePreset: {
       reverbLong: parseInt(DOM.presetReverbLong?.value) || 0,
       reverbShort: parseInt(DOM.presetReverbShort?.value) || 0,

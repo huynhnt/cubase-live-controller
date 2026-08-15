@@ -102,6 +102,7 @@ export const DOM = {
   get chkAutoOpen() { return document.getElementById('chk-auto-open'); },
   get sliderOpacity() { return document.getElementById('slider-opacity'); },
   get valOpacity() { return document.getElementById('val-opacity'); },
+  get inputCustomAppTarget() { return document.getElementById('input-custom-app-target'); },
   get inputAudioDuration() { return document.getElementById('input-audio-duration'); },
   get inputAudioMinFreq() { return document.getElementById('input-audio-minfreq'); },
   

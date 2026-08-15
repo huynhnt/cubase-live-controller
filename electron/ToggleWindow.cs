@@ -39,8 +39,9 @@ class Program {
             
             if (action == "cubase") {
                 isMatch = p.ProcessName.IndexOf("Cubase", StringComparison.OrdinalIgnoreCase) >= 0;
-            } else if (action == "youtube") {
-                isMatch = p.MainWindowTitle.IndexOf("YouTube", StringComparison.OrdinalIgnoreCase) >= 0;
+            } else {
+                isMatch = p.ProcessName.IndexOf(args[0], StringComparison.OrdinalIgnoreCase) >= 0 ||
+                          p.MainWindowTitle.IndexOf(args[0], StringComparison.OrdinalIgnoreCase) >= 0;
             }
             
             if (isMatch) {

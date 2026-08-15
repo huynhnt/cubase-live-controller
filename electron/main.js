@@ -471,25 +471,14 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.on('toggle-cubase', () => {
+  ipcMain.on('toggle-app', (event, targetName) => {
     try {
       const execPath = path.join(__dirname, 'ToggleWindow.exe');
-      execFile(execPath, ['cubase'], (err) => {
-        if (err) console.error('Lỗi khi chạy ToggleWindow (cubase):', err);
+      execFile(execPath, [targetName], (err) => {
+        if (err) console.error(`Lỗi khi chạy ToggleWindow (${targetName}):`, err);
       });
     } catch (err) {
-      console.error('Lỗi khi kích hoạt Toggle Cubase:', err);
-    }
-  });
-
-  ipcMain.on('toggle-youtube', () => {
-    try {
-      const execPath = path.join(__dirname, 'ToggleWindow.exe');
-      execFile(execPath, ['youtube'], (err) => {
-        if (err) console.error('Lỗi khi chạy ToggleWindow (youtube):', err);
-      });
-    } catch (err) {
-      console.error('Lỗi khi kích hoạt Toggle YouTube:', err);
+      console.error(`Lỗi khi kích hoạt Toggle App (${targetName}):`, err);
     }
   });
 

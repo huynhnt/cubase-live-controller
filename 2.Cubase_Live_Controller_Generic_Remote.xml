@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <remotedescription version="1.1">
 <ctrltable name="Cubase Live Controller">
-<ctrl><name>Vol Nhac</name><stat>176</stat><chan>0</chan><addr>20</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Tat Nhac</name><stat>176</stat><chan>0</chan><addr>21</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Vol Mic</name><stat>176</stat><chan>0</chan><addr>22</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Tat Mic</name><stat>176</stat><chan>0</chan><addr>23</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Tat Vang</name><stat>176</stat><chan>0</chan><addr>24</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Vang Dai</name><stat>176</stat><chan>0</chan><addr>25</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Vang Ngan</name><stat>176</stat><chan>0</chan><addr>26</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Delay</name><stat>176</stat><chan>0</chan><addr>27</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Autotune</name><stat>176</stat><chan>0</chan><addr>28</addr><max>127</max><flags>1</flags></ctrl>
-<ctrl><name>Flex</name><stat>176</stat><chan>0</chan><addr>29</addr><max>127</max><flags>1</flags></ctrl>
+<ctrl><name>Vol Nhac</name><stat>176</stat><chan>0</chan><addr>20</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Tat Nhac</name><stat>176</stat><chan>0</chan><addr>21</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Vol Mic</name><stat>176</stat><chan>0</chan><addr>22</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Tat Mic</name><stat>176</stat><chan>0</chan><addr>23</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Tat Auto-tune</name><stat>176</stat><chan>0</chan><addr>24</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Vang Dai</name><stat>176</stat><chan>0</chan><addr>25</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Vang Ngan</name><stat>176</stat><chan>0</chan><addr>26</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Delay</name><stat>176</stat><chan>0</chan><addr>27</addr><max>127</max><flags>3</flags></ctrl>
+<ctrl><name>Autotune Retune Speed</name><stat>176</stat><chan>0</chan><addr>28</addr><max>127</max><flags>1</flags></ctrl>
+<ctrl><name>Autotune Humanize</name><stat>176</stat><chan>0</chan><addr>29</addr><max>127</max><flags>1</flags></ctrl>
 <ctrl><name>Autotune Key</name><stat>176</stat><chan>0</chan><addr>31</addr><max>127</max><flags>1</flags></ctrl>
 <ctrl><name>Autotune Scale</name><stat>176</stat><chan>0</chan><addr>32</addr><max>127</max><flags>1</flags></ctrl>
+<ctrl><name>Get Tone</name><stat>176</stat><chan>0</chan><addr>33</addr><max>127</max><flags>1</flags></ctrl>
+<ctrl><name>Send Tone</name><stat>176</stat><chan>0</chan><addr>34</addr><max>127</max><flags>1</flags></ctrl>
 </ctrltable>
 <bank name="Cubase Live Controller Bank">
 <entry ctrl="Vol Nhac">
 <value><device>VST Mixer</device><chan>0</chan><name>volume</name><flags>0</flags></value>
 </entry>
 <entry ctrl="Tat Nhac">
-<value><device>VST Mixer</device><chan>7</chan><name>mute</name><flags>2</flags></value>
+<value><device>VST Mixer</device><chan>0</chan><name>mute</name><flags>2</flags></value>
 </entry>
 <entry ctrl="Vol Mic">
 <value><device>VST Mixer</device><chan>1</chan><name>volume</name><flags>0</flags></value>
@@ -27,8 +29,8 @@
 <entry ctrl="Tat Mic">
 <value><device>VST Mixer</device><chan>1</chan><name>mute</name><flags>2</flags></value>
 </entry>
-<entry ctrl="Tat Vang">
-<value><device>VST Mixer</device><chan>1</chan><tag>1819440227</tag><flags>2</flags></value>
+<entry ctrl="Tat Auto-tune">
+<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot1:bypass</name><flags>2</flags></value>
 </entry>
 <entry ctrl="Vang Dai">
 <value><device>VST Mixer</device><chan>1</chan><name>sends/slot2:volume</name><flags>0</flags></value>
@@ -39,17 +41,23 @@
 <entry ctrl="Delay">
 <value><device>VST Mixer</device><chan>1</chan><name>sends/slot4:volume</name><flags>0</flags></value>
 </entry>
-<entry ctrl="Autotune">
-<value><device>VST Mixer</device><chan>1819440227</chan><tag>1</tag><flags>0</flags></value>
+<entry ctrl="Autotune Retune Speed">
+<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot2:param4</name><flags>0</flags></value>
 </entry>
-<entry ctrl="Flex">
-<value><device>VST Mixer</device><chan>1819440227</chan><tag>2</tag><flags>0</flags></value>
+<entry ctrl="Autotune Humanize">
+<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot2:param61</name><flags>0</flags></value>
 </entry>
 <entry ctrl="Autotune Key">
-<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot1:param2</name><flags>0</flags></value>
+<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot2:param2</name><flags>0</flags></value>
 </entry>
 <entry ctrl="Autotune Scale">
-<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot1:param3</name><flags>0</flags></value>
+<value><device>VST Mixer</device><chan>1</chan><name>inserts/slot2:param1</name><flags>0</flags></value>
+</entry>
+<entry ctrl="Get Tone">
+<value><device>VST Mixer</device><chan>1819440227</chan><tag>1</tag><flags>0</flags></value>
+</entry>
+<entry ctrl="Send Tone">
+<value><device>VST Mixer</device><chan>1819440227</chan><tag>1</tag><flags>0</flags></value>
 </entry>
 </bank>
 </remotedescription>
