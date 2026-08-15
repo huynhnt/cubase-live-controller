@@ -35,6 +35,35 @@ import {
 } from './settings.js';
 import { initSoundboard } from './soundboard.js';
 
+export const interactingSliders = {
+  beatVol: false,
+  micVol: false,
+  reverbLong: false,
+  reverbShort: false,
+  delay: false,
+  autotune: false,
+  flex: false,
+};
+
+export function syncAllStatesToCubase() {
+  if (!appConfig) return;
+  const mappings = appConfig.midiMappings;
+
+  midi.sendCC(mappings.beatVol, DOM.sliderBeatVol.value);
+  midi.sendCC(mappings.micVol, DOM.sliderMicVol.value);
+  midi.sendCC(mappings.reverbLong, DOM.sliders.reverbLong.value);
+  midi.sendCC(mappings.reverbShort, DOM.sliders.reverbShort.value);
+  midi.sendCC(mappings.delay, DOM.sliders.delay.value);
+  midi.sendCC(mappings.autotune, DOM.sliders.autotune.value);
+  midi.sendCC(mappings.flex, DOM.sliders.flex.value);
+
+  midi.sendCC(mappings.beatMute, states.beatMuted ? 127 : 0);
+  midi.sendCC(mappings.micMute, states.micMuted ? 127 : 0);
+  midi.sendCC(mappings.fxMute, states.fxMuted ? 0 : 127);
+
+  midi.sendCC(mappings.modeSingVoice, states.currentMode === 'sing' ? 127 : 0);
+}
+
 // -------------------------------------------------------------
 // KHỞI TẠO CÁC CỔNG MIDI VÀ KẾT NỐI
 // -------------------------------------------------------------
@@ -109,6 +138,8 @@ export function connectMidi() {
     const successOut = midi.connectOutput(appConfig.midiOutPort);
     if (successOut) {
       statusMsg += `MIDI Out: ${appConfig.midiOutPort}`;
+      // Đồng bộ từ app xuống Cubase sau khi kết nối (ưu tiên app)
+      setTimeout(() => syncAllStatesToCubase(), 200);
     } else {
       statusMsg += `Lỗi kết nối Out: ${appConfig.midiOutPort}`;
     }
@@ -134,46 +165,63 @@ export function connectMidi() {
 // Xử lý đồng bộ dữ liệu khi nhận lệnh MIDI CC ngược lại từ Cubase (2-way sync)
 export function handleIncomingMidiCC({ cc, value }) {
   const mappings = appConfig.midiMappings;
+  let stateChanged = false;
   
-  if (cc === mappings.beatVol) {
+  if (cc === mappings.beatVol && !interactingSliders.beatVol) {
     DOM.sliderBeatVol.value = value;
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
+    stateChanged = true;
   }
-  else if (cc === mappings.micVol) {
+  else if (cc === mappings.micVol && !interactingSliders.micVol) {
     DOM.sliderMicVol.value = value;
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
+    stateChanged = true;
   }
   else if (cc === mappings.beatMute) {
     const isMuted = value >= 64;
-    setBeatMuteUI(isMuted);
+    if (states.beatMuted !== isMuted) {
+      setBeatMuteUI(isMuted);
+      stateChanged = true;
+    }
   }
   else if (cc === mappings.micMute) {
     const isMuted = value >= 64;
-    setMicMuteUI(isMuted);
+    if (states.micMuted !== isMuted) {
+      setMicMuteUI(isMuted);
+      stateChanged = true;
+    }
   }
   else if (cc === mappings.fxMute) {
     const isMuted = value < 64;
-    setFxMuteUI(isMuted);
+    if (states.fxMuted !== isMuted) {
+      setFxMuteUI(isMuted);
+      stateChanged = true;
+    }
   }
-  else if (cc === mappings.reverbLong) {
+  else if (cc === mappings.reverbLong && !interactingSliders.reverbLong) {
     DOM.sliders.reverbLong.value = value;
     updateSliderFill(DOM.sliders.reverbLong, DOM.fills.reverbLong, DOM.vals.reverbLong);
+    stateChanged = true;
   }
-  else if (cc === mappings.reverbShort) {
+  else if (cc === mappings.reverbShort && !interactingSliders.reverbShort) {
     DOM.sliders.reverbShort.value = value;
     updateSliderFill(DOM.sliders.reverbShort, DOM.fills.reverbShort, DOM.vals.reverbShort);
+    stateChanged = true;
   }
-  else if (cc === mappings.delay) {
+  else if (cc === mappings.delay && !interactingSliders.delay) {
     DOM.sliders.delay.value = value;
     updateSliderFill(DOM.sliders.delay, DOM.fills.delay, DOM.vals.delay);
+    stateChanged = true;
   }
-  else if (cc === mappings.autotune) {
+  else if (cc === mappings.autotune && !interactingSliders.autotune) {
     DOM.sliders.autotune.value = value;
     updateSliderFill(DOM.sliders.autotune, DOM.fills.autotune, DOM.vals.autotune);
+    stateChanged = true;
   }
-  else if (cc === mappings.flex) {
+  else if (cc === mappings.flex && !interactingSliders.flex) {
     DOM.sliders.flex.value = value;
     updateSliderFill(DOM.sliders.flex, DOM.fills.flex, DOM.vals.flex);
+    stateChanged = true;
   }
   else if (cc === mappings.detectedKey) {
     const keyIndex = Math.round((value / 127) * 11);
@@ -184,6 +232,13 @@ export function handleIncomingMidiCC({ cc, value }) {
     const scaleIndex = value > 64 ? 1 : 0;
     states.detectedScale = scaleIndex;
     updateAutoKeyDisplay();
+  }
+
+  if (stateChanged) {
+    clearTimeout(window._autoSaveDebounce);
+    window._autoSaveDebounce = setTimeout(() => {
+      autoSaveCurrentStates();
+    }, 500);
   }
 }
 
@@ -329,6 +384,49 @@ export function openSettingsPanel() {
 // THIẾT LẬP SỰ KIỆN KHỞI TẠO VÀ LẮNG NGHE (EVENT LISTENERS)
 // -------------------------------------------------------------
 export function setupEventListeners() {
+  const setupInteraction = (slider, key, valElement) => {
+    if (!slider) return;
+    slider.addEventListener('mousedown', () => interactingSliders[key] = true);
+    slider.addEventListener('touchstart', () => interactingSliders[key] = true, {passive: true});
+    slider.addEventListener('mouseup', () => interactingSliders[key] = false);
+    slider.addEventListener('touchend', () => interactingSliders[key] = false);
+    
+    if (valElement) {
+      const resetAction = () => {
+        slider.value = 100;
+        slider.dispatchEvent(new Event('input'));
+        slider.dispatchEvent(new Event('change'));
+      };
+
+      valElement.style.cursor = 'pointer';
+      valElement.title = 'Nháy đúp để Reset về 0 dB';
+      valElement.addEventListener('dblclick', resetAction);
+      
+      // Thêm event double click thẳng vào thanh trượt (slider)
+      slider.title = 'Nháy đúp để Reset về 0 dB';
+      slider.addEventListener('dblclick', resetAction);
+
+      const parent = valElement.parentElement;
+      if (parent) {
+        const label = parent.querySelector('.slider-label');
+        if (label) {
+          label.style.cursor = 'pointer';
+          label.title = 'Nháy đúp để Reset về 0 dB';
+          label.addEventListener('dblclick', resetAction);
+          label.style.userSelect = 'none';
+        }
+      }
+    }
+  };
+  
+  setupInteraction(DOM.sliderBeatVol, 'beatVol', DOM.valBeatVol);
+  setupInteraction(DOM.sliderMicVol, 'micVol', DOM.valMicVol);
+  setupInteraction(DOM.sliders.reverbLong, 'reverbLong', DOM.vals.reverbLong);
+  setupInteraction(DOM.sliders.reverbShort, 'reverbShort', DOM.vals.reverbShort);
+  setupInteraction(DOM.sliders.delay, 'delay', DOM.vals.delay);
+  setupInteraction(DOM.sliders.autotune, 'autotune', DOM.vals.autotune);
+  setupInteraction(DOM.sliders.flex, 'flex', DOM.vals.flex);
+
   DOM.btnMinimize.addEventListener('click', () => window.electronAPI.minimizeWindow());
   DOM.btnClose.addEventListener('click', () => window.electronAPI.closeWindow());
   DOM.btnSettingsToggle.addEventListener('click', () => {

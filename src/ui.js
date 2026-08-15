@@ -4,11 +4,37 @@ import { midi } from './midi.js';
 import { parseToneFromTitle, extractSongInfo } from './tone-parser.js';
 import { analyzeAudioKey, stopAnalysis } from './audio-analyzer.js';
 
+export function midiToDbString(value, format = 'db') {
+  const val = parseInt(value);
+  if (isNaN(val)) return value;
+  
+  if (format === 'percent') {
+    return Math.round((val / 127) * 100) + '%';
+  }
+
+  // Format 'db'
+  if (val <= 0) return '-∞ dB';
+  if (val === 100) return '0.0 dB';
+  
+  if (val < 100) {
+    const db = 20 * Math.log10(val / 100);
+    return db.toFixed(1) + ' dB';
+  } else {
+    // 101 to 127
+    const db = (val - 100) * (6.0 / 27);
+    return '+' + db.toFixed(1) + ' dB';
+  }
+}
+
 export function updateSliderFill(slider, fillElement, valElement) {
   if (!slider) return;
   const percent = (slider.value / slider.max) * 100;
   if (fillElement) fillElement.style.width = percent + '%';
-  if (valElement) valElement.innerText = slider.value;
+  if (valElement) {
+    const id = slider.id || '';
+    const format = (id.includes('autotune') || id.includes('flex')) ? 'percent' : 'db';
+    valElement.innerText = midiToDbString(slider.value, format);
+  }
 }
 
 export function updateStatus(text, isConnected = true) {

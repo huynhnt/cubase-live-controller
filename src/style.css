@@ -276,8 +276,9 @@ body.web-mode .app-container {
   font-size: 10px;
   font-weight: 700;
   color: var(--color-blue);
-  width: 20px;
+  width: 45px;
   text-align: right;
+  user-select: none;
 }
 
 .slider-wrapper {
