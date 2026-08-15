@@ -434,7 +434,11 @@ export function setupEventListeners() {
   } else {
     DOM.btnMinimize.style.display = 'none';
     DOM.btnClose.style.display = 'none';
-    DOM.btnMediaPlayPause.addEventListener('click', () => alert('Tính năng Play/Pause chỉ hoạt động trên phiên bản App cài đặt (Electron).'));
+    if (DOM.btnMediaPlayPause) DOM.btnMediaPlayPause.style.display = 'none';
+    if (DOM.shortcutPlayMedia) {
+      const parentItem = DOM.shortcutPlayMedia.closest('.shortcut-item');
+      if (parentItem) parentItem.style.display = 'none';
+    }
   }
   DOM.btnSettingsToggle.addEventListener('click', () => {
     if (states.isSettingsOpen) {
