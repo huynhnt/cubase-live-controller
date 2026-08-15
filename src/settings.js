@@ -50,6 +50,7 @@ export function loadConfigToForm() {
   if (DOM.shortcutToggleWindow) DOM.shortcutToggleWindow.value = appConfig.shortcuts?.toggleWindow || 'Chưa gán';
   if (DOM.shortcutSetSingMode) DOM.shortcutSetSingMode.value = appConfig.shortcuts?.setSingMode || 'Chưa gán';
   if (DOM.shortcutSetVoiceMode) DOM.shortcutSetVoiceMode.value = appConfig.shortcuts?.setVoiceMode || 'Chưa gán';
+  if (DOM.shortcutPlayMedia) DOM.shortcutPlayMedia.value = appConfig.shortcuts?.playMedia || 'Chưa gán';
 
   if (appConfig.audioAnalyzer) {
     if (DOM.inputAudioDuration) DOM.inputAudioDuration.value = appConfig.audioAnalyzer.duration || 8;
@@ -113,7 +114,8 @@ export async function saveSettings() {
       toggleFx: DOM.shortcutToggleFx?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleFx?.value ?? ''),
       toggleWindow: DOM.shortcutToggleWindow?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleWindow?.value ?? ''),
       setSingMode: DOM.shortcutSetSingMode?.value === 'Chưa gán' ? '' : (DOM.shortcutSetSingMode?.value ?? ''),
-      setVoiceMode: DOM.shortcutSetVoiceMode?.value === 'Chưa gán' ? '' : (DOM.shortcutSetVoiceMode?.value ?? '')
+      setVoiceMode: DOM.shortcutSetVoiceMode?.value === 'Chưa gán' ? '' : (DOM.shortcutSetVoiceMode?.value ?? ''),
+      playMedia: DOM.shortcutPlayMedia?.value === 'Chưa gán' ? '' : (DOM.shortcutPlayMedia?.value ?? '')
     },
     audioAnalyzer: {
       duration: parseInt(DOM.inputAudioDuration?.value) || 8,

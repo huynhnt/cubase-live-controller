@@ -589,7 +589,8 @@ export function setupEventListeners() {
     DOM.shortcutToggleFx,
     DOM.shortcutToggleWindow,
     DOM.shortcutSetSingMode,
-    DOM.shortcutSetVoiceMode
+    DOM.shortcutSetVoiceMode,
+    DOM.shortcutPlayMedia
   ];
   
   shortcutInputs.forEach(input => {
@@ -739,6 +740,8 @@ export async function bootstrap() {
           setMode('sing');
         } else if (action === 'setVoiceMode') {
           setMode('voice');
+        } else if (action === 'playMedia') {
+          window.electronAPI.playPauseMedia();
         }
       });
     }

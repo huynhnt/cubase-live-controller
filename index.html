@@ -28,7 +28,6 @@
       </div>
       <div class="window-controls">
         <button id="btn-pwa-install" class="control-btn pwa-btn hidden" title="Cài đặt phần mềm Web PWA">📲 Cài PWA</button>
-        <button id="btn-media-playpause" class="control-btn" style="color: #ff4757;" title="Phát/Dừng YouTube (Nhạc nền)">⏯️</button>
         <button id="btn-theme-toggle" class="control-btn" title="Chuyển chế độ Sáng / Tối">🌙</button>
         <button id="btn-about-toggle" class="control-btn" title="Giới thiệu & Liên hệ">ℹ️</button>
         <button id="btn-pin-toggle" class="control-btn active" title="Ghim luôn nổi trên màn hình">📌</button>
@@ -52,6 +51,7 @@
 
       <div class="control-group sliders-group">
         <div class="slider-item">
+          <button id="btn-media-playpause" class="control-btn" style="color: #ff4757; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: rgba(255, 71, 87, 0.15); border-radius: 4px; border: 1px solid rgba(255, 71, 87, 0.3); padding: 0; font-size: 11px;" title="Phát/Dừng YouTube (Nhạc nền)">⏯</button>
           <span class="slider-label">Vol Nhạc</span>
           <div class="slider-wrapper">
             <input type="range" id="slider-beat-vol" min="0" max="127" value="100">
@@ -427,6 +427,13 @@
               <div class="shortcut-input-group">
                 <input type="text" id="shortcut-set-voice" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
                 <button type="button" class="btn-clear-shortcut" data-target="shortcut-set-voice" title="Xóa phím tắt">✕</button>
+              </div>
+            </div>
+            <div class="shortcut-item">
+              <label>7. Phát/Dừng Nhạc (Play/Pause YouTube)</label>
+              <div class="shortcut-input-group">
+                <input type="text" id="shortcut-play-media" class="shortcut-input-field" readonly placeholder="Nhấp để ghi phím...">
+                <button type="button" class="btn-clear-shortcut" data-target="shortcut-play-media" title="Xóa phím tắt">✕</button>
               </div>
             </div>
           </div>

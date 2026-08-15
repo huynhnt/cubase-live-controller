@@ -110,6 +110,7 @@ export const DOM = {
   get shortcutToggleWindow() { return document.getElementById('shortcut-toggle-window'); },
   get shortcutSetSingMode() { return document.getElementById('shortcut-set-sing'); },
   get shortcutSetVoiceMode() { return document.getElementById('shortcut-set-voice'); },
+  get shortcutPlayMedia() { return document.getElementById('shortcut-play-media'); },
   
   // Voice Presets inputs
   get presetReverbLong() { return document.getElementById('preset-reverb-long'); },

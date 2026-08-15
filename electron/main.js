@@ -278,6 +278,19 @@ function registerGlobalShortcuts(config) {
     }
   }
 
+  if (config.shortcuts.playMedia && config.shortcuts.playMedia !== 'Chưa gán') {
+    try {
+      const ok = globalShortcut.register(config.shortcuts.playMedia, () => {
+        if (mainWindow && !mainWindow.webContents.isDestroyed()) {
+          mainWindow.webContents.send('shortcut-pressed', 'playMedia');
+        }
+      });
+      if (!ok) console.warn(`Không thể đăng ký phím tắt cho Play Media: ${config.shortcuts.playMedia}`);
+    } catch (err) {
+      console.error(`Lỗi đăng ký phím tắt Play Media (${config.shortcuts.playMedia}):`, err);
+    }
+  }
+
   // Đăng ký phím tắt cho các ô Soundboard
   if (config && config.soundboard && Array.isArray(config.soundboard)) {
     config.soundboard.forEach(slot => {
