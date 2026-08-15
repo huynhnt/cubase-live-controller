@@ -29,6 +29,9 @@
     "directories": {
       "output": "release"
     },
+    "asarUnpack": [
+      "electron/ToggleWindow.exe"
+    ],
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
