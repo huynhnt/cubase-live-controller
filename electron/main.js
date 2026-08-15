@@ -462,7 +462,10 @@ app.whenReady().then(() => {
 
   ipcMain.on('play-pause-media', () => {
     try {
-      const execPath = path.join(__dirname, 'ToggleWindow.exe');
+      let execPath = path.join(__dirname, 'ToggleWindow.exe');
+      if (execPath.includes('app.asar')) {
+        execPath = execPath.replace('app.asar', 'app.asar.unpacked');
+      }
       execFile(execPath, ['playpause'], (err) => {
         if (err) console.error('Lỗi khi chạy ToggleWindow (playpause):', err);
       });
@@ -473,7 +476,10 @@ app.whenReady().then(() => {
 
   ipcMain.on('toggle-app', (event, targetName) => {
     try {
-      const execPath = path.join(__dirname, 'ToggleWindow.exe');
+      let execPath = path.join(__dirname, 'ToggleWindow.exe');
+      if (execPath.includes('app.asar')) {
+        execPath = execPath.replace('app.asar', 'app.asar.unpacked');
+      }
       execFile(execPath, [targetName], (err) => {
         if (err) console.error(`Lỗi khi chạy ToggleWindow (${targetName}):`, err);
       });
