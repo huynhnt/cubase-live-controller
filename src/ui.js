@@ -4,6 +4,8 @@ import { midi } from './midi.js';
 import { parseToneFromTitle, extractSongInfo } from './tone-parser.js';
 import { analyzeAudioKey, stopAnalysis } from './audio-analyzer.js';
 
+import { CUBASE_DB_CURVE } from './cubase_curve.js';
+
 export function midiToDbString(value, format = 'db') {
   const val = parseInt(value);
   if (isNaN(val)) return value;
@@ -12,18 +14,12 @@ export function midiToDbString(value, format = 'db') {
     return Math.round((val / 127) * 100) + '%';
   }
 
-  // Format 'db'
-  if (val <= 0) return '-∞ dB';
-  if (val === 100) return '0.0 dB';
-  
-  if (val < 100) {
-    const db = 20 * Math.log10(val / 100);
-    return db.toFixed(1) + ' dB';
-  } else {
-    // 101 to 127
-    const db = (val - 100) * (6.0 / 27);
-    return '+' + db.toFixed(1) + ' dB';
+  // Lấy thẳng kết quả từ bảng nội suy siêu chuẩn 128 điểm của Cubase
+  if (val >= 0 && val <= 127) {
+    return CUBASE_DB_CURVE[val];
   }
+  
+  return '-∞ dB';
 }
 
 export function updateSliderFill(slider, fillElement, valElement) {
