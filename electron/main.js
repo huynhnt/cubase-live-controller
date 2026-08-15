@@ -446,6 +446,17 @@ app.whenReady().then(() => {
     app.quit();
   });
 
+  ipcMain.on('play-pause-media', () => {
+    try {
+      const execPath = require('path').join(__dirname, 'PlayPause.exe');
+      require('child_process').execFile(execPath, (err) => {
+        if (err) console.error('Lỗi khi chạy PlayPause.exe:', err);
+      });
+    } catch (err) {
+      console.error('Lỗi khi kích hoạt Media Play/Pause:', err);
+    }
+  });
+
   ipcMain.on('window-toggle-pin', (event, isPinned) => {
     if (mainWindow) {
       if (isPinned) {

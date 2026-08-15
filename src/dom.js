@@ -8,6 +8,7 @@ export const DOM = {
   get btnAboutToggle() { return document.getElementById('btn-about-toggle'); },
   get btnPinToggle() { return document.getElementById('btn-pin-toggle'); },
   get btnThemeToggle() { return document.getElementById('btn-theme-toggle'); },
+  get btnMediaPlayPause() { return document.getElementById('btn-media-playpause'); },
   
   // Nút chức năng chính
   get btnBeatMute() { return document.getElementById('btn-beat-mute'); },

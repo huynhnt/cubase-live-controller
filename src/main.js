@@ -429,6 +429,7 @@ export function setupEventListeners() {
 
   DOM.btnMinimize.addEventListener('click', () => window.electronAPI.minimizeWindow());
   DOM.btnClose.addEventListener('click', () => window.electronAPI.closeWindow());
+  DOM.btnMediaPlayPause.addEventListener('click', () => window.electronAPI.playPauseMedia());
   DOM.btnSettingsToggle.addEventListener('click', () => {
     if (states.isSettingsOpen) {
       cancelSettings();
