@@ -462,9 +462,9 @@ app.whenReady().then(() => {
 
   ipcMain.on('play-pause-media', () => {
     try {
-      const execPath = path.join(__dirname, 'PlayPause.exe');
-      execFile(execPath, (err) => {
-        if (err) console.error('Lỗi khi chạy PlayPause.exe:', err);
+      const execPath = path.join(__dirname, 'ToggleWindow.exe');
+      execFile(execPath, ['playpause'], (err) => {
+        if (err) console.error('Lỗi khi chạy ToggleWindow (playpause):', err);
       });
     } catch (err) {
       console.error('Lỗi khi kích hoạt Media Play/Pause:', err);
@@ -473,12 +473,23 @@ app.whenReady().then(() => {
 
   ipcMain.on('toggle-cubase', () => {
     try {
-      const execPath = path.join(__dirname, 'ToggleCubase.exe');
-      execFile(execPath, (err) => {
-        if (err) console.error('Lỗi khi chạy ToggleCubase.exe:', err);
+      const execPath = path.join(__dirname, 'ToggleWindow.exe');
+      execFile(execPath, ['cubase'], (err) => {
+        if (err) console.error('Lỗi khi chạy ToggleWindow (cubase):', err);
       });
     } catch (err) {
       console.error('Lỗi khi kích hoạt Toggle Cubase:', err);
+    }
+  });
+
+  ipcMain.on('toggle-youtube', () => {
+    try {
+      const execPath = path.join(__dirname, 'ToggleWindow.exe');
+      execFile(execPath, ['youtube'], (err) => {
+        if (err) console.error('Lỗi khi chạy ToggleWindow (youtube):', err);
+      });
+    } catch (err) {
+      console.error('Lỗi khi kích hoạt Toggle YouTube:', err);
     }
   });
 

@@ -432,10 +432,12 @@ export function setupEventListeners() {
     DOM.btnClose.addEventListener('click', () => window.electronAPI.closeWindow());
     DOM.btnMediaPlayPause.addEventListener('click', () => window.electronAPI.playPauseMedia());
     if (DOM.btnToggleCubase) DOM.btnToggleCubase.addEventListener('click', () => window.electronAPI.toggleCubase());
+    if (DOM.btnToggleYouTube) DOM.btnToggleYouTube.addEventListener('click', () => window.electronAPI.toggleYouTube());
   } else {
     DOM.btnMinimize.style.display = 'none';
     DOM.btnClose.style.display = 'none';
     if (DOM.btnToggleCubase) DOM.btnToggleCubase.style.display = 'none';
+    if (DOM.btnToggleYouTube) DOM.btnToggleYouTube.style.display = 'none';
     if (DOM.btnMediaPlayPause) DOM.btnMediaPlayPause.style.display = 'none';
     if (DOM.shortcutPlayMedia) {
       const parentItem = DOM.shortcutPlayMedia.closest('.shortcut-item');

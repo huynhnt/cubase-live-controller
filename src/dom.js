@@ -5,6 +5,7 @@ export const DOM = {
   get btnMinimize() { return document.getElementById('btn-minimize'); },
   get btnClose() { return document.getElementById('btn-close'); },
   get btnToggleCubase() { return document.getElementById('btn-toggle-cubase'); },
+  get btnToggleYouTube() { return document.getElementById('btn-toggle-youtube'); },
   get btnSettingsToggle() { return document.getElementById('btn-settings-toggle'); },
   get btnAboutToggle() { return document.getElementById('btn-about-toggle'); },
   get btnPinToggle() { return document.getElementById('btn-pin-toggle'); },
