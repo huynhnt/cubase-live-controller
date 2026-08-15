@@ -427,9 +427,15 @@ export function setupEventListeners() {
   setupInteraction(DOM.sliders.autotune, 'autotune', DOM.vals.autotune);
   setupInteraction(DOM.sliders.flex, 'flex', DOM.vals.flex);
 
-  DOM.btnMinimize.addEventListener('click', () => window.electronAPI.minimizeWindow());
-  DOM.btnClose.addEventListener('click', () => window.electronAPI.closeWindow());
-  DOM.btnMediaPlayPause.addEventListener('click', () => window.electronAPI.playPauseMedia());
+  if (window.electronAPI) {
+    DOM.btnMinimize.addEventListener('click', () => window.electronAPI.minimizeWindow());
+    DOM.btnClose.addEventListener('click', () => window.electronAPI.closeWindow());
+    DOM.btnMediaPlayPause.addEventListener('click', () => window.electronAPI.playPauseMedia());
+  } else {
+    DOM.btnMinimize.style.display = 'none';
+    DOM.btnClose.style.display = 'none';
+    DOM.btnMediaPlayPause.addEventListener('click', () => alert('Tính năng Play/Pause chỉ hoạt động trên phiên bản App cài đặt (Electron).'));
+  }
   DOM.btnSettingsToggle.addEventListener('click', () => {
     if (states.isSettingsOpen) {
       cancelSettings();
