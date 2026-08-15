@@ -471,6 +471,17 @@ app.whenReady().then(() => {
     }
   });
 
+  ipcMain.on('toggle-cubase', () => {
+    try {
+      const execPath = path.join(__dirname, 'ToggleCubase.exe');
+      execFile(execPath, (err) => {
+        if (err) console.error('Lỗi khi chạy ToggleCubase.exe:', err);
+      });
+    } catch (err) {
+      console.error('Lỗi khi kích hoạt Toggle Cubase:', err);
+    }
+  });
+
   ipcMain.on('window-toggle-pin', (event, isPinned) => {
     if (mainWindow) {
       if (isPinned) {

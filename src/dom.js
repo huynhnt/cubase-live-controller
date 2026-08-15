@@ -4,6 +4,7 @@ export const DOM = {
   // Nút điều khiển cửa sổ
   get btnMinimize() { return document.getElementById('btn-minimize'); },
   get btnClose() { return document.getElementById('btn-close'); },
+  get btnToggleCubase() { return document.getElementById('btn-toggle-cubase'); },
   get btnSettingsToggle() { return document.getElementById('btn-settings-toggle'); },
   get btnAboutToggle() { return document.getElementById('btn-about-toggle'); },
   get btnPinToggle() { return document.getElementById('btn-pin-toggle'); },
