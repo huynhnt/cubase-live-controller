@@ -5,7 +5,12 @@ Tất cả các thay đổi đáng chú ý của dự án sẽ được ghi lạ
 ## [v1.0.6] - 2026-08-15
 ### 🚀 Tính năng Mới & Cải tiến
 
-#### 1. App Master Priority (Ưu tiên Đồng bộ từ App)
+#### 1. Nút điều khiển Đa năng (Universal App Toggle) & Tùy biến App
+- **Nút YouTube/App:** Bổ sung thêm nút bấm (Logo YouTube) trên thanh tiêu đề để ẩn/hiện nhanh cửa sổ YouTube hoặc bất kỳ ứng dụng nào khác.
+- **Tùy biến Ứng dụng:** Bạn có thể đổi đối tượng điều khiển (thay vì YouTube) sang Spotify, OBS, Chrome... thông qua mục Cấu hình Ứng dụng Bổ sung trong phần Cài đặt.
+- **Kiến trúc Tối ưu:** Hợp nhất toàn bộ logic thu nhỏ, phóng to, Play/Pause Media vào một file thực thi duy nhất (`ToggleWindow.exe`) nhằm tối ưu hoá hệ thống và dễ dàng bảo trì.
+
+#### 2. App Master Priority (Ưu tiên Đồng bộ từ App)
 - **Vấn đề trước đây:** App và Cubase đôi khi bị lệch trạng thái khi khởi động hoặc vừa mở file Project.
 - **Bản cập nhật này:** Ngay khi ứng dụng kết nối thành công với cổng MIDI Out của Cubase, App sẽ kích hoạt đồng bộ (Force Sync) để đẩy toàn bộ tham số hiện tại (Volume, Mute, Reverb, Delay, Autotune, v.v.) xuống Cubase. 
 - **Kết quả:** Giao diện App hiển thị như thế nào, Cubase sẽ buộc phải kêu y như thế đó ngay từ giây đầu tiên kết nối.
