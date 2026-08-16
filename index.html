@@ -170,6 +170,7 @@
         <div class="settings-tabs">
           <button class="tab-btn active" data-tab="tab-midi">Cấu hình MIDI</button>
           <button class="tab-btn" data-tab="tab-mapping">Ánh xạ CC</button>
+          <button class="tab-btn" data-tab="tab-tune">Cấu hình Tune</button>
           <button class="tab-btn" data-tab="tab-general">Chung & Chế độ</button>
           <button class="tab-btn" data-tab="tab-shortcuts">Phím tắt</button>
         </div>
@@ -194,6 +195,68 @@
             <label for="input-midi-channel">Kênh MIDI (MIDI Channel)</label>
             <input type="number" id="input-midi-channel" min="1" max="16" value="1">
           </div>
+        </div>
+
+        <!-- Tab 2: Ánh xạ MIDI CC -->
+        <div id="tab-mapping" class="tab-content">
+          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 10px;">
+            Nháy đúp chuột vào cột <strong>Tên Điều khiển</strong> (chỉ cho phép sửa ở nhóm Hiệu ứng) hoặc <strong>Mã CC</strong> để chỉnh sửa. Sau khi sửa xong, nhớ bấm <strong>Lưu Cài đặt</strong> ở dưới cùng!
+          </p>
+
+          <div class="settings-group-title" style="margin-top: 5px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Nhóm 1: Tính năng (System Features)</span>
+          </div>
+          <div id="features-mapping-container" style="background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 15px; overflow-x: auto;">
+            <table class="cubase-table" id="features-mapping-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%">Tên Điều khiển</th>
+                  <th style="width: 15%">MIDI Status</th>
+                  <th style="width: 15%">Kênh MIDI</th>
+                  <th style="width: 15%">Mã CC</th>
+                  <th style="width: 15%">Max. Value</th>
+                  <th style="width: 15%">Flags</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="settings-group-title" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Nhóm 2: Hiệu ứng (Effects)</span>
+          </div>
+          <div id="effects-mapping-container" style="background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 15px; overflow-x: auto;">
+            <table class="cubase-table" id="effects-mapping-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%">Tên Điều khiển</th>
+                  <th style="width: 15%">MIDI Status</th>
+                  <th style="width: 15%">Kênh MIDI</th>
+                  <th style="width: 15%">Mã CC</th>
+                  <th style="width: 15%">Max. Value</th>
+                  <th style="width: 15%">Flags</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="settings-group-title" style="margin-top: 15px;">Xuất cấu hình Generic Remote (Cho Cubase)</div>
+          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
+            Hỗ trợ tạo sẵn file XML để đưa vào Cubase. Bạn có thể xuất riêng tính năng hoặc hiệu ứng để tránh xung đột khi chia sẻ.
+          </p>
+          <div class="settings-group-title" style="margin-top: 15px; display: flex; gap: 10px;">
+            <button id="btn-export-features" class="action-btn btn-blue" style="font-size: 11px; padding: 4px 8px; height: 26px;">📥 Xuất XML Tính năng</button>
+            <button id="btn-export-effects" class="action-btn btn-orange" style="font-size: 11px; padding: 4px 8px; height: 26px;">📥 Xuất XML Hiệu ứng</button>
+          </div>
+        </div>
+
+        <!-- Tab: Cấu hình Tune -->
+        <div id="tab-tune" class="tab-content">
           <div class="settings-row">
             <label for="select-autotune-version">Phiên bản Auto-Tune</label>
             <select id="select-autotune-version">
@@ -201,64 +264,9 @@
               <option value="efx">Auto-Tune EFX</option>
             </select>
           </div>
-        </div>
-
-        <!-- Tab 2: Ánh xạ MIDI CC -->
-        <div id="tab-mapping" class="tab-content">
-          <div class="mapping-grid">
-            <div class="mapping-item">
-              <label>Vol Nhạc CC</label>
-              <input type="number" id="map-beat-vol" min="0" max="127" value="20">
-            </div>
-            <div class="mapping-item">
-              <label>Tắt Nhạc CC</label>
-              <input type="number" id="map-beat-mute" min="0" max="127" value="21">
-            </div>
-            <div class="mapping-item">
-              <label>Vol Mic CC</label>
-              <input type="number" id="map-mic-vol" min="0" max="127" value="22">
-            </div>
-            <div class="mapping-item">
-              <label>Tắt Mic CC</label>
-              <input type="number" id="map-mic-mute" min="0" max="127" value="23">
-            </div>
-            <div class="mapping-item">
-              <label>Tắt AutoTune CC</label>
-              <input type="number" id="map-fx-mute" min="0" max="127" value="24">
-            </div>
-            <div class="mapping-item">
-              <label>Autotune Key CC</label>
-              <input type="number" id="map-autotune-key" min="0" max="127" value="31">
-            </div>
-            <div class="mapping-item">
-              <label>Autotune Scale CC</label>
-              <input type="number" id="map-autotune-scale" min="0" max="127" value="32">
-            </div>
-            <div class="mapping-item">
-              <label>Chuyển Mode CC</label>
-              <input type="number" id="map-mode" min="0" max="127" value="30">
-            </div>
-          </div>
           
-          <div class="settings-group-title" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Danh sách Mã CC của Hiệu ứng</span>
-          </div>
-          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
-            Các mã CC này được quản lý tự động. Bấm vào nút Sửa nếu bạn muốn thay đổi.
-          </p>
-          <div id="read-only-effects-list" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;">
-            <!-- Rendered by JS -->
-          </div>
 
-          <div class="settings-group-title" style="margin-top: 15px;">Xuất cấu hình Generic Remote (Cho Cubase)</div>
-          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
-            Hỗ trợ tạo sẵn file XML để đưa vào Cubase. Bạn có thể xuất riêng tính năng hoặc hiệu ứng để tránh xung đột khi chia sẻ.
-          </p>
-          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button id="btn-export-features" class="btn btn-blue" style="flex: 1; padding: 6px 0; font-size: 11px;">Xuất XML Tính năng</button>
-            <button id="btn-export-effects" class="btn btn-orange" style="flex: 1; padding: 6px 0; font-size: 11px;">Xuất XML Hiệu ứng</button>
-          </div>
-
+          
           <div class="settings-group-title" style="margin-top: 15px;">Tùy chỉnh Giá trị MIDI cho Auto-Tune Pro (Nếu bị nhận sai Tông)</div>
           <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
             Mỗi phiên bản Auto-Tune có bộ giá trị khác nhau. Kéo 2 thanh trượt dưới đây, nhìn vào Auto-Tune trong Cubase xem số bao nhiêu tương ứng với chữ gì, rồi nhập số đó vào ô bên dưới (cách nhau dấu phẩy).
@@ -284,6 +292,19 @@
             <label for="input-custom-scales">Giá trị cho 2 Scale (Trưởng, Thứ)</label>
             <input type="text" id="input-custom-scales" style="width: 100%;" value="0, 5">
           </div>
+
+          <div class="settings-group-title">Cấu hình Nhận diện Âm thanh (Level 3)</div>
+          <div class="settings-row">
+            <label for="input-audio-duration">Thời gian lấy mẫu (giây) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: 8)</span></label>
+            <input type="number" id="input-audio-duration" min="5" max="30" value="8">
+          </div>
+          <div class="settings-row">
+            <label for="input-audio-minfreq">Lọc nhiễu Bass (Cắt tần số thấp dưới Hz) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: 27.5)</span></label>
+            <input type="number" id="input-audio-minfreq" min="20" max="300" value="27.5">
+          </div>
+          <div class="settings-row" style="margin-top: -5px; margin-bottom: 15px;">
+            <span class="settings-hint" style="color: var(--color-green);">💡 <strong>Mẹo cho nhạc Pop/EDM:</strong> Đặt Thời gian <strong>12s - 15s</strong> và Lọc Bass <strong>100Hz - 150Hz</strong> (để loại bỏ nhiễu tiếng trống/bass), kết quả dò sẽ chính xác hơn đáng kể!</span>
+          </div>
         </div>
 
         <!-- Tab 3: Cấu hình chung & presets -->
@@ -308,18 +329,6 @@
             <label for="input-custom-app-target">Từ khóa cửa sổ Ẩn/Hiện (Tên App/Tiêu đề) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: YouTube)</span></label>
             <input type="text" id="input-custom-app-target" style="width: 100%; margin-top: 5px;" value="YouTube" placeholder="VD: Spotify, OBS, Chrome...">
             <span class="settings-hint" style="color: var(--text-secondary); display: block; margin-top: 4px;">Dùng cho nút bấm biểu tượng YouTube trên cùng góc phải.</span>
-          </div>
-          <div class="settings-group-title">Cấu hình Nhận diện Âm thanh (Level 3)</div>
-          <div class="settings-row">
-            <label for="input-audio-duration">Thời gian lấy mẫu (giây) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: 8)</span></label>
-            <input type="number" id="input-audio-duration" min="5" max="30" value="8">
-          </div>
-          <div class="settings-row">
-            <label for="input-audio-minfreq">Lọc nhiễu Bass (Cắt tần số thấp dưới Hz) <span style="font-size: 10px; color: var(--text-secondary); font-weight: normal;">(Mặc định: 27.5)</span></label>
-            <input type="number" id="input-audio-minfreq" min="20" max="300" value="27.5">
-          </div>
-          <div class="settings-row" style="margin-top: -5px; margin-bottom: 15px;">
-            <span class="settings-hint" style="color: var(--color-green);">💡 <strong>Mẹo cho nhạc Pop/EDM:</strong> Đặt Thời gian <strong>12s - 15s</strong> và Lọc Bass <strong>100Hz - 150Hz</strong> (để loại bỏ nhiễu tiếng trống/bass), kết quả dò sẽ chính xác hơn đáng kể!</span>
           </div>
 
           <div class="settings-group-title">Preset Chế độ Voice (Nói chuyện)</div>

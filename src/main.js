@@ -49,7 +49,7 @@ export function syncAllStatesToCubase() {
 
   midi.sendCC(mappings.beatVol, DOM.sliderBeatVol.value);
   midi.sendCC(mappings.micVol, DOM.sliderMicVol.value);
-  
+
   if (appConfig.effects) {
     appConfig.effects.forEach(fx => {
       const slider = document.getElementById(`slider-fx-${fx.id}`);
@@ -79,16 +79,16 @@ export async function initMidi() {
   try {
     updateStatus('Đang khởi tạo MIDI...');
     await midi.initialize();
-    
+
     window.onMidiStateChange = () => {
       populateMidiPorts();
       connectMidi();
     };
-    
+
     populateMidiPorts();
-    
+
     midi.setChannel(appConfig.midiChannel);
-    
+
     connectMidi();
   } catch (err) {
     console.error('Không khởi tạo được MIDI:', err);
@@ -99,10 +99,10 @@ export async function initMidi() {
 export function populateMidiPorts() {
   const outs = midi.getOutputPorts();
   const ins = midi.getInputPorts();
-  
+
   DOM.selectMidiOut.innerHTML = '<option value="">-- Chưa kết nối --</option>';
   DOM.selectMidiIn.innerHTML = '<option value="">-- Chưa kết nối --</option>';
-  
+
   let foundSavedOut = false;
   outs.forEach(port => {
     const opt = document.createElement('option');
@@ -118,7 +118,7 @@ export function populateMidiPorts() {
     opt.innerText = `${appConfig.midiOutPort} (Đã lưu)`;
     DOM.selectMidiOut.appendChild(opt);
   }
-  
+
   let foundSavedIn = false;
   ins.forEach(port => {
     const opt = document.createElement('option');
@@ -134,14 +134,14 @@ export function populateMidiPorts() {
     opt.innerText = `${appConfig.midiInPort} (Đã lưu)`;
     DOM.selectMidiIn.appendChild(opt);
   }
-  
+
   DOM.selectMidiOut.value = appConfig.midiOutPort || '';
   DOM.selectMidiIn.value = appConfig.midiInPort || '';
 }
 
 export function connectMidi() {
   let statusMsg = '';
-  
+
   if (appConfig.midiOutPort) {
     const successOut = midi.connectOutput(appConfig.midiOutPort);
     if (successOut) {
@@ -154,7 +154,7 @@ export function connectMidi() {
   } else {
     statusMsg += 'Chưa cấu hình MIDI Out';
   }
-  
+
   if (appConfig.midiInPort) {
     const successIn = midi.connectInput(appConfig.midiInPort, handleIncomingMidiCC);
     if (successIn) {
@@ -165,7 +165,7 @@ export function connectMidi() {
   } else {
     statusMsg += ' | Chưa kết nối MIDI In';
   }
-  
+
   const isOk = appConfig.midiOutPort && midi.midiOutPort;
   updateStatus(statusMsg, isOk);
 }
@@ -174,7 +174,7 @@ export function connectMidi() {
 export function handleIncomingMidiCC({ cc, value }) {
   const mappings = appConfig.midiMappings;
   let stateChanged = false;
-  
+
   if (cc === mappings.beatVol && !interactingSliders.beatVol) {
     DOM.sliderBeatVol.value = value;
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
@@ -284,7 +284,7 @@ export function setMode(targetMode) {
 
     savedSingingValues.beatVol = parseInt(DOM.sliderBeatVol.value);
     savedSingingValues.micVol = parseInt(DOM.sliderMicVol.value);
-    
+
     appConfig.effects.forEach(fx => {
       const slider = document.getElementById(`slider-fx-${fx.id}`);
       if (slider) {
@@ -293,7 +293,7 @@ export function setMode(targetMode) {
     });
 
     const preset = appConfig.voicePreset;
-    
+
     appConfig.effects.forEach(fx => {
       const presetVal = preset[fx.id] !== undefined ? preset[fx.id] : 0;
       midi.sendCC(fx.ccValue, presetVal);
@@ -334,7 +334,7 @@ export function setMode(targetMode) {
       if (val === undefined) val = fx.value;
       fx.value = val;
       midi.sendCC(fx.ccValue, val);
-      
+
       const slider = document.getElementById(`slider-fx-${fx.id}`);
       const fill = document.getElementById(`fill-fx-${fx.id}`);
       const valText = document.getElementById(`val-fx-${fx.id}`);
@@ -343,7 +343,7 @@ export function setMode(targetMode) {
         updateSliderFill(slider, fill, valText);
       }
     });
-    
+
     // Trả về âm lượng nhạc và mic ban đầu
     midi.sendCC(appConfig.midiMappings.beatVol, savedSingingValues.beatVol);
     midi.sendCC(appConfig.midiMappings.micVol, savedSingingValues.micVol);
@@ -367,15 +367,15 @@ export function openSettingsPanel() {
   states.isSettingsOpen = true;
   DOM.settingsPanel.classList.remove('hidden');
   DOM.btnSettingsToggle.classList.add('active');
-  
+
   DOM.fxPanel.classList.add('hidden');
-  DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▾';
+  DOM.btnReverbToggle.innerText = 'Hiệu Ứng ▾';
   DOM.btnReverbToggle.classList.remove('active');
   DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
   DOM.btnToneToggle.classList.remove('active');
-  
+
   window.electronAPI.resizeWindow('settings');
-  
+
   populateMidiPorts();
   loadConfigToForm();
 }
@@ -387,10 +387,10 @@ export function setupEventListeners() {
   const setupInteraction = (slider, key, valElement) => {
     if (!slider) return;
     slider.addEventListener('mousedown', () => interactingSliders[key] = true);
-    slider.addEventListener('touchstart', () => interactingSliders[key] = true, {passive: true});
+    slider.addEventListener('touchstart', () => interactingSliders[key] = true, { passive: true });
     slider.addEventListener('mouseup', () => interactingSliders[key] = false);
     slider.addEventListener('touchend', () => interactingSliders[key] = false);
-    
+
     if (valElement) {
       const resetAction = () => {
         slider.value = 100;
@@ -401,7 +401,7 @@ export function setupEventListeners() {
       valElement.style.cursor = 'pointer';
       valElement.title = 'Nháy đúp để Reset về 0 dB';
       valElement.addEventListener('dblclick', resetAction);
-      
+
       // Thêm event double click thẳng vào thanh trượt (slider)
       slider.title = 'Nháy đúp để Reset về 0 dB';
       slider.addEventListener('dblclick', resetAction);
@@ -418,10 +418,10 @@ export function setupEventListeners() {
       }
     }
   };
-  
+
   setupInteraction(DOM.sliderBeatVol, 'beatVol', DOM.valBeatVol);
   setupInteraction(DOM.sliderMicVol, 'micVol', DOM.valMicVol);
-  
+
   if (appConfig.effects) {
     appConfig.effects.forEach(fx => {
       const slider = document.getElementById(`slider-fx-${fx.id}`);
@@ -478,28 +478,28 @@ export function setupEventListeners() {
     }
   });
   DOM.btnThemeToggle.addEventListener('click', toggleTheme);
-  
+
   DOM.tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       DOM.tabButtons.forEach(b => b.classList.remove('active'));
       DOM.tabContents.forEach(c => c.classList.remove('active'));
-      
+
       btn.classList.add('active');
       const tabId = btn.getAttribute('data-tab');
       document.getElementById(tabId).classList.add('active');
     });
   });
-  
+
   DOM.btnBeatMute.addEventListener('click', toggleBeatMute);
   DOM.btnMicMute.addEventListener('click', toggleMicMute);
   DOM.btnFxMute.addEventListener('click', toggleFxMute);
-  
+
   DOM.btnModeToggle.addEventListener('click', toggleSingVoiceMode);
-  
+
   DOM.btnReverbToggle.addEventListener('click', toggleFxPanel);
   DOM.btnToneToggle.addEventListener('click', toggleKeySelector);
   DOM.btnSoundboardToggle.addEventListener('click', toggleSoundboardPanel);
-  
+
   let deferredPwaPrompt;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -519,14 +519,14 @@ export function setupEventListeners() {
 
   DOM.btnSaveSettings.addEventListener('click', saveSettings);
   DOM.btnCloseSettings.addEventListener('click', cancelSettings);
-  
+
   DOM.btnSelectProject.addEventListener('click', async () => {
     const filePath = await window.electronAPI.selectFile();
     if (filePath) {
       DOM.inputProjectPath.value = filePath;
     }
   });
-  
+
   DOM.sliderOpacity.addEventListener('input', (e) => {
     const val = e.target.value;
     DOM.valOpacity.innerText = val + '%';
@@ -541,28 +541,28 @@ export function setupEventListeners() {
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
     midi.sendCC(appConfig.midiMappings.micVol, e.target.value);
   });
-  
+
   DOM.sliderBeatVol.addEventListener('change', autoSaveCurrentStates);
   DOM.sliderMicVol.addEventListener('change', autoSaveCurrentStates);
-  
+
   if (DOM.btnAddEffect) DOM.btnAddEffect.addEventListener('click', () => openEffectEditModal(null));
   if (DOM.btnExportFeatures) DOM.btnExportFeatures.addEventListener('click', exportFeaturesXML);
   if (DOM.btnExportEffects) DOM.btnExportEffects.addEventListener('click', exportEffectsXML);
-  
+
   DOM.btnAddPreset.addEventListener('click', saveCurrentAsPreset);
-  
+
   DOM.btnModalSave.addEventListener('click', submitNewPreset);
   DOM.btnModalCancel.addEventListener('click', () => DOM.presetModal.classList.add('hidden'));
   DOM.inputPresetName.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') submitNewPreset();
   });
-  
+
   DOM.btnConfirmYes.addEventListener('click', confirmDeletePreset);
   DOM.btnConfirmNo.addEventListener('click', () => DOM.confirmModal.classList.add('hidden'));
-  
+
   DOM.btnOverwriteYes.addEventListener('click', confirmOverwritePreset);
   DOM.btnOverwriteNo.addEventListener('click', () => DOM.overwriteModal.classList.add('hidden'));
-  
+
   // Lắng nghe sự kiện ghi nhận phím tắt
   const shortcutInputs = [
     DOM.shortcutToggleMusic,
@@ -573,15 +573,15 @@ export function setupEventListeners() {
     DOM.shortcutSetVoiceMode,
     DOM.shortcutPlayMedia
   ];
-  
+
   shortcutInputs.forEach(input => {
     if (!input) return;
-    
+
     input.addEventListener('focus', () => {
       input.classList.add('recording');
       input.placeholder = 'Nhấn tổ hợp phím...';
     });
-    
+
     input.addEventListener('blur', () => {
       input.classList.remove('recording');
       if (!input.value) {
@@ -589,24 +589,24 @@ export function setupEventListeners() {
       }
       input.placeholder = 'Nhấp để ghi phím...';
     });
-    
+
     input.addEventListener('keydown', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      
+
       const keys = [];
       if (e.ctrlKey) keys.push('Ctrl');
       if (e.altKey) keys.push('Alt');
       if (e.shiftKey) keys.push('Shift');
-      
+
       let key = e.key;
-      
+
       // Nếu chỉ nhấn modifier, cập nhật giao diện hiển thị modifier tạm thời
       if (key === 'Control' || key === 'Alt' || key === 'Shift' || key === 'Meta') {
         input.value = keys.length > 0 ? keys.join('+') : '';
         return;
       }
-      
+
       // Chuẩn hóa tên phím sang định dạng Electron Accelerator
       if (key === ' ') {
         key = 'Space';
@@ -618,7 +618,7 @@ export function setupEventListeners() {
         input.blur();
         return;
       }
-      
+
       // Xử lý phím NumPad
       if (e.code.startsWith('Numpad')) {
         const num = e.code.replace('Numpad', '');
@@ -636,13 +636,13 @@ export function setupEventListeners() {
           key = 'numdec';
         }
       }
-      
+
       keys.push(key);
       input.value = keys.join('+');
       input.blur();
     });
   });
-  
+
   // Sự kiện xóa phím tắt bằng nút ✕
   document.querySelectorAll('.btn-clear-shortcut').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -661,9 +661,9 @@ export function setupEventListeners() {
 export async function bootstrap() {
   try {
     setAppConfig(await window.electronAPI.loadConfig());
-    
+
     applyTheme(appConfig.theme ?? 'dark');
-    
+
     if (appConfig.lastValues) {
       DOM.sliderBeatVol.value = appConfig.lastValues.beatVol ?? 100;
       DOM.sliderMicVol.value = appConfig.lastValues.micVol ?? 100;
@@ -683,23 +683,23 @@ export async function bootstrap() {
         DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click để HÁT';
       }
     }
-    
+
     setupEventListeners();
-    
+
     initKeySelector();
-    
+
     renderPresets();
     renderEffects();
-    
+
     DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
-    
+
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
-    
+
     setBeatMuteUI(states.beatMuted);
     setMicMuteUI(states.micMuted);
     setFxMuteUI(states.fxMuted);
-    
+
     // Đăng ký lắng nghe sự kiện phím tắt toàn cục từ Electron
     if (window.electronAPI.onShortcutPressed) {
       window.electronAPI.onShortcutPressed((action) => {
@@ -729,10 +729,10 @@ export async function bootstrap() {
         }
       });
     }
-    
+
     await initSoundboard();
     await initMidi();
-    
+
     if (window.electronAPI && window.electronAPI.getAppVersion) {
       window.electronAPI.getAppVersion().then(version => {
         const titleEl = document.querySelector('.app-title');

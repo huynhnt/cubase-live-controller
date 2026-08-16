@@ -336,7 +336,7 @@ body.web-mode .app-container {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: hidden;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -369,6 +369,9 @@ body.web-mode .app-container {
   border-radius: 4px;
   text-align: center;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .label-orange { background: rgba(243, 156, 18, 0.15); color: var(--color-orange); border: 1px solid rgba(243, 156, 18, 0.3); }
@@ -600,6 +603,57 @@ body.web-mode .app-container {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* Cubase Generic Remote Style Table */
+.cubase-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: #eeeeee;
+  background: #2a2c2e;
+  text-align: left;
+}
+
+.cubase-table th, .cubase-table td {
+  border: 1px solid #1c1d1f;
+  padding: 4px 6px;
+  white-space: nowrap;
+}
+
+.cubase-table th {
+  background: #383a3c;
+  color: #d0d0d0;
+  font-weight: normal;
+  border-bottom: 2px solid #1c1d1f;
+}
+
+.cubase-table tbody tr:nth-child(even) {
+  background: #313335;
+}
+
+.cubase-table tbody tr:nth-child(odd) {
+  background: #2a2c2e;
+}
+
+.cubase-table tbody tr.selected {
+  background: #e0e0e0;
+  color: #000000;
+}
+
+.cubase-table td.editable:hover {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.cubase-table input.inline-edit {
+  width: 100%;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  padding: 2px 4px;
+  font-size: 11px;
+  outline: 2px solid #0055ff;
 }
 
 .mapping-item label {

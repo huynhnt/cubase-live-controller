@@ -66,18 +66,9 @@ export const DOM = {
   get inputMidiChannel() { return document.getElementById('input-midi-channel'); },
   get selectAutotuneVersion() { return document.getElementById('select-autotune-version'); },
   
-  // Mapping inputs
-  get mapBeatVol() { return document.getElementById('map-beat-vol'); },
-  get mapBeatMute() { return document.getElementById('map-beat-mute'); },
-  get mapMicVol() { return document.getElementById('map-mic-vol'); },
-  get mapMicMute() { return document.getElementById('map-mic-mute'); },
-  get mapFxMute() { return document.getElementById('map-fx-mute'); },
-  get mapModeSingVoice() { return document.getElementById('map-mode'); },
-  get mapAutotuneKey() { return document.getElementById('map-autotune-key'); },
-  get mapAutotuneScale() { return document.getElementById('map-autotune-scale'); },
-  
-  // Read-only Effects List & Export
-  get readOnlyEffectsList() { return document.getElementById('read-only-effects-list'); },
+  // Mapping Tables & Export
+  get featuresMappingTable() { return document.getElementById('features-mapping-table'); },
+  get effectsMappingTable() { return document.getElementById('effects-mapping-table'); },
   get btnExportFeatures() { return document.getElementById('btn-export-features'); },
   get btnExportEffects() { return document.getElementById('btn-export-effects'); },
   

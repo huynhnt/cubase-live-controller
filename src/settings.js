@@ -1,24 +1,33 @@
 import { DOM } from './dom.js';
 import { states, appConfig, setAppConfig } from './state.js';
 import { midi } from './midi.js';
-import { closeSettingsPanelUI } from './ui.js';
+import { closeSettingsPanelUI, renderEffects } from './ui.js';
 import { connectMidi } from './main.js';
+
+let pendingMidiMappings = {};
+let pendingEffects = [];
+
+const FEATURE_NAMES = {
+  beatVol: 'Vol Nhạc',
+  beatMute: 'Tắt Nhạc',
+  micVol: 'Vol Mic',
+  micMute: 'Tắt Mic',
+  fxMute: 'Tắt Auto-tune',
+  modeSingVoice: 'Chuyển Mode',
+  autotuneKey: 'Autotune Key',
+  autotuneScale: 'Autotune Scale'
+};
 
 export function loadConfigToForm() {
   if (DOM.selectMidiOut) DOM.selectMidiOut.value = appConfig.midiOutPort || '';
   if (DOM.selectMidiIn) DOM.selectMidiIn.value = appConfig.midiInPort || '';
   if (DOM.inputMidiChannel) DOM.inputMidiChannel.value = appConfig.midiChannel || 1;
   
-  if (DOM.mapBeatVol) DOM.mapBeatVol.value = appConfig.midiMappings?.beatVol ?? 20;
-  if (DOM.mapBeatMute) DOM.mapBeatMute.value = appConfig.midiMappings?.beatMute ?? 21;
-  if (DOM.mapMicVol) DOM.mapMicVol.value = appConfig.midiMappings?.micVol ?? 22;
-  if (DOM.mapMicMute) DOM.mapMicMute.value = appConfig.midiMappings?.micMute ?? 23;
-  if (DOM.mapFxMute) DOM.mapFxMute.value = appConfig.midiMappings?.fxMute ?? 24;
-  if (DOM.mapModeSingVoice) DOM.mapModeSingVoice.value = appConfig.midiMappings?.modeSingVoice ?? 30;
-  if (DOM.mapAutotuneKey) DOM.mapAutotuneKey.value = appConfig.midiMappings?.autotuneKey ?? 31;
-  if (DOM.mapAutotuneScale) DOM.mapAutotuneScale.value = appConfig.midiMappings?.autotuneScale ?? 32;
+  pendingMidiMappings = { ...(appConfig.midiMappings || {}) };
+  pendingEffects = JSON.parse(JSON.stringify(appConfig.effects || []));
+  renderCubaseTables();
 
-  if (DOM.selectAutotuneVersion) DOM.selectAutotuneVersion.value = appConfig.autotuneVersion || 'efx';
+  if (DOM.selectAutotuneVersion) DOM.selectAutotuneVersion.value = appConfig.autotuneVersion || 'pro';
   if (DOM.inputCustomKeys) {
     DOM.inputCustomKeys.value = (appConfig.customAutotuneKeys || [0, 12, 24, 35, 47, 58, 70, 82, 93, 104, 125, 127]).join(', ');
   }
@@ -61,56 +70,165 @@ export function loadConfigToForm() {
     if (DOM.inputAudioMinFreq) DOM.inputAudioMinFreq.value = appConfig.audioAnalyzer.minFreq || 27.5;
   }
   
-  // Hiển thị danh sách CC Hiệu ứng (Read-only)
-  if (DOM.readOnlyEffectsList) {
-    DOM.readOnlyEffectsList.innerHTML = '';
-    if (appConfig.effects && appConfig.effects.length > 0) {
-      appConfig.effects.forEach(fx => {
-        const item = document.createElement('div');
-        item.style.display = 'flex';
-        item.style.justifyContent = 'space-between';
-        item.style.alignItems = 'center';
-        item.style.background = 'rgba(255,255,255,0.05)';
-        item.style.padding = '4px 8px';
-        item.style.borderRadius = '4px';
+  // (Tables are rendered by renderCubaseTables)
+}
+
+function renderCubaseTables() {
+  const midiChannel = parseInt(DOM.inputMidiChannel?.value) || appConfig.midiChannel || 1;
+  
+  if (DOM.featuresMappingTable) {
+    const tbody = DOM.featuresMappingTable.querySelector('tbody');
+    if (tbody) {
+      tbody.innerHTML = '';
+      Object.keys(FEATURE_NAMES).forEach(key => {
+        const ccVal = pendingMidiMappings[key] ?? 0;
+        const tr = document.createElement('tr');
         
-        const info = document.createElement('div');
-        info.style.display = 'flex';
-        info.style.flexDirection = 'column';
+        const tdName = document.createElement('td');
+        tdName.innerText = FEATURE_NAMES[key];
+        // Không cho phép sửa tên Tính năng hệ thống
         
-        const nameNode = document.createElement('span');
-        nameNode.style.fontSize = '12px';
-        nameNode.style.fontWeight = 'bold';
-        nameNode.style.color = fx.color || 'var(--text-primary)';
-        nameNode.innerText = fx.name;
+        const tdStatus = document.createElement('td');
+        tdStatus.innerText = 'Controller';
         
-        const ccNode = document.createElement('span');
-        ccNode.style.fontSize = '10px';
-        ccNode.style.color = 'var(--text-secondary)';
-        ccNode.innerText = `Giá trị: CC ${fx.ccValue}` + (fx.isEnabled && fx.ccToggle >= 0 ? ` | Tắt/Bật: CC ${fx.ccToggle}` : '');
+        const tdChannel = document.createElement('td');
+        tdChannel.innerText = midiChannel;
         
-        info.appendChild(nameNode);
-        info.appendChild(ccNode);
-        item.appendChild(info);
+        const tdAddress = document.createElement('td');
+        tdAddress.innerText = ccVal;
+        tdAddress.className = 'editable';
+        setupInlineEdit(tdAddress, key, 'address', 'features');
         
-        const btnEdit = document.createElement('button');
-        btnEdit.innerText = 'Sửa';
-        btnEdit.className = 'btn btn-sec';
-        btnEdit.style.padding = '2px 8px';
-        btnEdit.style.fontSize = '10px';
-        btnEdit.onclick = () => {
-          import('./ui.js').then(module => {
-            module.openEffectEditModal(fx.id);
-          });
-        };
-        item.appendChild(btnEdit);
+        const tdMax = document.createElement('td');
+        tdMax.innerText = '127';
         
-        DOM.readOnlyEffectsList.appendChild(item);
+        const tdFlags = document.createElement('td');
+        tdFlags.innerText = 'R, , , ';
+        
+        tr.append(tdName, tdStatus, tdChannel, tdAddress, tdMax, tdFlags);
+        tbody.appendChild(tr);
       });
-    } else {
-      DOM.readOnlyEffectsList.innerHTML = '<span style="font-size: 11px; color: var(--text-secondary);">Chưa có hiệu ứng nào.</span>';
     }
   }
+
+  if (DOM.effectsMappingTable) {
+    const tbody = DOM.effectsMappingTable.querySelector('tbody');
+    if (tbody) {
+      tbody.innerHTML = '';
+      pendingEffects.forEach((fx, index) => {
+        const tr1 = document.createElement('tr');
+        
+        const tdName1 = document.createElement('td');
+        tdName1.innerText = fx.name + ' (Giá trị)';
+        tdName1.className = 'editable';
+        setupInlineEdit(tdName1, index, 'name', 'effects');
+        
+        const tdStatus1 = document.createElement('td');
+        tdStatus1.innerText = 'Controller';
+        
+        const tdChannel1 = document.createElement('td');
+        tdChannel1.innerText = midiChannel;
+        
+        const tdAddress1 = document.createElement('td');
+        tdAddress1.innerText = fx.ccValue;
+        tdAddress1.className = 'editable';
+        setupInlineEdit(tdAddress1, index, 'address', 'effects');
+        
+        const tdMax1 = document.createElement('td');
+        tdMax1.innerText = '127';
+        
+        const tdFlags1 = document.createElement('td');
+        tdFlags1.innerText = 'R, , , ';
+        
+        tr1.append(tdName1, tdStatus1, tdChannel1, tdAddress1, tdMax1, tdFlags1);
+        tbody.appendChild(tr1);
+        
+        if (fx.isEnabled && fx.ccToggle >= 0) {
+          const tr2 = document.createElement('tr');
+          
+          const tdName2 = document.createElement('td');
+          tdName2.innerText = fx.name + ' (Tắt/Bật)';
+          
+          const tdStatus2 = document.createElement('td');
+          tdStatus2.innerText = 'Controller';
+          
+          const tdChannel2 = document.createElement('td');
+          tdChannel2.innerText = midiChannel;
+          
+          const tdAddress2 = document.createElement('td');
+          tdAddress2.innerText = fx.ccToggle;
+          tdAddress2.className = 'editable';
+          setupInlineEdit(tdAddress2, index, 'toggleAddress', 'effects');
+          
+          const tdMax2 = document.createElement('td');
+          tdMax2.innerText = '127';
+          
+          const tdFlags2 = document.createElement('td');
+          tdFlags2.innerText = 'R, T, , ';
+          
+          tr2.append(tdName2, tdStatus2, tdChannel2, tdAddress2, tdMax2, tdFlags2);
+          tbody.appendChild(tr2);
+        }
+      });
+      
+      if (pendingEffects.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.innerText = 'Chưa có hiệu ứng nào. Hãy thêm hiệu ứng ở màn hình chính.';
+        td.style.textAlign = 'center';
+        td.style.color = 'var(--text-secondary)';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
+    }
+  }
+}
+
+function setupInlineEdit(td, key, field, type) {
+  td.addEventListener('dblclick', () => {
+    if (td.querySelector('input')) return;
+    
+    const currentValue = field === 'name' ? td.innerText.replace(' (Giá trị)', '') : td.innerText;
+    td.innerHTML = '';
+    
+    const input = document.createElement('input');
+    input.type = field === 'name' ? 'text' : 'number';
+    if (field !== 'name') {
+      input.min = '0';
+      input.max = '127';
+    }
+    input.value = currentValue;
+    input.className = 'inline-edit';
+    
+    const commitEdit = () => {
+      let newVal = input.value;
+      if (field !== 'name') newVal = parseInt(newVal) || 0;
+      
+      if (type === 'features') {
+        if (field === 'address') pendingMidiMappings[key] = newVal;
+      } else if (type === 'effects') {
+        if (field === 'name') pendingEffects[key].name = newVal;
+        if (field === 'address') pendingEffects[key].ccValue = newVal;
+        if (field === 'toggleAddress') pendingEffects[key].ccToggle = newVal;
+      }
+      
+      renderCubaseTables();
+    };
+    
+    input.addEventListener('blur', commitEdit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        input.blur();
+      } else if (e.key === 'Escape') {
+        renderCubaseTables();
+      }
+    });
+    
+    td.appendChild(input);
+    input.focus();
+    input.select();
+  });
 }
 
 export async function saveSettings() {
@@ -133,7 +251,7 @@ export async function saveSettings() {
     midiOutPort: newMidiOutPort,
     midiInPort: newMidiInPort,
     midiChannel: parseInt(DOM.inputMidiChannel?.value) || (appConfig.midiChannel ?? 1),
-    autotuneVersion: DOM.selectAutotuneVersion?.value || 'efx',
+    autotuneVersion: DOM.selectAutotuneVersion?.value || 'pro',
     customAutotuneKeys: (DOM.inputCustomKeys?.value || '').split(',').map(v => parseInt(v.trim()) || 0),
     customAutotuneScales: (DOM.inputCustomScales?.value || '').split(',').map(v => parseInt(v.trim()) || 0),
     autoOpenProject: DOM.chkAutoOpen ? DOM.chkAutoOpen.checked : (appConfig.autoOpenProject ?? false),
@@ -145,16 +263,8 @@ export async function saveSettings() {
       micChange: parseInt(DOM.presetMicChange?.value) || 10,
       beatChange: parseInt(DOM.presetBeatChange?.value) || -20
     },
-    midiMappings: {
-      beatVol: parseInt(DOM.mapBeatVol?.value) || 20,
-      beatMute: parseInt(DOM.mapBeatMute?.value) || 21,
-      micVol: parseInt(DOM.mapMicVol?.value) || 22,
-      micMute: parseInt(DOM.mapMicMute?.value) || 23,
-      fxMute: parseInt(DOM.mapFxMute?.value) || 24,
-      modeSingVoice: parseInt(DOM.mapModeSingVoice?.value) || 30,
-      autotuneKey: parseInt(DOM.mapAutotuneKey?.value) || 31,
-      autotuneScale: parseInt(DOM.mapAutotuneScale?.value) || 32
-    },
+    midiMappings: pendingMidiMappings,
+    effects: pendingEffects,
     shortcuts: {
       toggleMusic: DOM.shortcutToggleMusic?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleMusic?.value ?? ''),
       toggleMic: DOM.shortcutToggleMic?.value === 'Chưa gán' ? '' : (DOM.shortcutToggleMic?.value ?? ''),
@@ -181,6 +291,7 @@ export async function saveSettings() {
     DOM.app.style.setProperty('--bg-opacity', newConfig.opacity / 100);
     
     closeSettingsPanelUI();
+    renderEffects();
     
     if (states.isFxPanelOpen) {
       DOM.fxPanel.classList.remove('hidden');
@@ -192,7 +303,10 @@ export async function saveSettings() {
       if (fxContainer) fxContainer.classList.remove('hidden');
       if (presetsContainer) presetsContainer.classList.remove('hidden');
       
-      window.electronAPI.resizeWindow('expanded');
+      const fxCount = appConfig.effects ? appConfig.effects.length : 0;
+      const addBtnHeight = fxCount >= 10 ? 0 : 40;
+      const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+      window.electronAPI.resizeWindow('expanded', customHeight);
     } else if (states.isKeySelectorOpen) {
       DOM.fxPanel.classList.remove('hidden');
       DOM.keySelectorContainer.classList.remove('hidden');

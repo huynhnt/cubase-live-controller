@@ -22,6 +22,7 @@ export const DEFAULT_CONFIG = {
     micChange: 10,
     beatChange: -20
   },
+  autotuneVersion: 'pro',
   effects: [
     { id: 'fx1', name: 'VANG DÀI', color: 'orange', ccValue: 25, ccToggle: 0, format: 'db' },
     { id: 'fx2', name: 'VANG NGẮN', color: 'yellow', ccValue: 26, ccToggle: 0, format: 'db' },
