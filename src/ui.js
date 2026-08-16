@@ -582,12 +582,13 @@ export function renderEffects() {
     
     row.innerHTML = `
       ${toggleHtml}
-      <div class="fx-fader-body" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình">
-        <div class="fx-track-fill ${fillClass}" id="fill-fx-${fx.id}" style="${fillStyle}"></div>
+      <div class="fx-fader-body split-layout" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình">
         <div class="fx-fader-label ${labelClass}" style="${labelStyle}">${fx.name}</div>
+        <div class="fx-track-fill ${fillClass}" id="fill-fx-${fx.id}" style="${fillStyle}">
+           <div class="fx-value-vertical" id="val-fx-${fx.id}">${fx.value ?? 24}</div>
+        </div>
         <input type="range" id="slider-fx-${fx.id}" class="${sliderClass} vertical-slider" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
       </div>
-      <span class="fx-value" id="val-fx-${fx.id}">${fx.value ?? 24}</span>
     `;
     
     DOM.effectsContainer.appendChild(row);

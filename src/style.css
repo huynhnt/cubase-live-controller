@@ -383,72 +383,84 @@ body.web-mode .app-container {
   flex-shrink: 0;
 }
 
-.fx-fader-body {
+.fx-fader-body.split-layout {
   position: relative;
   width: 100%;
   height: 220px;
-  background: rgba(0, 0, 0, 0.2);
+  background: #34495e; /* Màu nền của hình mẫu */
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
-  justify-content: center;
   overflow: hidden;
   cursor: pointer;
 }
 
-.fx-fader-label {
+.fx-fader-body.split-layout .fx-fader-label {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-90deg);
+  bottom: 10px;
+  left: 4px;
+  transform-origin: left bottom;
+  transform: rotate(-90deg);
   white-space: nowrap;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  opacity: 0.8;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
   pointer-events: none;
   z-index: 2;
   text-transform: uppercase;
-  width: 200px; /* Tăng độ dài tối đa để phù hợp fader cao hơn */
-  text-align: center;
+  width: 200px; /* Chiều dài tối đa cho text dọc */
+  text-align: left; /* Căn từ dưới lên */
   overflow: hidden;
   text-overflow: ellipsis;
+  color: white; /* Đè màu theo hình mẫu */
 }
 
-/* Các màu chữ */
-.label-orange { color: var(--color-orange); }
-.label-yellow { color: var(--color-yellow); }
-.label-purple { color: var(--color-purple); }
-.label-red { color: var(--color-red); }
-.label-blue { color: var(--color-blue); }
+/* Các màu chữ bị vô hiệu hóa vì dùng thiết kế nền đậm chữ trắng */
+.label-orange { color: #fff; }
+.label-yellow { color: #fff; }
+.label-purple { color: #fff; }
+.label-red { color: #fff; }
+.label-blue { color: #fff; }
 
 .vertical-slider {
   display: none;
 }
 
-.fx-track-fill {
+.fx-fader-body.split-layout .fx-track-fill {
   position: absolute;
   bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0%; /* Sẽ được tính bằng JS */
+  right: 0;
+  width: 45%; /* Nửa bên phải */
+  height: 0%; /* JS điều khiển */
   z-index: 1;
   pointer-events: none;
-  opacity: 0.15; /* Giảm độ sáng của nền fill để dễ đọc chữ */
+  opacity: 1; /* Hiển thị đặc màu */
+  background: #3498db; /* Màu mặc định xanh dương theo hình mẫu */
+  border-left: 1px solid rgba(0,0,0,0.2);
 }
 
-.fill-orange { background: var(--color-orange); }
-.fill-yellow { background: var(--color-yellow); }
-.fill-purple { background: var(--color-purple); }
-.fill-red { background: var(--color-red); }
-.fill-blue { background: var(--color-blue); }
-
-.fx-value {
+.fx-value-vertical {
+  position: absolute;
+  top: 5px; /* Luôn nổi ở trên cùng của thanh fill */
+  left: 50%;
+  transform: translateX(-50%) rotate(-90deg);
+  transform-origin: center center;
   font-size: 10px;
   font-weight: 700;
-  text-align: center;
-  opacity: 0.8;
-  margin-top: 8px;
+  color: white;
+  white-space: nowrap;
+}
+
+/* Đổi màu fill */
+.fill-orange { background: var(--color-orange) !important; }
+.fill-yellow { background: var(--color-yellow) !important; }
+.fill-purple { background: var(--color-purple) !important; }
+.fill-red { background: var(--color-red) !important; }
+.fill-blue { background: #3498db !important; }
+
+/* Ẩn fx-value cũ vì đã gộp vào trong */
+.fx-value {
+  display: none;
 }
 
 /* Panel Cài đặt (Settings Panel) */
