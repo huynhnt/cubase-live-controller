@@ -12,17 +12,14 @@ export function renderPresets() {
   const defaultPresets = ["Mặc định"];
   
   const keys = Object.keys(appConfig.presets);
-  keys.sort((a, b) => {
-    const idxA = defaultPresets.indexOf(a);
-    const idxB = defaultPresets.indexOf(b);
-    
-    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-    if (idxA !== -1) return -1;
-    if (idxB !== -1) return 1;
-    return a.localeCompare(b);
-  });
   
-  keys.forEach(name => {
+  const systemKeys = keys.filter(k => defaultPresets.includes(k));
+  // Giữ nguyên thứ tự gốc (thứ tự thêm vào) cho các preset cá nhân
+  const customKeys = keys.filter(k => !defaultPresets.includes(k));
+  
+  const orderedKeys = [...systemKeys, ...customKeys];
+  
+  orderedKeys.forEach(name => {
     const btn = document.createElement('button');
     btn.className = 'preset-btn';
     btn.setAttribute('data-preset', name);
