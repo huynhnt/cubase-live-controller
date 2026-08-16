@@ -711,7 +711,17 @@ export function openEffectEditModal(id) {
   }
 
   if (!fx) {
-    fx = { isNew: true, ccValue: findNextAvailableValueCC(), ccToggle: findNextAvailableToggleCC() };
+    let maxEffectNum = 0;
+    appConfig.effects.forEach(e => {
+      if (e.name && e.name.toUpperCase().startsWith('EFFECT ')) {
+        const num = parseInt(e.name.substring(7));
+        if (!isNaN(num) && num > maxEffectNum) {
+          maxEffectNum = num;
+        }
+      }
+    });
+    const nextName = `EFFECT ${maxEffectNum + 1}`;
+    fx = { isNew: true, name: nextName, ccValue: findNextAvailableValueCC(), ccToggle: findNextAvailableToggleCC() };
   } else {
     // Clone to avoid mutating original state before save
     fx = JSON.parse(JSON.stringify(fx));

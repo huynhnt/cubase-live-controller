@@ -148,7 +148,7 @@ if (window.electronAPI && window.electronAPI.onLoadEffectEdit) {
     
     const isNew = fx && fx.isNew;
     inputFxId.value = isNew ? '' : (fx ? fx.id : '');
-    inputFxName.value = isNew ? '' : (fx ? fx.name : '');
+    inputFxName.value = fx ? (fx.name || '') : '';
     
     const color = isNew ? 'orange' : (fx ? fx.color : 'orange');
     hiddenFxColor.value = color;
