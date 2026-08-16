@@ -731,6 +731,13 @@ if (window.electronAPI && window.electronAPI.onSaveEffectEdit) {
   window.electronAPI.onSaveEffectEdit((newFxData) => {
     if (newFxData.deleteId) {
       appConfig.effects = appConfig.effects.filter(e => e.id !== newFxData.deleteId);
+      if (appConfig.presets) {
+        Object.keys(appConfig.presets).forEach(presetName => {
+          if (appConfig.presets[presetName]) {
+            delete appConfig.presets[presetName][newFxData.deleteId];
+          }
+        });
+      }
     } else {
       if (newFxData.ccToggle === -1) {
         newFxData.ccToggle = findNextAvailableToggleCC();
