@@ -25,7 +25,15 @@ export function midiToDbString(value, format = 'db') {
 export function updateSliderFill(slider, fillElement, valElement) {
   if (!slider) return;
   const percent = (slider.value / slider.max) * 100;
-  if (fillElement) fillElement.style.width = percent + '%';
+  if (fillElement) {
+    if (slider.classList.contains('vertical-slider')) {
+      fillElement.style.height = percent + '%';
+      fillElement.style.width = '100%';
+    } else {
+      fillElement.style.width = percent + '%';
+      fillElement.style.height = '100%';
+    }
+  }
   if (valElement) {
     const format = slider.getAttribute('data-format') || ((slider.id && (slider.id.includes('autotune') || slider.id.includes('flex'))) ? 'percent' : 'db');
     
@@ -137,8 +145,7 @@ export function toggleFxPanel() {
     }
 
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 40;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+    const customHeight = 360;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else {
     DOM.fxPanel.classList.add('hidden');
@@ -481,8 +488,7 @@ export function toggleSoundboardPanel() {
     DOM.btnSoundboardToggle.classList.add('active');
     
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 40;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+    const customHeight = 360;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else {
     DOM.soundboardPanel.classList.add('hidden');
@@ -541,14 +547,14 @@ export function renderEffects() {
   
   appConfig.effects.forEach(fx => {
     const row = document.createElement('div');
-    row.className = 'fx-row';
+    row.className = 'fx-column';
     
-    // Luôn hiển thị nút bật tắt, dùng CSS switch
+    // Nút bật tắt
     const isOn = fx.isEnabled !== false;
     const toggleHtml = `
-      <label class="fx-switch" title="Bật/Tắt hiệu ứng" style="margin-right: 12px; cursor: pointer;">
+      <label class="fx-switch" title="Bật/Tắt hiệu ứng" style="cursor: pointer; display: block; text-align: center; margin-bottom: 8px;">
         <input type="checkbox" class="fx-toggle-checkbox" data-id="${fx.id}" ${isOn ? 'checked' : ''} style="display: none;">
-        <div class="fx-switch-slider ${isOn ? 'on' : 'off'}" style="width: 32px; height: 18px; background: ${isOn ? '#2ecc71' : 'rgba(255,255,255,0.2)'}; border-radius: 9px; position: relative; transition: 0.2s;">
+        <div class="fx-switch-slider ${isOn ? 'on' : 'off'}" style="width: 32px; height: 18px; background: ${isOn ? '#2ecc71' : 'rgba(255,255,255,0.2)'}; border-radius: 9px; position: relative; transition: 0.2s; margin: 0 auto;">
           <div class="fx-switch-knob" style="width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 2px; left: ${isOn ? '16px' : '2px'}; transition: 0.2s;"></div>
         </div>
       </label>
@@ -559,7 +565,7 @@ export function renderEffects() {
     const fillClass = isHex ? '' : `fill-${fx.color}`;
     const sliderClass = isHex ? `custom-slider-${fx.id}` : fx.color;
     
-    const labelStyle = isHex ? `color: ${fx.color}; border-color: ${fx.color};` : '';
+    const labelStyle = isHex ? `color: ${fx.color};` : '';
     const fillStyle = isHex ? `background: ${fx.color};` : '';
     
     if (isHex) {
@@ -576,13 +582,10 @@ export function renderEffects() {
     
     row.innerHTML = `
       ${toggleHtml}
-      <span class="fx-label ${labelClass}" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình" style="${labelStyle}; display: inline-flex; align-items: center; justify-content: space-between; padding: 0 8px;">
-        ${fx.name}
-        <button class="btn-fx-edit" data-id="${fx.id}" title="Sửa hiệu ứng này" style="background:none; border:none; color:inherit; opacity: 0.6; cursor:pointer; font-size: 12px; padding:0; margin-left:4px;">⚙️</button>
-      </span>
-      <div class="fx-slider-wrapper">
-        <input type="range" id="slider-fx-${fx.id}" class="${sliderClass}" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
+      <div class="fx-fader-body" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình">
         <div class="fx-track-fill ${fillClass}" id="fill-fx-${fx.id}" style="${fillStyle}"></div>
+        <div class="fx-fader-label ${labelClass}" style="${labelStyle}">${fx.name}</div>
+        <input type="range" id="slider-fx-${fx.id}" class="${sliderClass} vertical-slider" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
       </div>
       <span class="fx-value" id="val-fx-${fx.id}">${fx.value ?? 24}</span>
     `;
@@ -592,9 +595,8 @@ export function renderEffects() {
     const slider = document.getElementById(`slider-fx-${fx.id}`);
     const fill = document.getElementById(`fill-fx-${fx.id}`);
     const valText = document.getElementById(`val-fx-${fx.id}`);
-    const label = row.querySelector('.fx-label');
+    const label = row.querySelector('.fx-fader-body');
     const toggleBtn = row.querySelector('.fx-toggle-btn');
-    const editBtn = row.querySelector('.btn-fx-edit');
     
     updateSliderFill(slider, fill, valText);
     
@@ -612,16 +614,11 @@ export function renderEffects() {
       slider.dispatchEvent(new Event('change'));
     });
     
-    label.addEventListener('dblclick', () => {
-      openEffectEditModal(fx.id);
-    });
-    
-    if (editBtn) {
-      editBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+    label.addEventListener('dblclick', (e) => {
+      if (e.target !== slider) {
         openEffectEditModal(fx.id);
-      });
-    }
+      }
+    });
     
     const toggleCheckbox = row.querySelector('.fx-toggle-checkbox');
     const switchSlider = row.querySelector('.fx-switch-slider');
@@ -651,8 +648,7 @@ export function renderEffects() {
   
   if (states.isFxPanelOpen) {
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 50;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight + 20; // Thêm 20px padding
+    const customHeight = 360;
     window.electronAPI.resizeWindow('expanded', customHeight);
   }
 }
