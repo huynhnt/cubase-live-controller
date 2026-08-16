@@ -171,6 +171,10 @@ export async function confirmDeletePreset() {
     states.activePreset = "Mặc định";
   }
   
+  if (appConfig.voicePreset && appConfig.voicePreset.presetName === name) {
+    appConfig.voicePreset.presetName = "Voice";
+  }
+  
   const success = await window.electronAPI.saveConfig(appConfig);
   if (success) {
     renderPresets();
