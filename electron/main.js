@@ -89,12 +89,18 @@ const DEFAULT_CONFIG = {
   },
   presets: {
     "Mặc định": {
-      "fx_reverb": 24,
-      "fx_delay": 0
+      "fx1": 24,
+      "fx2": 24,
+      "fx3": 0,
+      "fx4": 20,
+      "fx5": 50
     },
     "Voice": {
-      "fx_reverb": 0,
-      "fx_delay": 0
+      "fx1": 0,
+      "fx2": 0,
+      "fx3": 0,
+      "fx4": 0,
+      "fx5": 0
     }
   },
   soundboard: [
