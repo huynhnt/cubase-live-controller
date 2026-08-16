@@ -145,7 +145,7 @@ export function toggleFxPanel() {
     }
 
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const customHeight = 360;
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else {
     DOM.fxPanel.classList.add('hidden');
@@ -488,7 +488,7 @@ export function toggleSoundboardPanel() {
     DOM.btnSoundboardToggle.classList.add('active');
     
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const customHeight = 360;
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else {
     DOM.soundboardPanel.classList.add('hidden');
@@ -595,7 +595,7 @@ export function renderEffects() {
     const slider = document.getElementById(`slider-fx-${fx.id}`);
     const fill = document.getElementById(`fill-fx-${fx.id}`);
     const valText = document.getElementById(`val-fx-${fx.id}`);
-    const label = row.querySelector('.fx-fader-body');
+    const faderBody = row.querySelector('.fx-fader-body');
     const toggleBtn = row.querySelector('.fx-toggle-btn');
     
     updateSliderFill(slider, fill, valText);
@@ -608,15 +608,45 @@ export function renderEffects() {
     
     slider.addEventListener('change', autoSaveCurrentStates);
     
-    slider.addEventListener('dblclick', () => {
-      slider.value = 100;
-      slider.dispatchEvent(new Event('input'));
-      slider.dispatchEvent(new Event('change'));
-    });
+    // Custom Drag Logic
+    let isDragging = false;
+    let clickTimeout = null;
+    let clickCount = 0;
     
-    label.addEventListener('dblclick', (e) => {
-      if (e.target !== slider) {
+    const updateFaderValue = (clientY) => {
+      const rect = faderBody.getBoundingClientRect();
+      let percent = (rect.bottom - clientY) / rect.height;
+      percent = Math.max(0, Math.min(1, percent));
+      slider.value = Math.round(percent * 127);
+      slider.dispatchEvent(new Event('input'));
+    };
+
+    faderBody.addEventListener('mousedown', (e) => {
+      // Xử lý Double Click
+      clickCount++;
+      if (clickCount === 1) {
+        clickTimeout = setTimeout(() => { clickCount = 0; }, 300);
+      } else if (clickCount === 2) {
+        clearTimeout(clickTimeout);
+        clickCount = 0;
         openEffectEditModal(fx.id);
+        return; // Không drag nếu là double click
+      }
+      
+      isDragging = true;
+      updateFaderValue(e.clientY);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        updateFaderValue(e.clientY);
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        slider.dispatchEvent(new Event('change'));
       }
     });
     
@@ -648,7 +678,7 @@ export function renderEffects() {
   
   if (states.isFxPanelOpen) {
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const customHeight = 360;
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   }
 }
