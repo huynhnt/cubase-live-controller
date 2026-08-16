@@ -26,7 +26,11 @@ export function updateSliderFill(slider, fillElement, valElement) {
   if (!slider) return;
   const percent = (slider.value / slider.max) * 100;
   if (fillElement) {
-    if (slider.classList.contains('vertical-slider')) {
+    if (slider.classList.contains('hidden-slider')) {
+      fillElement.style.bottom = `calc(${percent}% - 10px)`;
+      fillElement.style.height = '20px';
+      fillElement.style.width = '100%';
+    } else if (slider.classList.contains('vertical-slider')) {
       fillElement.style.height = percent + '%';
       fillElement.style.width = '100%';
     } else {
@@ -582,28 +586,31 @@ export function renderEffects() {
     
     row.innerHTML = `
       ${toggleHtml}
-      <div class="fx-fader-body split-layout" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình">
-        <div class="fx-fader-label ${labelClass}" style="${labelStyle}">${fx.name}</div>
-        <div class="fx-track-fill ${fillClass}" id="fill-fx-${fx.id}" style="${fillStyle}">
-           <div class="fx-value-vertical" id="val-fx-${fx.id}">${fx.value ?? 24}</div>
+      <div class="fx-fader-body standard-layout" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình">
+        <div class="fx-fader-track"></div>
+        <div class="fx-fader-thumb ${fillClass}" id="thumb-fx-${fx.id}" style="${fillStyle}">
+           <div class="fx-fader-thumb-line"></div>
         </div>
-        <input type="range" id="slider-fx-${fx.id}" class="${sliderClass} vertical-slider" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
+        <!-- Vẫn giữ thẻ input ẩn để dùng cho updateSliderFill và logic cũ -->
+        <input type="range" id="slider-fx-${fx.id}" class="vertical-slider hidden-slider" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
       </div>
+      <div class="fx-value-box" id="val-fx-${fx.id}">${fx.value ?? 24}</div>
+      <div class="fx-label-box ${labelClass}" style="${labelStyle}">${fx.name}</div>
     `;
     
     DOM.effectsContainer.appendChild(row);
     
     const slider = document.getElementById(`slider-fx-${fx.id}`);
-    const fill = document.getElementById(`fill-fx-${fx.id}`);
+    const thumb = document.getElementById(`thumb-fx-${fx.id}`);
     const valText = document.getElementById(`val-fx-${fx.id}`);
     const faderBody = row.querySelector('.fx-fader-body');
     const toggleBtn = row.querySelector('.fx-toggle-btn');
     
-    updateSliderFill(slider, fill, valText);
+    updateSliderFill(slider, thumb, valText);
     
     slider.addEventListener('input', (e) => {
       fx.value = parseInt(e.target.value);
-      updateSliderFill(slider, fill, valText);
+      updateSliderFill(slider, thumb, valText);
       import('./midi.js').then(({midi}) => midi.sendCC(fx.ccValue, fx.value));
     });
     

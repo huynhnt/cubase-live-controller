@@ -375,90 +375,117 @@ body.web-mode .app-container {
   background: rgba(255, 255, 255, 0.4);
 }
 
+/* Standard Cubase Mixer Fader Layout */
 .fx-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 50px;
+  width: 55px; /* Cubase mixer columns are usually narrow */
   flex-shrink: 0;
 }
 
-.fx-fader-body.split-layout {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  background: #34495e; /* Màu nền của hình mẫu */
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  overflow: hidden;
-  cursor: pointer;
+.fx-switch {
+  margin-bottom: 8px;
 }
 
-.fx-fader-body.split-layout .fx-fader-label {
+.fx-fader-body.standard-layout {
+  position: relative;
+  width: 40px;
+  height: 180px; /* Cubase faders are long */
+  background: #2a2a2a;
+  border-radius: 2px;
+  border: 1px solid #1a1a1a;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  cursor: pointer;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  margin-bottom: 8px;
+}
+
+.fx-fader-track {
   position: absolute;
+  top: 10px;
   bottom: 10px;
-  left: 4px;
-  transform-origin: left bottom;
-  transform: rotate(-90deg);
-  white-space: nowrap;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  pointer-events: none;
+  left: 50%;
+  width: 6px;
+  margin-left: -3px;
+  background: #111;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.fx-fader-thumb {
+  position: absolute;
+  bottom: 50%; /* Sẽ bị js ghi đè */
+  left: 50%;
+  width: 28px;
+  height: 20px;
+  margin-left: -14px;
+  background: var(--color-blue);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.3);
   z-index: 2;
-  text-transform: uppercase;
-  width: 200px; /* Chiều dài tối đa cho text dọc */
-  text-align: left; /* Căn từ dưới lên */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Let the body handle dragging */
+}
+
+.fx-fader-thumb-line {
+  width: 100%;
+  height: 2px;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.4);
+}
+
+.fx-value-box {
+  width: 100%;
+  text-align: center;
+  background: #333;
+  color: #ddd;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  margin-bottom: 4px;
+  border: 1px solid #222;
+}
+
+.fx-label-box {
+  width: 100%;
+  text-align: center;
+  background: #444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: white; /* Đè màu theo hình mẫu */
+  text-transform: uppercase;
 }
 
-/* Các màu chữ bị vô hiệu hóa vì dùng thiết kế nền đậm chữ trắng */
-.label-orange { color: #fff; }
-.label-yellow { color: #fff; }
-.label-purple { color: #fff; }
-.label-red { color: #fff; }
-.label-blue { color: #fff; }
-
-.vertical-slider {
-  display: none;
+.hidden-slider {
+  display: none !important;
 }
 
-.fx-fader-body.split-layout .fx-track-fill {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 45%; /* Nửa bên phải */
-  height: 0%; /* JS điều khiển */
-  z-index: 1;
-  pointer-events: none;
-  opacity: 1; /* Hiển thị đặc màu */
-  background: #3498db; /* Màu mặc định xanh dương theo hình mẫu */
-  border-left: 1px solid rgba(0,0,0,0.2);
-}
+/* Các màu chữ */
+.label-orange { background: #5a3c11; }
+.label-yellow { background: #5c4e10; }
+.label-purple { background: #4a2e57; }
+.label-red { background: #5a221f; }
+.label-blue { background: #1a425c; }
 
-.fx-value-vertical {
-  position: absolute;
-  top: 5px; /* Luôn nổi ở trên cùng của thanh fill */
-  left: 50%;
-  transform: translateX(-50%) rotate(-90deg);
-  transform-origin: center center;
-  font-size: 10px;
-  font-weight: 700;
-  color: white;
-  white-space: nowrap;
-}
-
-/* Đổi màu fill */
+/* Các màu fader thumb */
 .fill-orange { background: var(--color-orange) !important; }
 .fill-yellow { background: var(--color-yellow) !important; }
 .fill-purple { background: var(--color-purple) !important; }
 .fill-red { background: var(--color-red) !important; }
 .fill-blue { background: #3498db !important; }
 
-/* Ẩn fx-value cũ vì đã gộp vào trong */
+/* Ẩn fx-value cũ */
 .fx-value {
   display: none;
 }
