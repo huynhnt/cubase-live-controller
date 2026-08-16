@@ -270,7 +270,7 @@ export function toggleFxMute() {
 }
 
 // -------------------------------------------------------------
-// CHUYỂN ĐỔI CHẾ ĐỘ HÁT LIVE <=> VOICE ĐỐI THOẠI
+// CHUYỂN ĐỔI CHẾ ĐỘ HÁT LIVE <=> VOICE THOẠI
 // -------------------------------------------------------------
 export function setMode(targetMode) {
   if (targetMode === states.currentMode) return;
@@ -279,7 +279,7 @@ export function setMode(targetMode) {
     states.currentMode = 'voice';
     DOM.btnModeToggle.className = 'action-btn btn-blue active';
     DOM.btnModeToggle.style.backgroundColor = 'var(--color-orange)';
-    DOM.btnModeToggle.querySelector('.mode-text').innerText = 'VOICE ĐỐI THOẠI';
+    DOM.btnModeToggle.querySelector('.mode-text').innerText = 'VOICE THOẠI';
     DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click để HÁT';
 
     savedSingingValues.beatVol = parseInt(DOM.sliderBeatVol.value);
@@ -680,7 +680,7 @@ export async function bootstrap() {
       if (states.currentMode === 'voice') {
         DOM.btnModeToggle.className = 'action-btn btn-blue active';
         DOM.btnModeToggle.style.backgroundColor = 'var(--color-orange)';
-        DOM.btnModeToggle.querySelector('.mode-text').innerText = 'VOICE ĐỐI THOẠI';
+        DOM.btnModeToggle.querySelector('.mode-text').innerText = 'VOICE THOẠI';
         DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click để HÁT';
       }
     }

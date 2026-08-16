@@ -526,12 +526,8 @@ export async function autoSaveCurrentStates() {
 
   appConfig.theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
 
-  const defaultPresets = ["Mặc định"];
-  if (states.activePreset && !defaultPresets.includes(states.activePreset) && appConfig.presets && appConfig.presets[states.activePreset]) {
-    appConfig.effects.forEach(fx => {
-      appConfig.presets[states.activePreset][fx.id] = fx.value;
-    });
-  }
+  // Không tự động lưu đè cấu hình vào preset khi kéo slider.
+  // Người dùng phải bấm nút Lưu (dấu +) để ghi đè.
 
   await window.electronAPI.saveConfig(appConfig);
 }
