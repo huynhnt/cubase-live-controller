@@ -292,10 +292,11 @@ export function setMode(targetMode) {
       }
     });
 
-    const preset = appConfig.voicePreset;
+    const presetName = appConfig.voicePreset?.presetName || 'Voice';
+    const preset = appConfig.presets && appConfig.presets[presetName] ? appConfig.presets[presetName] : {};
 
     appConfig.effects.forEach(fx => {
-      const presetVal = preset[fx.id] !== undefined ? preset[fx.id] : 0;
+      const presetVal = preset[fx.id] !== undefined ? preset[fx.id] : (fx.value ?? 24);
       midi.sendCC(fx.ccValue, presetVal);
       const slider = document.getElementById(`slider-fx-${fx.id}`);
       const fill = document.getElementById(`fill-fx-${fx.id}`);
@@ -307,14 +308,14 @@ export function setMode(targetMode) {
     });
 
     // Thay đổi âm lượng nhạc theo phần trăm (thang 127 CC)
-    let newBeatVol = savedSingingValues.beatVol + Math.round(127 * ((preset.beatChange ?? -20) / 100));
+    let newBeatVol = savedSingingValues.beatVol + Math.round(127 * ((appConfig.voicePreset?.beatChange ?? -20) / 100));
     newBeatVol = Math.max(0, Math.min(127, newBeatVol));
     DOM.sliderBeatVol.value = newBeatVol;
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
     midi.sendCC(appConfig.midiMappings.beatVol, newBeatVol);
 
     // Thay đổi âm lượng mic theo phần trăm (thang 127 CC)
-    let newMicVol = savedSingingValues.micVol + Math.round(127 * ((preset.micChange ?? 10) / 100));
+    let newMicVol = savedSingingValues.micVol + Math.round(127 * ((appConfig.voicePreset?.micChange ?? 10) / 100));
     newMicVol = Math.max(0, Math.min(127, newMicVol));
     DOM.sliderMicVol.value = newMicVol;
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);

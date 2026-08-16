@@ -64,7 +64,7 @@ export function loadPreset(name) {
   
   appConfig.effects.forEach(fx => {
     let val = preset[fx.id];
-    if (val === undefined) val = fx.value ?? 0;
+    if (val === undefined) val = fx.value ?? 24;
     
     fx.value = val;
     const slider = document.getElementById(`slider-fx-${fx.id}`);
@@ -109,7 +109,9 @@ export async function executeSavePreset(name) {
   const newPreset = {};
   appConfig.effects.forEach(fx => {
     const slider = document.getElementById(`slider-fx-${fx.id}`);
-    newPreset[fx.id] = slider ? parseInt(slider.value) : fx.value;
+    let val = slider ? parseInt(slider.value) : fx.value;
+    if (isNaN(val)) val = 24;
+    newPreset[fx.id] = val;
   });
   
   if (!appConfig.presets) appConfig.presets = {};

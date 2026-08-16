@@ -44,7 +44,13 @@ export function loadConfigToForm() {
   if (DOM.selectVoicePreset) {
     DOM.selectVoicePreset.innerHTML = '';
     const presetNames = appConfig.presets ? Object.keys(appConfig.presets) : [];
-    if (!presetNames.includes('Voice')) presetNames.push('Voice');
+    
+    // Chỉ thêm 'Voice' nếu nó là preset đang được cấu hình VÀ chưa có trong danh sách
+    const currentVoicePreset = appConfig.voicePreset?.presetName || 'Voice';
+    if (!presetNames.includes(currentVoicePreset)) {
+      presetNames.push(currentVoicePreset);
+    }
+    
     presetNames.forEach(pName => {
       const option = document.createElement('option');
       option.value = pName;
@@ -260,8 +266,8 @@ export async function saveSettings() {
     customAppTarget: DOM.inputCustomAppTarget?.value || 'YouTube',
     voicePreset: {
       presetName: DOM.selectVoicePreset?.value || 'Voice',
-      micChange: parseInt(DOM.presetMicChange?.value) || 10,
-      beatChange: parseInt(DOM.presetBeatChange?.value) || -20
+      micChange: (DOM.presetMicChange && !isNaN(parseInt(DOM.presetMicChange.value))) ? parseInt(DOM.presetMicChange.value) : 10,
+      beatChange: (DOM.presetBeatChange && !isNaN(parseInt(DOM.presetBeatChange.value))) ? parseInt(DOM.presetBeatChange.value) : -20
     },
     midiMappings: pendingMidiMappings,
     effects: pendingEffects,
@@ -342,7 +348,10 @@ export function cancelSettings() {
     if (fxContainer) fxContainer.classList.remove('hidden');
     if (presetsContainer) presetsContainer.classList.remove('hidden');
     
-    window.electronAPI.resizeWindow('expanded');
+    const fxCount = appConfig.effects ? appConfig.effects.length : 0;
+    const addBtnHeight = fxCount >= 10 ? 0 : 40;
+    const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+    window.electronAPI.resizeWindow('expanded', customHeight);
   } else if (states.isKeySelectorOpen) {
     DOM.fxPanel.classList.remove('hidden');
     DOM.keySelectorContainer.classList.remove('hidden');
