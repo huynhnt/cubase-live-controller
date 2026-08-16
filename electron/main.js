@@ -88,7 +88,14 @@ const DEFAULT_CONFIG = {
     autotuneScale: 32
   },
   presets: {
-    "Mặc định": { fx1: 24, fx2: 24, fx3: 24, fx4: 20, fx5: 50 }
+    "Mặc định": {
+      "fx_reverb": 24,
+      "fx_delay": 0
+    },
+    "Voice": {
+      "fx_reverb": 0,
+      "fx_delay": 0
+    }
   },
   soundboard: [
     { id: 0, name: 'Chào Khán Giả', filePath: '', shortcut: 'num1', color: 'blue' },

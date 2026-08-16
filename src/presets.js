@@ -9,9 +9,13 @@ export function renderPresets() {
   DOM.presetsSystemList.innerHTML = '';
   DOM.presetsCustomList.innerHTML = '';
   
-  const defaultPresets = ["Mặc định"];
+  const defaultPresets = ["Mặc định", "Voice"];
   
   const keys = Object.keys(appConfig.presets);
+  
+  // Đảm bảo Mặc định và Voice luôn tồn tại trong danh sách để render
+  if (!keys.includes("Mặc định")) keys.push("Mặc định");
+  if (!keys.includes("Voice")) keys.push("Voice");
   
   const systemKeys = keys.filter(k => defaultPresets.includes(k));
   // Giữ nguyên thứ tự gốc (thứ tự thêm vào) cho các preset cá nhân
@@ -35,11 +39,11 @@ export function renderPresets() {
     
     if (isSystem) {
       btn.classList.add('system-preset');
-      btn.title = "Preset chuẩn hệ thống (không thể ghi đè thông số gốc)";
+      btn.title = name === "Mặc định" ? "Preset chuẩn hệ thống (không thể xóa)" : "Preset hệ thống cho Voice (nháy đúp hoặc lưu đè để sửa, không thể xóa)";
       DOM.presetsSystemList.appendChild(btn);
     } else {
       btn.classList.add('custom-preset');
-      btn.title = "Preset cá nhân của bạn (tự động lưu khi chỉnh, chuột phải để xóa)";
+      btn.title = "Preset cá nhân của bạn (chuột phải để xóa)";
       
       btn.addEventListener('contextmenu', (e) => {
         e.preventDefault();
@@ -52,7 +56,15 @@ export function renderPresets() {
 }
 
 export function loadPreset(name) {
-  if (!appConfig || !appConfig.presets || !appConfig.presets[name]) return;
+  if (!appConfig || !appConfig.presets) return;
+  
+  // Tạo rỗng nếu preset hệ thống vô tình bị xóa khỏi config
+  const defaultPresets = ["Mặc định", "Voice"];
+  if (defaultPresets.includes(name) && !appConfig.presets[name]) {
+    appConfig.presets[name] = {};
+  }
+  
+  if (!appConfig.presets[name]) return;
   
   states.activePreset = name;
   renderPresets();
@@ -89,6 +101,11 @@ export async function submitNewPreset() {
   const name = DOM.inputPresetName.value.trim();
   if (name === '') {
     alert('Tên Preset không được để trống!');
+    return;
+  }
+  
+  if (name === "Mặc định") {
+    alert('Không thể ghi đè Preset "Mặc định" của hệ thống!');
     return;
   }
   
@@ -133,9 +150,9 @@ export function confirmOverwritePreset() {
 }
 
 export function deletePreset(name) {
-  const defaultPresets = ["Mặc định"];
+  const defaultPresets = ["Mặc định", "Voice"];
   if (defaultPresets.includes(name)) {
-    alert(`Không thể xóa Preset mặc định "${name}" của hệ thống!`);
+    alert(`Không thể xóa Preset "${name}" của hệ thống!`);
     return;
   }
   
