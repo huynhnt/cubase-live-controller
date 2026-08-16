@@ -14,11 +14,6 @@ export function loadConfigToForm() {
   if (DOM.mapMicVol) DOM.mapMicVol.value = appConfig.midiMappings?.micVol ?? 22;
   if (DOM.mapMicMute) DOM.mapMicMute.value = appConfig.midiMappings?.micMute ?? 23;
   if (DOM.mapFxMute) DOM.mapFxMute.value = appConfig.midiMappings?.fxMute ?? 24;
-  if (DOM.mapReverbLong) DOM.mapReverbLong.value = appConfig.midiMappings?.reverbLong ?? 25;
-  if (DOM.mapReverbShort) DOM.mapReverbShort.value = appConfig.midiMappings?.reverbShort ?? 26;
-  if (DOM.mapDelay) DOM.mapDelay.value = appConfig.midiMappings?.delay ?? 27;
-  if (DOM.mapAutotune) DOM.mapAutotune.value = appConfig.midiMappings?.autotune ?? 28;
-  if (DOM.mapFlex) DOM.mapFlex.value = appConfig.midiMappings?.flex ?? 29;
   if (DOM.mapModeSingVoice) DOM.mapModeSingVoice.value = appConfig.midiMappings?.modeSingVoice ?? 30;
   if (DOM.mapAutotuneKey) DOM.mapAutotuneKey.value = appConfig.midiMappings?.autotuneKey ?? 31;
   if (DOM.mapAutotuneScale) DOM.mapAutotuneScale.value = appConfig.midiMappings?.autotuneScale ?? 32;
@@ -37,11 +32,19 @@ export function loadConfigToForm() {
   if (DOM.valOpacity) DOM.valOpacity.innerText = (appConfig.opacity ?? 85) + '%';
   if (DOM.inputCustomAppTarget) DOM.inputCustomAppTarget.value = appConfig.customAppTarget || 'YouTube';
   
-  if (DOM.presetReverbLong) DOM.presetReverbLong.value = appConfig.voicePreset?.reverbLong ?? 0;
-  if (DOM.presetReverbShort) DOM.presetReverbShort.value = appConfig.voicePreset?.reverbShort ?? 0;
-  if (DOM.presetDelay) DOM.presetDelay.value = appConfig.voicePreset?.delay ?? 0;
-  if (DOM.presetAutotune) DOM.presetAutotune.value = appConfig.voicePreset?.autotune ?? 0;
-  if (DOM.presetFlex) DOM.presetFlex.value = appConfig.voicePreset?.flex ?? 0;
+  if (DOM.selectVoicePreset) {
+    DOM.selectVoicePreset.innerHTML = '';
+    const presetNames = appConfig.presets ? Object.keys(appConfig.presets) : [];
+    if (!presetNames.includes('Voice')) presetNames.push('Voice');
+    presetNames.forEach(pName => {
+      const option = document.createElement('option');
+      option.value = pName;
+      option.innerText = pName;
+      DOM.selectVoicePreset.appendChild(option);
+    });
+    DOM.selectVoicePreset.value = appConfig.voicePreset?.presetName || 'Voice';
+  }
+  
   if (DOM.presetMicChange) DOM.presetMicChange.value = appConfig.voicePreset?.micChange ?? appConfig.voicePreset?.micVolChange ?? 10;
   if (DOM.presetBeatChange) DOM.presetBeatChange.value = appConfig.voicePreset?.beatChange ?? -20;
   
@@ -56,6 +59,57 @@ export function loadConfigToForm() {
   if (appConfig.audioAnalyzer) {
     if (DOM.inputAudioDuration) DOM.inputAudioDuration.value = appConfig.audioAnalyzer.duration || 8;
     if (DOM.inputAudioMinFreq) DOM.inputAudioMinFreq.value = appConfig.audioAnalyzer.minFreq || 27.5;
+  }
+  
+  // Hiển thị danh sách CC Hiệu ứng (Read-only)
+  if (DOM.readOnlyEffectsList) {
+    DOM.readOnlyEffectsList.innerHTML = '';
+    if (appConfig.effects && appConfig.effects.length > 0) {
+      appConfig.effects.forEach(fx => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.style.background = 'rgba(255,255,255,0.05)';
+        item.style.padding = '4px 8px';
+        item.style.borderRadius = '4px';
+        
+        const info = document.createElement('div');
+        info.style.display = 'flex';
+        info.style.flexDirection = 'column';
+        
+        const nameNode = document.createElement('span');
+        nameNode.style.fontSize = '12px';
+        nameNode.style.fontWeight = 'bold';
+        nameNode.style.color = fx.color || 'var(--text-primary)';
+        nameNode.innerText = fx.name;
+        
+        const ccNode = document.createElement('span');
+        ccNode.style.fontSize = '10px';
+        ccNode.style.color = 'var(--text-secondary)';
+        ccNode.innerText = `Giá trị: CC ${fx.ccValue}` + (fx.isEnabled && fx.ccToggle >= 0 ? ` | Tắt/Bật: CC ${fx.ccToggle}` : '');
+        
+        info.appendChild(nameNode);
+        info.appendChild(ccNode);
+        item.appendChild(info);
+        
+        const btnEdit = document.createElement('button');
+        btnEdit.innerText = 'Sửa';
+        btnEdit.className = 'btn btn-sec';
+        btnEdit.style.padding = '2px 8px';
+        btnEdit.style.fontSize = '10px';
+        btnEdit.onclick = () => {
+          import('./ui.js').then(module => {
+            module.openEffectEditModal(fx.id);
+          });
+        };
+        item.appendChild(btnEdit);
+        
+        DOM.readOnlyEffectsList.appendChild(item);
+      });
+    } else {
+      DOM.readOnlyEffectsList.innerHTML = '<span style="font-size: 11px; color: var(--text-secondary);">Chưa có hiệu ứng nào.</span>';
+    }
   }
 }
 
@@ -87,11 +141,7 @@ export async function saveSettings() {
     opacity: parseInt(DOM.sliderOpacity?.value) || (appConfig.opacity ?? 85),
     customAppTarget: DOM.inputCustomAppTarget?.value || 'YouTube',
     voicePreset: {
-      reverbLong: parseInt(DOM.presetReverbLong?.value) || 0,
-      reverbShort: parseInt(DOM.presetReverbShort?.value) || 0,
-      delay: parseInt(DOM.presetDelay?.value) || 0,
-      autotune: parseInt(DOM.presetAutotune?.value) || 0,
-      flex: parseInt(DOM.presetFlex?.value) || 0,
+      presetName: DOM.selectVoicePreset?.value || 'Voice',
       micChange: parseInt(DOM.presetMicChange?.value) || 10,
       beatChange: parseInt(DOM.presetBeatChange?.value) || -20
     },
@@ -101,11 +151,6 @@ export async function saveSettings() {
       micVol: parseInt(DOM.mapMicVol?.value) || 22,
       micMute: parseInt(DOM.mapMicMute?.value) || 23,
       fxMute: parseInt(DOM.mapFxMute?.value) || 24,
-      reverbLong: parseInt(DOM.mapReverbLong?.value) || 25,
-      reverbShort: parseInt(DOM.mapReverbShort?.value) || 26,
-      delay: parseInt(DOM.mapDelay?.value) || 27,
-      autotune: parseInt(DOM.mapAutotune?.value) || 28,
-      flex: parseInt(DOM.mapFlex?.value) || 29,
       modeSingVoice: parseInt(DOM.mapModeSingVoice?.value) || 30,
       autotuneKey: parseInt(DOM.mapAutotuneKey?.value) || 31,
       autotuneScale: parseInt(DOM.mapAutotuneScale?.value) || 32
@@ -139,7 +184,7 @@ export async function saveSettings() {
     
     if (states.isFxPanelOpen) {
       DOM.fxPanel.classList.remove('hidden');
-      DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
+      DOM.btnReverbToggle.innerText = 'Hiệu ứng ▴';
       DOM.btnReverbToggle.classList.add('active');
       
       const fxContainer = DOM.fxPanel.querySelector('.fx-container');
@@ -175,7 +220,7 @@ export function cancelSettings() {
   
   if (states.isFxPanelOpen) {
     DOM.fxPanel.classList.remove('hidden');
-    DOM.btnReverbToggle.innerText = 'Chỉnh Vang ▴';
+    DOM.btnReverbToggle.innerText = 'Hiệu ứng ▴';
     DOM.btnReverbToggle.classList.add('active');
     
     const fxContainer = DOM.fxPanel.querySelector('.fx-container');

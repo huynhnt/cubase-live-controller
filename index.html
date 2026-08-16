@@ -78,60 +78,18 @@
       </div>
 
       <div class="control-group actions-group">
-        <button id="btn-reverb-toggle" class="action-btn btn-red">Chỉnh Vang ▾</button>
+        <button id="btn-reverb-toggle" class="action-btn btn-red">Hiệu ứng ▾</button>
         <button id="btn-tone-toggle" class="action-btn btn-orange">Chọn Tone ▾</button>
         <button id="btn-soundboard-toggle" class="action-btn btn-pink">FX ▾</button>
       </div>
     </main>
 
-    <!-- Panel chỉnh vang chi tiết (Xổ xuống khi nhấn Chỉnh Vang) -->
     <section id="fx-panel" class="fx-panel hidden">
-      <div class="fx-container">
-        <!-- Vang Dài -->
-        <div class="fx-row">
-          <span class="fx-label label-orange">VANG DÀI</span>
-          <div class="fx-slider-wrapper">
-            <input type="range" id="slider-reverb-long" class="orange" min="0" max="127" value="24">
-            <div class="fx-track-fill fill-orange"></div>
-          </div>
-          <span class="fx-value" id="val-reverb-long">24</span>
-        </div>
-        <!-- Vang Ngắn -->
-        <div class="fx-row">
-          <span class="fx-label label-yellow">VANG NGẮN</span>
-          <div class="fx-slider-wrapper">
-            <input type="range" id="slider-reverb-short" class="yellow" min="0" max="127" value="24">
-            <div class="fx-track-fill fill-yellow"></div>
-          </div>
-          <span class="fx-value" id="val-reverb-short">24</span>
-        </div>
-        <!-- Delay -->
-        <div class="fx-row">
-          <span class="fx-label label-purple">DELAY</span>
-          <div class="fx-slider-wrapper">
-            <input type="range" id="slider-delay" class="purple" min="0" max="127" value="24">
-            <div class="fx-track-fill fill-purple"></div>
-          </div>
-          <span class="fx-value" id="val-delay">24</span>
-        </div>
-        <!-- Auto-Tune -->
-        <div class="fx-row">
-          <span class="fx-label label-red">RETUNE SPEED</span>
-          <div class="fx-slider-wrapper">
-            <input type="range" id="slider-autotune" class="red" min="0" max="127" value="20">
-            <div class="fx-track-fill fill-red"></div>
-          </div>
-          <span class="fx-value" id="val-autotune">20</span>
-        </div>
-        <!-- Flex -->
-        <div class="fx-row">
-          <span class="fx-label label-blue">HUMANIZE</span>
-          <div class="fx-slider-wrapper">
-            <input type="range" id="slider-flex" class="blue" min="0" max="127" value="50">
-            <div class="fx-track-fill fill-blue"></div>
-          </div>
-          <span class="fx-value" id="val-flex">50</span>
-        </div>
+      <div class="fx-container" id="effects-container">
+        <!-- Render hiệu ứng động ở đây -->
+      </div>
+      <div style="text-align: center; margin-bottom: 15px; margin-top: 8px;">
+        <button id="btn-add-effect" class="sec-btn" style="font-size: 11px; padding: 4px 12px; height: 26px;">+ Thêm Hiệu ứng</button>
       </div>
 
       <!-- Hàng Preset giọng hát nổi (Được chia nhóm Mặc định và Cá nhân) -->
@@ -269,26 +227,6 @@
               <input type="number" id="map-fx-mute" min="0" max="127" value="24">
             </div>
             <div class="mapping-item">
-              <label>Vang Dài CC</label>
-              <input type="number" id="map-reverb-long" min="0" max="127" value="25">
-            </div>
-            <div class="mapping-item">
-              <label>Vang Ngắn CC</label>
-              <input type="number" id="map-reverb-short" min="0" max="127" value="26">
-            </div>
-            <div class="mapping-item">
-              <label>Delay CC</label>
-              <input type="number" id="map-delay" min="0" max="127" value="27">
-            </div>
-            <div class="mapping-item">
-              <label>Retune Speed CC</label>
-              <input type="number" id="map-autotune" min="0" max="127" value="28">
-            </div>
-            <div class="mapping-item">
-              <label>Humanize CC</label>
-              <input type="number" id="map-flex" min="0" max="127" value="29">
-            </div>
-            <div class="mapping-item">
               <label>Autotune Key CC</label>
               <input type="number" id="map-autotune-key" min="0" max="127" value="31">
             </div>
@@ -296,6 +234,29 @@
               <label>Autotune Scale CC</label>
               <input type="number" id="map-autotune-scale" min="0" max="127" value="32">
             </div>
+            <div class="mapping-item">
+              <label>Chuyển Mode CC</label>
+              <input type="number" id="map-mode" min="0" max="127" value="30">
+            </div>
+          </div>
+          
+          <div class="settings-group-title" style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Danh sách Mã CC của Hiệu ứng</span>
+          </div>
+          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
+            Các mã CC này được quản lý tự động. Bấm vào nút Sửa nếu bạn muốn thay đổi.
+          </p>
+          <div id="read-only-effects-list" style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="settings-group-title" style="margin-top: 15px;">Xuất cấu hình Generic Remote (Cho Cubase)</div>
+          <p class="settings-description" style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;">
+            Hỗ trợ tạo sẵn file XML để đưa vào Cubase. Bạn có thể xuất riêng tính năng hoặc hiệu ứng để tránh xung đột khi chia sẻ.
+          </p>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button id="btn-export-features" class="btn btn-blue" style="flex: 1; padding: 6px 0; font-size: 11px;">Xuất XML Tính năng</button>
+            <button id="btn-export-effects" class="btn btn-orange" style="flex: 1; padding: 6px 0; font-size: 11px;">Xuất XML Hiệu ứng</button>
           </div>
 
           <div class="settings-group-title" style="margin-top: 15px;">Tùy chỉnh Giá trị MIDI cho Auto-Tune Pro (Nếu bị nhận sai Tông)</div>
@@ -362,27 +323,13 @@
           </div>
 
           <div class="settings-group-title">Preset Chế độ Voice (Nói chuyện)</div>
-          <div class="voice-presets-grid">
-            <div class="preset-item">
-              <label>Vang Dài</label>
-              <input type="number" id="preset-reverb-long" min="0" max="127" value="0">
-            </div>
-            <div class="preset-item">
-              <label>Vang Ngắn</label>
-              <input type="number" id="preset-reverb-short" min="0" max="127" value="0">
-            </div>
-            <div class="preset-item">
-              <label>Delay</label>
-              <input type="number" id="preset-delay" min="0" max="127" value="0">
-            </div>
-            <div class="preset-item">
-              <label>Retune Speed</label>
-              <input type="number" id="preset-autotune" min="0" max="127" value="0">
-            </div>
-            <div class="preset-item">
-              <label>Humanize</label>
-              <input type="number" id="preset-flex" min="0" max="127" value="0">
-            </div>
+          <div class="settings-row">
+            <label for="select-voice-preset" style="font-size: 11px;">Preset sử dụng cho Voice Mode</label>
+            <select id="select-voice-preset" style="width: 100%; margin-top: 5px;">
+              <!-- Dữ liệu render động -->
+            </select>
+          </div>
+          <div class="voice-presets-grid" style="grid-template-columns: 1fr 1fr;">
             <div class="preset-item">
               <label>Thay đổi Vol Mic (%)</label>
               <input type="number" id="preset-mic-change" min="-100" max="100" value="10">
@@ -602,6 +549,7 @@
         </div>
       </div>
     </div>
+
   </div>
 
 

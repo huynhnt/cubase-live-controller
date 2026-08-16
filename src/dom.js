@@ -30,38 +30,30 @@ export const DOM = {
   
   // Panel chỉnh vang & sliders
   get fxPanel() { return document.getElementById('fx-panel'); },
+  get effectsContainer() { return document.getElementById('effects-container'); },
+  get btnAddEffect() { return document.getElementById('btn-add-effect'); },
+  
+  // Effect Edit Modal
+  get effectEditModal() { return document.getElementById('effect-edit-modal'); },
+  get inputFxId() { return document.getElementById('input-fx-id'); },
+  get inputFxName() { return document.getElementById('input-fx-name'); },
+  get selectFxColor() { return document.getElementById('select-fx-color'); },
+  get inputFxCc() { return document.getElementById('input-fx-cc'); },
+  get inputFxToggleCc() { return document.getElementById('input-fx-toggle-cc'); },
+  get btnFxSave() { return document.getElementById('btn-fx-save'); },
+  get btnFxCancel() { return document.getElementById('btn-fx-cancel'); },
+  get btnFxDelete() { return document.getElementById('btn-fx-delete'); },
+  
+  get selectFxFormat() { return document.getElementById('select-fx-format'); },
+  get fxCustomRange() { return document.getElementById('fx-custom-range'); },
+  get inputFxMin() { return document.getElementById('input-fx-min'); },
+  get inputFxMax() { return document.getElementById('input-fx-max'); },
+
   get keySelectorPanel() { return document.getElementById('key-selector-panel'); },
   get keySelectorContainer() { return document.getElementById('key-selector-container'); },
   get currentKeyDisplay() { return document.getElementById('current-key-display'); },
   get detectedKeyDisplay() { return document.getElementById('detected-key-display'); },
   get btnGetTone() { return document.getElementById('btn-get-tone'); },
-  get sliders() {
-    return {
-      reverbLong: document.getElementById('slider-reverb-long'),
-      reverbShort: document.getElementById('slider-reverb-short'),
-      delay: document.getElementById('slider-delay'),
-      autotune: document.getElementById('slider-autotune'),
-      flex: document.getElementById('slider-flex')
-    };
-  },
-  get vals() {
-    return {
-      reverbLong: document.getElementById('val-reverb-long'),
-      reverbShort: document.getElementById('val-reverb-short'),
-      delay: document.getElementById('val-delay'),
-      autotune: document.getElementById('val-autotune'),
-      flex: document.getElementById('val-flex')
-    };
-  },
-  get fills() {
-    return {
-      reverbLong: document.querySelector('.fill-orange'),
-      reverbShort: document.querySelector('.fill-yellow'),
-      delay: document.querySelector('.fill-purple'),
-      autotune: document.querySelector('.fill-red'),
-      flex: document.querySelector('.fill-blue')
-    };
-  },
   
   // Panel cài đặt & inputs
   get settingsPanel() { return document.getElementById('settings-panel'); },
@@ -80,14 +72,14 @@ export const DOM = {
   get mapMicVol() { return document.getElementById('map-mic-vol'); },
   get mapMicMute() { return document.getElementById('map-mic-mute'); },
   get mapFxMute() { return document.getElementById('map-fx-mute'); },
-  get mapReverbLong() { return document.getElementById('map-reverb-long'); },
-  get mapReverbShort() { return document.getElementById('map-reverb-short'); },
-  get mapDelay() { return document.getElementById('map-delay'); },
-  get mapAutotune() { return document.getElementById('map-autotune'); },
-  get mapFlex() { return document.getElementById('map-flex'); },
-  get mapModeSingVoice() { return document.getElementById('map-mode-sing-voice'); },
+  get mapModeSingVoice() { return document.getElementById('map-mode'); },
   get mapAutotuneKey() { return document.getElementById('map-autotune-key'); },
   get mapAutotuneScale() { return document.getElementById('map-autotune-scale'); },
+  
+  // Read-only Effects List & Export
+  get readOnlyEffectsList() { return document.getElementById('read-only-effects-list'); },
+  get btnExportFeatures() { return document.getElementById('btn-export-features'); },
+  get btnExportEffects() { return document.getElementById('btn-export-effects'); },
   
   get inputCustomKeys() { return document.getElementById('input-custom-keys'); },
   get inputCustomScales() { return document.getElementById('input-custom-scales'); },
@@ -116,11 +108,7 @@ export const DOM = {
   get shortcutPlayMedia() { return document.getElementById('shortcut-play-media'); },
   
   // Voice Presets inputs
-  get presetReverbLong() { return document.getElementById('preset-reverb-long'); },
-  get presetReverbShort() { return document.getElementById('preset-reverb-short'); },
-  get presetDelay() { return document.getElementById('preset-delay'); },
-  get presetAutotune() { return document.getElementById('preset-autotune'); },
-  get presetFlex() { return document.getElementById('preset-flex'); },
+  get selectVoicePreset() { return document.getElementById('select-voice-preset'); },
   get presetMicChange() { return document.getElementById('preset-mic-change'); },
   get presetBeatChange() { return document.getElementById('preset-beat-change'); },
   

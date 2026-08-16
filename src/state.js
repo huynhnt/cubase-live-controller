@@ -18,34 +18,29 @@ export const DEFAULT_CONFIG = {
   spotifyClientId: '',
   spotifyClientSecret: '',
   voicePreset: {
-    reverbLong: 10,
-    reverbShort: 25,
-    delay: 0,
-    autotune: 0,
-    flex: 0,
+    presetName: 'Voice',
     micChange: 10,
     beatChange: -20
   },
+  effects: [
+    { id: 'fx1', name: 'VANG DÀI', color: 'orange', ccValue: 25, ccToggle: 0, format: 'db' },
+    { id: 'fx2', name: 'VANG NGẮN', color: 'yellow', ccValue: 26, ccToggle: 0, format: 'db' },
+    { id: 'fx3', name: 'DELAY', color: 'purple', ccValue: 27, ccToggle: 0, format: 'db' },
+    { id: 'fx4', name: 'RETUNE SPEED', color: 'red', ccValue: 28, ccToggle: 0, format: 'custom', min: 400, max: 0 },
+    { id: 'fx5', name: 'HUMANIZE', color: 'blue', ccValue: 29, ccToggle: 0, format: 'percent' }
+  ],
   midiMappings: {
     beatVol: 20,
     beatMute: 21,
     micVol: 22,
     micMute: 23,
     fxMute: 24,
-    reverbLong: 25,
-    reverbShort: 26,
-    delay: 27,
-    autotune: 28,
-    flex: 29,
     modeSingVoice: 30,
     autotuneKey: 31,
     autotuneScale: 32
   },
   presets: {
-    "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
-    "Bolero": { reverbLong: 45, reverbShort: 30, delay: 40, autotune: 15, flex: 60 },
-    "Remix": { reverbLong: 15, reverbShort: 10, delay: 15, autotune: 40, flex: 20 },
-    "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
+    "Mặc định": { fx1: 24, fx2: 24, fx3: 24, fx4: 20, fx5: 50 }
   },
   soundboard: [
     { id: 0, name: 'Tiếng Cười', filePath: '', shortcut: 'num1', color: 'purple' },
@@ -77,6 +72,7 @@ if (!window.electronAPI) {
         ...loaded,
         midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
         voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
+        effects: loaded.effects ? loaded.effects : DEFAULT_CONFIG.effects,
         presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
         shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts },
         soundboard: loaded.soundboard ? loaded.soundboard : DEFAULT_CONFIG.soundboard,
@@ -163,13 +159,16 @@ export function setAppConfig(config) {
 export let savedSingingValues = {
   beatVol: 100,
   micVol: 100,
-  reverbLong: 24,
-  reverbShort: 24,
-  delay: 24,
-  autotune: 20,
-  flex: 50,
+  fx1: 24,
+  fx2: 24,
+  fx3: 24,
+  fx4: 20,
+  fx5: 50,
   fxMuted: false
 };
+
+// Lưu trạng thái on/off của từng hiệu ứng (true = on, false = off)
+export let effectToggleStates = {};
 
 export let states = {
   beatMuted: false,

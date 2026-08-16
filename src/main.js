@@ -18,8 +18,11 @@ import {
   toggleAboutPanel,
   closeSettingsPanelUI,
   autoSaveCurrentStates,
-  toggleSoundboardPanel
+  toggleSoundboardPanel,
+  renderEffects,
+  openEffectEditModal
 } from './ui.js';
+import { exportFeaturesXML, exportEffectsXML } from './export.js';
 import {
   renderPresets,
   loadPreset,
@@ -38,11 +41,6 @@ import { initSoundboard } from './soundboard.js';
 export const interactingSliders = {
   beatVol: false,
   micVol: false,
-  reverbLong: false,
-  reverbShort: false,
-  delay: false,
-  autotune: false,
-  flex: false,
 };
 
 export function syncAllStatesToCubase() {
@@ -51,11 +49,21 @@ export function syncAllStatesToCubase() {
 
   midi.sendCC(mappings.beatVol, DOM.sliderBeatVol.value);
   midi.sendCC(mappings.micVol, DOM.sliderMicVol.value);
-  midi.sendCC(mappings.reverbLong, DOM.sliders.reverbLong.value);
-  midi.sendCC(mappings.reverbShort, DOM.sliders.reverbShort.value);
-  midi.sendCC(mappings.delay, DOM.sliders.delay.value);
-  midi.sendCC(mappings.autotune, DOM.sliders.autotune.value);
-  midi.sendCC(mappings.flex, DOM.sliders.flex.value);
+  
+  if (appConfig.effects) {
+    appConfig.effects.forEach(fx => {
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      if (slider) {
+        midi.sendCC(fx.ccValue, slider.value);
+      }
+      if (fx.isEnabled && fx.ccToggle >= 0) {
+        const toggle = document.getElementById(`toggle-fx-${fx.id}`);
+        if (toggle) {
+          midi.sendCC(fx.ccToggle, toggle.checked ? 127 : 0);
+        }
+      }
+    });
+  }
 
   midi.sendCC(mappings.beatMute, states.beatMuted ? 127 : 0);
   midi.sendCC(mappings.micMute, states.micMuted ? 127 : 0);
@@ -198,30 +206,28 @@ export function handleIncomingMidiCC({ cc, value }) {
       stateChanged = true;
     }
   }
-  else if (cc === mappings.reverbLong && !interactingSliders.reverbLong) {
-    DOM.sliders.reverbLong.value = value;
-    updateSliderFill(DOM.sliders.reverbLong, DOM.fills.reverbLong, DOM.vals.reverbLong);
-    stateChanged = true;
-  }
-  else if (cc === mappings.reverbShort && !interactingSliders.reverbShort) {
-    DOM.sliders.reverbShort.value = value;
-    updateSliderFill(DOM.sliders.reverbShort, DOM.fills.reverbShort, DOM.vals.reverbShort);
-    stateChanged = true;
-  }
-  else if (cc === mappings.delay && !interactingSliders.delay) {
-    DOM.sliders.delay.value = value;
-    updateSliderFill(DOM.sliders.delay, DOM.fills.delay, DOM.vals.delay);
-    stateChanged = true;
-  }
-  else if (cc === mappings.autotune && !interactingSliders.autotune) {
-    DOM.sliders.autotune.value = value;
-    updateSliderFill(DOM.sliders.autotune, DOM.fills.autotune, DOM.vals.autotune);
-    stateChanged = true;
-  }
-  else if (cc === mappings.flex && !interactingSliders.flex) {
-    DOM.sliders.flex.value = value;
-    updateSliderFill(DOM.sliders.flex, DOM.fills.flex, DOM.vals.flex);
-    stateChanged = true;
+  else if (appConfig.effects && appConfig.effects.find(e => e.ccValue === cc || e.ccToggle === cc)) {
+    const fx = appConfig.effects.find(e => e.ccValue === cc || e.ccToggle === cc);
+    if (fx.ccValue === cc && !interactingSliders[fx.id]) {
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      const fill = document.getElementById(`fill-fx-${fx.id}`);
+      const valText = document.getElementById(`val-fx-${fx.id}`);
+      if (slider) {
+        slider.value = value;
+        updateSliderFill(slider, fill, valText);
+        stateChanged = true;
+      }
+    } else if (fx.ccToggle === cc) {
+      const toggle = document.getElementById(`toggle-fx-${fx.id}`);
+      if (toggle) {
+        const isChecked = value > 63;
+        if (toggle.checked !== isChecked) {
+          toggle.checked = isChecked;
+          toggle.dispatchEvent(new Event('change'));
+          stateChanged = true;
+        }
+      }
+    }
   }
   else if (cc === mappings.detectedKey) {
     const keyIndex = Math.round((value / 127) * 11);
@@ -278,28 +284,26 @@ export function setMode(targetMode) {
 
     savedSingingValues.beatVol = parseInt(DOM.sliderBeatVol.value);
     savedSingingValues.micVol = parseInt(DOM.sliderMicVol.value);
-    savedSingingValues.reverbLong = parseInt(DOM.sliders.reverbLong.value);
-    savedSingingValues.reverbShort = parseInt(DOM.sliders.reverbShort.value);
-    savedSingingValues.delay = parseInt(DOM.sliders.delay.value);
-    savedSingingValues.autotune = parseInt(DOM.sliders.autotune.value);
-    savedSingingValues.flex = parseInt(DOM.sliders.flex.value);
+    
+    appConfig.effects.forEach(fx => {
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      if (slider) {
+        savedSingingValues[fx.id] = parseInt(slider.value) || 0;
+      }
+    });
 
     const preset = appConfig.voicePreset;
     
-    midi.sendCC(appConfig.midiMappings.reverbLong, preset.reverbLong);
-    midi.sendCC(appConfig.midiMappings.reverbShort, preset.reverbShort);
-    midi.sendCC(appConfig.midiMappings.delay, preset.delay);
-    midi.sendCC(appConfig.midiMappings.autotune, preset.autotune ?? 0);
-    midi.sendCC(appConfig.midiMappings.flex, preset.flex ?? 0);
-
-    DOM.sliders.reverbLong.value = preset.reverbLong;
-    DOM.sliders.reverbShort.value = preset.reverbShort;
-    DOM.sliders.delay.value = preset.delay;
-    DOM.sliders.autotune.value = preset.autotune ?? 0;
-    DOM.sliders.flex.value = preset.flex ?? 0;
-
-    Object.keys(DOM.sliders).forEach(key => {
-      updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
+    appConfig.effects.forEach(fx => {
+      const presetVal = preset[fx.id] !== undefined ? preset[fx.id] : 0;
+      midi.sendCC(fx.ccValue, presetVal);
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      const fill = document.getElementById(`fill-fx-${fx.id}`);
+      const valText = document.getElementById(`val-fx-${fx.id}`);
+      if (slider) {
+        slider.value = presetVal;
+        updateSliderFill(slider, fill, valText);
+      }
     });
 
     // Thay đổi âm lượng nhạc theo phần trăm (thang 127 CC)
@@ -325,28 +329,24 @@ export function setMode(targetMode) {
     DOM.btnModeToggle.querySelector('.mode-text').innerText = 'HÁT LIVE';
     DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click đổi Voice';
 
-    midi.sendCC(appConfig.midiMappings.reverbLong, savedSingingValues.reverbLong);
-    midi.sendCC(appConfig.midiMappings.reverbShort, savedSingingValues.reverbShort);
-    midi.sendCC(appConfig.midiMappings.delay, savedSingingValues.delay);
-    midi.sendCC(appConfig.midiMappings.autotune, savedSingingValues.autotune);
-    midi.sendCC(appConfig.midiMappings.flex, savedSingingValues.flex);
+    appConfig.effects.forEach(fx => {
+      let val = savedSingingValues[fx.id];
+      if (val === undefined) val = fx.value;
+      fx.value = val;
+      midi.sendCC(fx.ccValue, val);
+      
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      const fill = document.getElementById(`fill-fx-${fx.id}`);
+      const valText = document.getElementById(`val-fx-${fx.id}`);
+      if (slider) {
+        slider.value = val;
+        updateSliderFill(slider, fill, valText);
+      }
+    });
     
     // Trả về âm lượng nhạc và mic ban đầu
     midi.sendCC(appConfig.midiMappings.beatVol, savedSingingValues.beatVol);
     midi.sendCC(appConfig.midiMappings.micVol, savedSingingValues.micVol);
-
-    DOM.sliders.reverbLong.value = savedSingingValues.reverbLong;
-    DOM.sliders.reverbShort.value = savedSingingValues.reverbShort;
-    DOM.sliders.delay.value = savedSingingValues.delay;
-    DOM.sliders.autotune.value = savedSingingValues.autotune;
-    DOM.sliders.flex.value = savedSingingValues.flex;
-    
-    DOM.sliderBeatVol.value = savedSingingValues.beatVol;
-    DOM.sliderMicVol.value = savedSingingValues.micVol;
-
-    Object.keys(DOM.sliders).forEach(key => {
-      updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
-    });
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
 
@@ -421,11 +421,16 @@ export function setupEventListeners() {
   
   setupInteraction(DOM.sliderBeatVol, 'beatVol', DOM.valBeatVol);
   setupInteraction(DOM.sliderMicVol, 'micVol', DOM.valMicVol);
-  setupInteraction(DOM.sliders.reverbLong, 'reverbLong', DOM.vals.reverbLong);
-  setupInteraction(DOM.sliders.reverbShort, 'reverbShort', DOM.vals.reverbShort);
-  setupInteraction(DOM.sliders.delay, 'delay', DOM.vals.delay);
-  setupInteraction(DOM.sliders.autotune, 'autotune', DOM.vals.autotune);
-  setupInteraction(DOM.sliders.flex, 'flex', DOM.vals.flex);
+  
+  if (appConfig.effects) {
+    appConfig.effects.forEach(fx => {
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      const valText = document.getElementById(`val-fx-${fx.id}`);
+      if (slider) {
+        setupInteraction(slider, fx.id, valText);
+      }
+    });
+  }
 
   if (window.electronAPI) {
     DOM.btnMinimize.addEventListener('click', () => window.electronAPI.minimizeWindow());
@@ -537,47 +542,12 @@ export function setupEventListeners() {
     midi.sendCC(appConfig.midiMappings.micVol, e.target.value);
   });
   
-  DOM.sliders.reverbLong.addEventListener('input', (e) => {
-    updateSliderFill(DOM.sliders.reverbLong, DOM.fills.reverbLong, DOM.vals.reverbLong);
-    midi.sendCC(appConfig.midiMappings.reverbLong, e.target.value);
-  });
-  DOM.sliders.reverbShort.addEventListener('input', (e) => {
-    updateSliderFill(DOM.sliders.reverbShort, DOM.fills.reverbShort, DOM.vals.reverbShort);
-    midi.sendCC(appConfig.midiMappings.reverbShort, e.target.value);
-  });
-  DOM.sliders.delay.addEventListener('input', (e) => {
-    updateSliderFill(DOM.sliders.delay, DOM.fills.delay, DOM.vals.delay);
-    midi.sendCC(appConfig.midiMappings.delay, e.target.value);
-  });
-  DOM.sliders.autotune.addEventListener('input', (e) => {
-    updateSliderFill(DOM.sliders.autotune, DOM.fills.autotune, DOM.vals.autotune);
-    midi.sendCC(appConfig.midiMappings.autotune, e.target.value);
-  });
-  DOM.sliders.flex.addEventListener('input', (e) => {
-    updateSliderFill(DOM.sliders.flex, DOM.fills.flex, DOM.vals.flex);
-    midi.sendCC(appConfig.midiMappings.flex, e.target.value);
-  });
-
-  if (DOM.scannerKey && DOM.valScannerKey) {
-    DOM.scannerKey.addEventListener('input', (e) => {
-      DOM.valScannerKey.innerText = e.target.value;
-      midi.sendCC(appConfig.midiMappings.autotuneKey ?? 31, e.target.value);
-    });
-  }
-  if (DOM.scannerScale && DOM.valScannerScale) {
-    DOM.scannerScale.addEventListener('input', (e) => {
-      DOM.valScannerScale.innerText = e.target.value;
-      midi.sendCC(appConfig.midiMappings.autotuneScale ?? 32, e.target.value);
-    });
-  }
-
   DOM.sliderBeatVol.addEventListener('change', autoSaveCurrentStates);
   DOM.sliderMicVol.addEventListener('change', autoSaveCurrentStates);
-  DOM.sliders.reverbLong.addEventListener('change', autoSaveCurrentStates);
-  DOM.sliders.reverbShort.addEventListener('change', autoSaveCurrentStates);
-  DOM.sliders.delay.addEventListener('change', autoSaveCurrentStates);
-  DOM.sliders.autotune.addEventListener('change', autoSaveCurrentStates);
-  DOM.sliders.flex.addEventListener('change', autoSaveCurrentStates);
+  
+  if (DOM.btnAddEffect) DOM.btnAddEffect.addEventListener('click', () => openEffectEditModal(null));
+  if (DOM.btnExportFeatures) DOM.btnExportFeatures.addEventListener('click', exportFeaturesXML);
+  if (DOM.btnExportEffects) DOM.btnExportEffects.addEventListener('click', exportEffectsXML);
   
   DOM.btnAddPreset.addEventListener('click', saveCurrentAsPreset);
   
@@ -697,11 +667,6 @@ export async function bootstrap() {
     if (appConfig.lastValues) {
       DOM.sliderBeatVol.value = appConfig.lastValues.beatVol ?? 100;
       DOM.sliderMicVol.value = appConfig.lastValues.micVol ?? 100;
-      DOM.sliders.reverbLong.value = appConfig.lastValues.reverbLong ?? 24;
-      DOM.sliders.reverbShort.value = appConfig.lastValues.reverbShort ?? 24;
-      DOM.sliders.delay.value = appConfig.lastValues.delay ?? 24;
-      DOM.sliders.autotune.value = appConfig.lastValues.autotune ?? 20;
-      DOM.sliders.flex.value = appConfig.lastValues.flex ?? 50;
 
       states.beatMuted = appConfig.lastValues.beatMuted ?? false;
       states.micMuted = appConfig.lastValues.micMuted ?? false;
@@ -724,15 +689,12 @@ export async function bootstrap() {
     initKeySelector();
     
     renderPresets();
+    renderEffects();
     
     DOM.app.style.setProperty('--bg-opacity', appConfig.opacity / 100);
     
     updateSliderFill(DOM.sliderBeatVol, DOM.fillBeatVol, DOM.valBeatVol);
     updateSliderFill(DOM.sliderMicVol, DOM.fillMicVol, DOM.valMicVol);
-    
-    Object.keys(DOM.sliders).forEach(key => {
-      updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
-    });
     
     setBeatMuteUI(states.beatMuted);
     setMicMuteUI(states.micMuted);

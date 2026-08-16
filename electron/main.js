@@ -61,6 +61,13 @@ const DEFAULT_CONFIG = {
     micChange: 10,
     beatChange: -20
   },
+  effects: [
+    { id: 'fx1', name: 'VANG DÀI', color: 'orange', ccValue: 25, ccToggle: 0, format: 'db' },
+    { id: 'fx2', name: 'VANG NGẮN', color: 'yellow', ccValue: 26, ccToggle: 0, format: 'db' },
+    { id: 'fx3', name: 'DELAY', color: 'purple', ccValue: 27, ccToggle: 0, format: 'db' },
+    { id: 'fx4', name: 'RETUNE SPEED', color: 'red', ccValue: 28, ccToggle: 0, format: 'custom', min: 400, max: 0 },
+    { id: 'fx5', name: 'HUMANIZE', color: 'blue', ccValue: 29, ccToggle: 0, format: 'percent' }
+  ],
   audioAnalyzer: {
     duration: 8,
     minFreq: 27.5
@@ -81,10 +88,7 @@ const DEFAULT_CONFIG = {
     autotuneScale: 32
   },
   presets: {
-    "Mặc định": { reverbLong: 24, reverbShort: 24, delay: 24, autotune: 20, flex: 50 },
-    "Bolero": { reverbLong: 45, reverbShort: 30, delay: 40, autotune: 15, flex: 60 },
-    "Remix": { reverbLong: 15, reverbShort: 10, delay: 15, autotune: 40, flex: 20 },
-    "Lofi": { reverbLong: 35, reverbShort: 25, delay: 35, autotune: 5, flex: 80 }
+    "Mặc định": { fx1: 24, fx2: 24, fx3: 24, fx4: 20, fx5: 50 }
   },
   soundboard: [
     { id: 0, name: 'Chào Khán Giả', filePath: '', shortcut: 'num1', color: 'blue' },
@@ -146,9 +150,15 @@ async function loadConfig() {
     const config = {
       ...DEFAULT_CONFIG,
       ...loaded,
-      midiMappings: { ...DEFAULT_CONFIG.midiMappings, ...loaded.midiMappings },
+      midiMappings: Object.keys(DEFAULT_CONFIG.midiMappings).reduce((acc, key) => {
+        acc[key] = (loaded.midiMappings && loaded.midiMappings[key] !== undefined) 
+                   ? loaded.midiMappings[key] 
+                   : DEFAULT_CONFIG.midiMappings[key];
+        return acc;
+      }, {}),
       audioAnalyzer: { ...DEFAULT_CONFIG.audioAnalyzer, ...loaded.audioAnalyzer },
       voicePreset: { ...DEFAULT_CONFIG.voicePreset, ...loaded.voicePreset },
+      effects: loaded.effects && loaded.effects.length > 0 ? loaded.effects : DEFAULT_CONFIG.effects,
       presets: loaded.presets ? loaded.presets : DEFAULT_CONFIG.presets,
       shortcuts: { ...DEFAULT_CONFIG.shortcuts, ...loaded.shortcuts },
       soundboard: loaded.soundboard ? loaded.soundboard : DEFAULT_CONFIG.soundboard,
@@ -444,12 +454,71 @@ app.whenReady().then(() => {
   });
 
   // Lắng nghe resize cửa sổ từ renderer
-  ipcMain.on('window-resize', (event, state) => {
+  ipcMain.on('window-resize', (event, state, customHeight) => {
     if (!mainWindow) return;
     const size = WINDOW_SIZES[state] || WINDOW_SIZES.collapsed;
     mainWindow.setResizable(true);
-    mainWindow.setSize(size.width, size.height);
+    let newHeight = customHeight ? customHeight : size.height;
+    // Đảm bảo không quá dài
+    if (newHeight > 700) newHeight = 700;
+    mainWindow.setSize(size.width, newHeight);
     mainWindow.setResizable(false);
+  });
+
+  let effectEditWindow = null;
+
+  ipcMain.on('open-effect-edit-window', (event, fxData) => {
+    if (effectEditWindow && !effectEditWindow.isDestroyed()) {
+      effectEditWindow.focus();
+      effectEditWindow.webContents.send('load-effect-edit', fxData);
+      return;
+    }
+
+    effectEditWindow = new BrowserWindow({
+      parent: mainWindow,
+      width: 440,
+      height: 520,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      resizable: false,
+      maximizable: false,
+      fullscreenable: false,
+      skipTaskbar: false,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.cjs'),
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    });
+
+    const editHtmlPath = path.join(__dirname, 'effect-edit-window.html');
+    effectEditWindow.loadFile(editHtmlPath);
+
+    effectEditWindow.webContents.on('did-finish-load', () => {
+      if (effectEditWindow && !effectEditWindow.isDestroyed()) {
+        effectEditWindow.webContents.send('load-effect-edit', fxData);
+      }
+    });
+
+    effectEditWindow.on('closed', () => {
+      effectEditWindow = null;
+    });
+  });
+
+  ipcMain.on('close-effect-edit-window', () => {
+    if (effectEditWindow && !effectEditWindow.isDestroyed()) {
+      effectEditWindow.close();
+    }
+  });
+
+  ipcMain.on('save-effect-edit', (event, fxData) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('save-effect-edit-success', fxData);
+    }
+    if (effectEditWindow && !effectEditWindow.isDestroyed()) {
+      effectEditWindow.close();
+    }
   });
 
   ipcMain.on('window-minimize', () => {
@@ -511,19 +580,34 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('select-file', async () => {
-    if (!mainWindow) return '';
     const result = await dialog.showOpenDialog(mainWindow, {
-      title: 'Chọn file Cubase Project',
-      filters: [
-        { name: 'Cubase Project', extensions: ['cpr'] }
-      ],
-      properties: ['openFile']
+      properties: ['openFile'],
+      filters: [{ name: 'Cubase Projects', extensions: ['cpr'] }]
     });
-    
     if (result.canceled || result.filePaths.length === 0) {
-      return '';
+      return null;
     }
     return result.filePaths[0];
+  });
+  
+  ipcMain.handle('save-xml-file', async (event, xmlString, defaultFileName) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: 'Lưu file Generic Remote',
+      defaultPath: path.join(app.getPath('documents'), defaultFileName || 'Generic_Remote.xml'),
+      filters: [{ name: 'XML Files', extensions: ['xml'] }]
+    });
+    
+    if (result.canceled || !result.filePath) {
+      return false;
+    }
+    
+    try {
+      await fs.writeFile(result.filePath, xmlString, 'utf8');
+      return true;
+    } catch (err) {
+      console.error('Lỗi lưu file XML:', err);
+      return false;
+    }
   });
 
   ipcMain.handle('open-cubase-project', async (event, filePath) => {

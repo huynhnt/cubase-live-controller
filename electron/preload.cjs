@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimizeWindow: () => ipcRenderer.send('window-minimize'),
   closeWindow: () => ipcRenderer.send('window-close'),
   togglePin: (isPinned) => ipcRenderer.send('window-toggle-pin', isPinned),
-  resizeWindow: (state) => ipcRenderer.send('window-resize', state),
+  resizeWindow: (state, customHeight) => ipcRenderer.send('window-resize', state, customHeight),
   playPauseMedia: () => ipcRenderer.send('play-pause-media'),
   toggleApp: (targetName) => ipcRenderer.send('toggle-app', targetName),
   onShortcutPressed: (callback) => ipcRenderer.on('shortcut-pressed', (event, action) => callback(action)),
@@ -16,6 +16,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getBrowserTitle: () => ipcRenderer.invoke('get-browser-title'),
   selectAudioFile: () => ipcRenderer.invoke('select-audio-file'),
   onPlaySoundboardSlot: (callback) => ipcRenderer.on('play-soundboard-slot', (event, slotId) => callback(slotId)),
+
+  // Effect Edit Window
+  openEffectEditWindow: (fxData) => ipcRenderer.send('open-effect-edit-window', fxData),
+  closeEffectEditWindow: () => ipcRenderer.send('close-effect-edit-window'),
+  saveEffectEdit: (fxData) => ipcRenderer.send('save-effect-edit', fxData),
+  onSaveEffectEdit: (callback) => ipcRenderer.on('save-effect-edit-success', (event, fxData) => callback(fxData)),
+  onLoadEffectEdit: (callback) => ipcRenderer.on('load-effect-edit', (event, fxData) => callback(fxData)),
+
+  // Export
+  saveXMLFile: (xmlString, defaultFileName) => ipcRenderer.invoke('save-xml-file', xmlString, defaultFileName),
 
   // Auto Updater
   onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, info) => callback(info)),

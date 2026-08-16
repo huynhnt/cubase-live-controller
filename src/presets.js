@@ -9,7 +9,7 @@ export function renderPresets() {
   DOM.presetsSystemList.innerHTML = '';
   DOM.presetsCustomList.innerHTML = '';
   
-  const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
+  const defaultPresets = ["Mặc định"];
   
   const keys = Object.keys(appConfig.presets);
   keys.sort((a, b) => {
@@ -62,21 +62,22 @@ export function loadPreset(name) {
   
   const preset = appConfig.presets[name];
   
-  DOM.sliders.reverbLong.value = preset.reverbLong;
-  DOM.sliders.reverbShort.value = preset.reverbShort;
-  DOM.sliders.delay.value = preset.delay;
-  DOM.sliders.autotune.value = preset.autotune ?? preset.autoTune ?? 20;
-  DOM.sliders.flex.value = preset.flex;
-  
-  Object.keys(DOM.sliders).forEach(key => {
-    updateSliderFill(DOM.sliders[key], DOM.fills[key], DOM.vals[key]);
+  appConfig.effects.forEach(fx => {
+    let val = preset[fx.id];
+    if (val === undefined) val = fx.value ?? 0;
+    
+    fx.value = val;
+    const slider = document.getElementById(`slider-fx-${fx.id}`);
+    const fill = document.getElementById(`fill-fx-${fx.id}`);
+    const valText = document.getElementById(`val-fx-${fx.id}`);
+    
+    if (slider) {
+      slider.value = val;
+      updateSliderFill(slider, fill, valText);
+    }
+    
+    midi.sendCC(fx.ccValue, val);
   });
-  
-  midi.sendCC(appConfig.midiMappings.reverbLong, preset.reverbLong);
-  midi.sendCC(appConfig.midiMappings.reverbShort, preset.reverbShort);
-  midi.sendCC(appConfig.midiMappings.delay, preset.delay);
-  midi.sendCC(appConfig.midiMappings.autotune, preset.autotune ?? preset.autoTune ?? 20);
-  midi.sendCC(appConfig.midiMappings.flex, preset.flex);
   
   autoSaveCurrentStates();
 }
@@ -105,13 +106,11 @@ export async function submitNewPreset() {
 }
 
 export async function executeSavePreset(name) {
-  const newPreset = {
-    reverbLong: parseInt(DOM.sliders.reverbLong.value),
-    reverbShort: parseInt(DOM.sliders.reverbShort.value),
-    delay: parseInt(DOM.sliders.delay.value),
-    autotune: parseInt(DOM.sliders.autotune.value),
-    flex: parseInt(DOM.sliders.flex.value)
-  };
+  const newPreset = {};
+  appConfig.effects.forEach(fx => {
+    const slider = document.getElementById(`slider-fx-${fx.id}`);
+    newPreset[fx.id] = slider ? parseInt(slider.value) : fx.value;
+  });
   
   if (!appConfig.presets) appConfig.presets = {};
   appConfig.presets[name] = newPreset;
@@ -135,7 +134,7 @@ export function confirmOverwritePreset() {
 }
 
 export function deletePreset(name) {
-  const defaultPresets = ["Mặc định", "Bolero", "Remix", "Lofi"];
+  const defaultPresets = ["Mặc định"];
   if (defaultPresets.includes(name)) {
     alert(`Không thể xóa Preset mặc định "${name}" của hệ thống!`);
     return;
