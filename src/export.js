@@ -22,10 +22,11 @@ function buildXML(name, ctrls, banks) {
   return xml;
 }
 
-export async function exportFeaturesXML() {
+export async function exportCombinedXML() {
   const ctrls = [];
   const banks = [];
   
+  // --- 1. Thêm Tính Năng (Features) ---
   const mappings = appConfig.midiMappings || {};
   const featureNames = {
     beatVol: 'Vol Nhac',
@@ -47,18 +48,8 @@ export async function exportFeaturesXML() {
       banks.push({ name, path: isMute ? 'mute' : 'volume', flags: isMute ? 2 : 0 });
     }
   }
-  
-  const xml = buildXML('Cubase Live Controller - Tinh nang', ctrls, banks);
-  const success = await window.electronAPI.saveXMLFile(xml, 'Cubase_Live_Features.xml');
-  if (success) {
-    alert('Xuất file XML Tính năng thành công!');
-  }
-}
 
-export async function exportEffectsXML() {
-  const ctrls = [];
-  const banks = [];
-  
+  // --- 2. Thêm Hiệu Ứng (Effects) ---
   const effects = appConfig.effects || [];
   const sortedEffects = [...effects].sort((a, b) => (a.slotIndex ?? 0) - (b.slotIndex ?? 0));
 
@@ -69,20 +60,20 @@ export async function exportEffectsXML() {
     
     if (fx.ccValue >= 0) {
       ctrls.push({ name: fullName, cc: fx.ccValue, flags: 3 });
-      banks.push({ name: fullName, path: '', flags: 0 }); // Empty path
+      banks.push({ name: fullName, path: 'volume', flags: 0 }); // Set 'volume' instead of empty to keep VST Mixer selected
     }
     
     const isToggleOn = fx.isEnabled !== false;
     if (isToggleOn && fx.ccToggle >= 0) {
       const toggleName = `Tat CH ${channelNum} (${safeName})`;
       ctrls.push({ name: toggleName, cc: fx.ccToggle, flags: 3 });
-      banks.push({ name: toggleName, path: '', flags: 2 }); // Empty path
+      banks.push({ name: toggleName, path: 'mute', flags: 2 }); // Set 'mute' instead of empty to keep VST Mixer selected
     }
   });
   
-  const xml = buildXML('Cubase Live Controller - Hieu ung', ctrls, banks);
-  const success = await window.electronAPI.saveXMLFile(xml, 'Cubase_Live_Effects.xml');
+  const xml = buildXML('Cubase Live Controller', ctrls, banks);
+  const success = await window.electronAPI.saveXMLFile(xml, 'Cubase_Live_Controller.xml');
   if (success) {
-    alert('Xuất file XML Hiệu ứng thành công!');
+    alert('Xuất file XML thành công!');
   }
 }
