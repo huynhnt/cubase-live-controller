@@ -22,7 +22,7 @@ import {
   renderEffects,
   openEffectEditModal
 } from './ui.js';
-import { exportFeaturesXML, exportEffectsXML } from './export.js';
+import { exportCombinedXML } from './export.js';
 import {
   renderPresets,
   loadPreset,
@@ -547,8 +547,7 @@ export function setupEventListeners() {
   DOM.sliderMicVol.addEventListener('change', autoSaveCurrentStates);
 
   if (DOM.btnAddEffect) DOM.btnAddEffect.addEventListener('click', () => openEffectEditModal(null));
-  if (DOM.btnExportFeatures) DOM.btnExportFeatures.addEventListener('click', exportFeaturesXML);
-  if (DOM.btnExportEffects) DOM.btnExportEffects.addEventListener('click', exportEffectsXML);
+  if (DOM.btnExportXML) DOM.btnExportXML.addEventListener('click', exportCombinedXML);
 
   DOM.btnAddPreset.addEventListener('click', saveCurrentAsPreset);
 

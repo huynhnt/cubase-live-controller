@@ -69,8 +69,7 @@ export const DOM = {
   // Mapping Tables & Export
   get featuresMappingTable() { return document.getElementById('features-mapping-table'); },
   get effectsMappingTable() { return document.getElementById('effects-mapping-table'); },
-  get btnExportFeatures() { return document.getElementById('btn-export-features'); },
-  get btnExportEffects() { return document.getElementById('btn-export-effects'); },
+  get btnExportXML() { return document.getElementById('btn-export-xml'); },
   
   get inputCustomKeys() { return document.getElementById('input-custom-keys'); },
   get inputCustomScales() { return document.getElementById('input-custom-scales'); },
