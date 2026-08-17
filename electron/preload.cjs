@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Effect Edit Window
   openEffectEditWindow: (fxData) => ipcRenderer.send('open-effect-edit-window', fxData),
   closeEffectEditWindow: () => ipcRenderer.send('close-effect-edit-window'),
+  resizeEffectEditWindow: (width, height) => ipcRenderer.send('resize-effect-edit-window', width, height),
   saveEffectEdit: (fxData) => ipcRenderer.send('save-effect-edit', fxData),
   onSaveEffectEdit: (callback) => ipcRenderer.on('save-effect-edit-success', (event, fxData) => callback(fxData)),
   onLoadEffectEdit: (callback) => ipcRenderer.on('load-effect-edit', (event, fxData) => callback(fxData)),

@@ -25,7 +25,19 @@ export function midiToDbString(value, format = 'db') {
 export function updateSliderFill(slider, fillElement, valElement) {
   if (!slider) return;
   const percent = (slider.value / slider.max) * 100;
-  if (fillElement) fillElement.style.width = percent + '%';
+  if (fillElement) {
+    if (slider.classList.contains('hidden-slider')) {
+      fillElement.style.bottom = `calc(${percent}% - 10px)`;
+      fillElement.style.height = '20px';
+      fillElement.style.width = '100%';
+    } else if (slider.classList.contains('vertical-slider')) {
+      fillElement.style.height = percent + '%';
+      fillElement.style.width = '100%';
+    } else {
+      fillElement.style.width = percent + '%';
+      fillElement.style.height = '100%';
+    }
+  }
   if (valElement) {
     const format = slider.getAttribute('data-format') || ((slider.id && (slider.id.includes('autotune') || slider.id.includes('flex'))) ? 'percent' : 'db');
     
@@ -137,8 +149,7 @@ export function toggleFxPanel() {
     }
 
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 40;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else {
     DOM.fxPanel.classList.add('hidden');
@@ -307,12 +318,14 @@ export function initKeySelector() {
       } catch (audioErr) {
         // Tất cả 3 tier đều thất bại
         states.isWaitingForAutoKey = false;
-        DOM.btnGetTone.innerText = 'Lấy Tone';
+        DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
         DOM.btnGetTone.classList.remove('analyzing');
-        DOM.detectedKeyDisplay.innerText = `Không tìm được tone: ${audioErr.message}`;
+        DOM.detectedKeyDisplay.innerText = 'Chưa rõ (Im lặng)';
+        DOM.detectedKeyDisplay.title = `Không tìm được tone: ${audioErr.message}`;
         DOM.detectedKeyDisplay.style.color = 'var(--color-red, #e74c3c)';
         setTimeout(() => {
           DOM.detectedKeyDisplay.innerText = 'Smart Tone: Chưa rõ';
+          DOM.detectedKeyDisplay.title = '';
           DOM.detectedKeyDisplay.style.color = '';
         }, 5000);
       }
@@ -481,8 +494,7 @@ export function toggleSoundboardPanel() {
     DOM.btnSoundboardToggle.classList.add('active');
     
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 40;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else {
     DOM.soundboardPanel.classList.add('hidden');
@@ -532,127 +544,231 @@ export async function autoSaveCurrentStates() {
   await window.electronAPI.saveConfig(appConfig);
 }
 
-// Render Hiệu ứng động
+function formatTickNum(val) {
+  if (Math.abs(val) >= 1000) {
+    const k = val / 1000;
+    return (Number.isInteger(k) ? k : k.toFixed(1)) + 'k';
+  }
+  return Number.isInteger(val) ? val.toString() : val.toFixed(1);
+}
+
+function renderFaderTicksHtml(format = 'db', minVal = 0, maxVal = 100) {
+  let ticks = [];
+  if (format === 'percent') {
+    ticks = [
+      { percent: 100, label: '100%' },
+      { percent: 75, label: '75%' },
+      { percent: 50, label: '50%' },
+      { percent: 25, label: '25%' },
+      { percent: 0, label: '0%' }
+    ];
+  } else if (format === 'custom') {
+    const min = parseFloat(minVal ?? 0);
+    const max = parseFloat(maxVal ?? 100);
+    const step = (max - min) / 4;
+    ticks = [
+      { percent: 100, label: formatTickNum(max) },
+      { percent: 75, label: formatTickNum(min + step * 3) },
+      { percent: 50, label: formatTickNum(min + step * 2) },
+      { percent: 25, label: formatTickNum(min + step * 1) },
+      { percent: 0, label: formatTickNum(min) }
+    ];
+  } else {
+    // Default 'db' format (Cubase curve)
+    ticks = [
+      { percent: 100, label: '+6' },
+      { percent: (104 / 127) * 100, label: '0' },
+      { percent: (76 / 127) * 100, label: '-6' },
+      { percent: (40 / 127) * 100, label: '-18' },
+      { percent: 0, label: '-∞' }
+    ];
+  }
+
+  const itemsHtml = ticks.map(t => {
+    const bottomPx = `calc(10px + (160px * ${t.percent / 100}))`;
+    return `
+      <div class="fader-tick-item" style="bottom: ${bottomPx};">
+        <span class="fader-tick-line left-line"></span>
+        <span class="fader-tick-label">${t.label}</span>
+        <span class="fader-tick-line right-line"></span>
+      </div>
+    `;
+  }).join('');
+
+  return `<div class="fx-fader-ticks">${itemsHtml}</div>`;
+}
+
+// Render Hiệu ứng động (Console Mixer 16 Kênh)
 export function renderEffects() {
   if (!DOM.effectsContainer) return;
   DOM.effectsContainer.innerHTML = '';
   
   if (!appConfig.effects) appConfig.effects = [];
-  
+
+  // Gán slotIndex duy nhất cho các hiệu ứng cũ chưa có
+  const usedSlots = new Set();
+  appConfig.effects.forEach((fx, idx) => {
+    if (fx.slotIndex === undefined || typeof fx.slotIndex !== 'number' || usedSlots.has(fx.slotIndex) || fx.slotIndex < 0) {
+      let freeSlot = 0;
+      while (usedSlots.has(freeSlot)) freeSlot++;
+      fx.slotIndex = freeSlot;
+    }
+    usedSlots.add(fx.slotIndex);
+  });
+
+  const maxOccupiedSlot = appConfig.effects.reduce((max, fx) => Math.max(max, fx.slotIndex ?? 0), -1);
+  const TOTAL_SLOTS = Math.max(12, maxOccupiedSlot + 2);
+  const slotMap = new Array(TOTAL_SLOTS).fill(null);
   appConfig.effects.forEach(fx => {
-    const row = document.createElement('div');
-    row.className = 'fx-row';
-    
-    // Luôn hiển thị nút bật tắt, dùng CSS switch
-    const isOn = fx.isEnabled !== false;
-    const toggleHtml = `
-      <label class="fx-switch" title="Bật/Tắt hiệu ứng" style="margin-right: 12px; cursor: pointer;">
-        <input type="checkbox" class="fx-toggle-checkbox" data-id="${fx.id}" ${isOn ? 'checked' : ''} style="display: none;">
-        <div class="fx-switch-slider ${isOn ? 'on' : 'off'}" style="width: 32px; height: 18px; background: ${isOn ? '#2ecc71' : 'rgba(255,255,255,0.2)'}; border-radius: 9px; position: relative; transition: 0.2s;">
-          <div class="fx-switch-knob" style="width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 2px; left: ${isOn ? '16px' : '2px'}; transition: 0.2s;"></div>
-        </div>
-      </label>
-    `;
-    
-    const isHex = fx.color && fx.color.startsWith('#');
-    const labelClass = isHex ? '' : `label-${fx.color}`;
-    const fillClass = isHex ? '' : `fill-${fx.color}`;
-    const sliderClass = isHex ? `custom-slider-${fx.id}` : fx.color;
-    
-    const labelStyle = isHex ? `color: ${fx.color}; border-color: ${fx.color};` : '';
-    const fillStyle = isHex ? `background: ${fx.color};` : '';
-    
-    if (isHex) {
-      let styleEl = document.getElementById(`style-fx-${fx.id}`);
-      if (!styleEl) {
-        styleEl = document.createElement('style');
-        styleEl.id = `style-fx-${fx.id}`;
-        document.head.appendChild(styleEl);
-      }
-      styleEl.innerHTML = `
-        input[type=range].custom-slider-${fx.id}::-webkit-slider-thumb { border-color: ${fx.color} !important; box-shadow: 0 0 10px ${fx.color} !important; }
-      `;
-    }
-    
-    row.innerHTML = `
-      ${toggleHtml}
-      <span class="fx-label ${labelClass}" data-id="${fx.id}" title="Nháy đúp để sửa cấu hình" style="${labelStyle}; display: inline-flex; align-items: center; justify-content: space-between; padding: 0 8px;">
-        ${fx.name}
-        <button class="btn-fx-edit" data-id="${fx.id}" title="Sửa hiệu ứng này" style="background:none; border:none; color:inherit; opacity: 0.6; cursor:pointer; font-size: 12px; padding:0; margin-left:4px;">⚙️</button>
-      </span>
-      <div class="fx-slider-wrapper">
-        <input type="range" id="slider-fx-${fx.id}" class="${sliderClass}" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
-        <div class="fx-track-fill ${fillClass}" id="fill-fx-${fx.id}" style="${fillStyle}"></div>
-      </div>
-      <span class="fx-value" id="val-fx-${fx.id}">${fx.value ?? 24}</span>
-    `;
-    
-    DOM.effectsContainer.appendChild(row);
-    
-    const slider = document.getElementById(`slider-fx-${fx.id}`);
-    const fill = document.getElementById(`fill-fx-${fx.id}`);
-    const valText = document.getElementById(`val-fx-${fx.id}`);
-    const label = row.querySelector('.fx-label');
-    const toggleBtn = row.querySelector('.fx-toggle-btn');
-    const editBtn = row.querySelector('.btn-fx-edit');
-    
-    updateSliderFill(slider, fill, valText);
-    
-    slider.addEventListener('input', (e) => {
-      fx.value = parseInt(e.target.value);
-      updateSliderFill(slider, fill, valText);
-      import('./midi.js').then(({midi}) => midi.sendCC(fx.ccValue, fx.value));
-    });
-    
-    slider.addEventListener('change', autoSaveCurrentStates);
-    
-    slider.addEventListener('dblclick', () => {
-      slider.value = 100;
-      slider.dispatchEvent(new Event('input'));
-      slider.dispatchEvent(new Event('change'));
-    });
-    
-    label.addEventListener('dblclick', () => {
-      openEffectEditModal(fx.id);
-    });
-    
-    if (editBtn) {
-      editBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        openEffectEditModal(fx.id);
-      });
-    }
-    
-    const toggleCheckbox = row.querySelector('.fx-toggle-checkbox');
-    const switchSlider = row.querySelector('.fx-switch-slider');
-    const switchKnob = row.querySelector('.fx-switch-knob');
-    
-    if (toggleCheckbox) {
-      toggleCheckbox.addEventListener('change', (e) => {
-        fx.isEnabled = e.target.checked;
-        const isOn = fx.isEnabled;
-        
-        switchSlider.style.background = isOn ? '#2ecc71' : 'rgba(255,255,255,0.2)';
-        switchKnob.style.left = isOn ? '16px' : '2px';
-        
-        if (fx.ccToggle > 0) {
-          import('./midi.js').then(({midi}) => midi.sendCC(fx.ccToggle, isOn ? 127 : 0));
-        }
-        autoSaveCurrentStates();
-      });
+    if (fx.slotIndex >= 0 && fx.slotIndex < TOTAL_SLOTS) {
+      slotMap[fx.slotIndex] = fx;
     }
   });
-  
-  if (appConfig.effects.length >= 10) {
-    if(DOM.btnAddEffect) DOM.btnAddEffect.style.display = 'none';
-  } else {
-    if(DOM.btnAddEffect) DOM.btnAddEffect.style.display = 'inline-block';
+
+  for (let slotIdx = 0; slotIdx < TOTAL_SLOTS; slotIdx++) {
+    const fx = slotMap[slotIdx];
+    if (fx) {
+      // Render Kênh Hiệu ứng Đang Bật
+      const row = document.createElement('div');
+      row.className = 'fx-column';
+      row.setAttribute('title', fx.name);
+      
+      const isOn = fx.isEnabled !== false;
+      const toggleHtml = `
+        <label class="fx-switch" title="Bật/Tắt hiệu ứng" style="cursor: pointer; display: block; text-align: center; margin-bottom: 8px;">
+          <input type="checkbox" class="fx-toggle-checkbox" data-id="${fx.id}" ${isOn ? 'checked' : ''} style="display: none;">
+          <div class="fx-switch-slider ${isOn ? 'on' : 'off'}" style="width: 32px; height: 18px; background: ${isOn ? '#2ecc71' : 'rgba(255,255,255,0.2)'}; border-radius: 9px; position: relative; transition: 0.2s; margin: 0 auto;">
+            <div class="fx-switch-knob" style="width: 14px; height: 14px; background: white; border-radius: 50%; position: absolute; top: 2px; left: ${isOn ? '16px' : '2px'}; transition: 0.2s;"></div>
+          </div>
+        </label>
+      `;
+      
+      const isHex = fx.color && fx.color.startsWith('#');
+      const labelClass = isHex ? '' : `label-${fx.color}`;
+      const fillClass = isHex ? '' : `fill-${fx.color}`;
+      const sliderStyle = isHex ? `color: ${fx.color};` : '';
+      const fillStyle = isHex ? `background: ${fx.color};` : '';
+      
+      if (isHex) {
+        let styleEl = document.getElementById(`style-fx-${fx.id}`);
+        if (!styleEl) {
+          styleEl = document.createElement('style');
+          styleEl.id = `style-fx-${fx.id}`;
+          document.head.appendChild(styleEl);
+        }
+        styleEl.innerHTML = `
+          input[type=range].custom-slider-${fx.id}::-webkit-slider-thumb { border-color: ${fx.color} !important; box-shadow: 0 0 10px ${fx.color} !important; }
+        `;
+      }
+      
+      row.innerHTML = `
+        ${toggleHtml}
+        <div class="fx-fader-body standard-layout" data-id="${fx.id}" title="Kéo để điều chỉnh giá trị">
+          ${renderFaderTicksHtml(fx.format || 'db', fx.min, fx.max)}
+          <div class="fx-fader-track"></div>
+          <div class="fx-fader-thumb ${fillClass}" id="thumb-fx-${fx.id}" style="${fillStyle}">
+             <div class="fx-fader-thumb-line"></div>
+          </div>
+          <input type="range" id="slider-fx-${fx.id}" class="vertical-slider hidden-slider" min="0" max="127" value="${fx.value ?? 24}" data-format="${fx.format || 'db'}" data-min="${fx.min ?? 0}" data-max="${fx.max ?? 100}">
+        </div>
+        <div class="fx-value-box" id="val-fx-${fx.id}">${fx.value ?? 24}</div>
+        <div class="fx-label-box ${labelClass}" style="${sliderStyle}" title="Nháy đúp để sửa cấu hình: ${fx.name}">${fx.name}</div>
+      `;
+      
+      DOM.effectsContainer.appendChild(row);
+      
+      const slider = document.getElementById(`slider-fx-${fx.id}`);
+      const thumb = document.getElementById(`thumb-fx-${fx.id}`);
+      const valText = document.getElementById(`val-fx-${fx.id}`);
+      const faderBody = row.querySelector('.fx-fader-body');
+      const labelBox = row.querySelector('.fx-label-box');
+      
+      updateSliderFill(slider, thumb, valText);
+      
+      slider.addEventListener('input', (e) => {
+        fx.value = parseInt(e.target.value);
+        updateSliderFill(slider, thumb, valText);
+        midi.sendCC(fx.ccValue, fx.value);
+      });
+      
+      slider.addEventListener('change', autoSaveCurrentStates);
+      
+      if (labelBox) {
+        labelBox.addEventListener('dblclick', () => {
+          openEffectEditModal({ id: fx.id, slotIndex: slotIdx });
+        });
+      }
+
+      let isDragging = false;
+      
+      const updateFaderValue = (clientY) => {
+        const rect = faderBody.getBoundingClientRect();
+        let percent = (rect.bottom - clientY) / rect.height;
+        percent = Math.max(0, Math.min(1, percent));
+        slider.value = Math.round(percent * 127);
+        slider.dispatchEvent(new Event('input'));
+      };
+
+      faderBody.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        updateFaderValue(e.clientY);
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          updateFaderValue(e.clientY);
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          slider.dispatchEvent(new Event('change'));
+        }
+      });
+      
+      const toggleCheckbox = row.querySelector('.fx-toggle-checkbox');
+      const switchSlider = row.querySelector('.fx-switch-slider');
+      const switchKnob = row.querySelector('.fx-switch-knob');
+      
+      if (toggleCheckbox) {
+        toggleCheckbox.addEventListener('change', (e) => {
+          fx.isEnabled = e.target.checked;
+          const isOn = fx.isEnabled;
+          switchSlider.style.background = isOn ? '#2ecc71' : 'rgba(255,255,255,0.2)';
+          switchKnob.style.left = isOn ? '16px' : '2px';
+          
+          if (fx.ccToggle > 0) {
+            midi.sendCC(fx.ccToggle, isOn ? 127 : 0);
+          }
+          autoSaveCurrentStates();
+        });
+      }
+    } else {
+      // Render Kênh Chờ Rỗng (Ghost Slot) tại đúng slotIdx
+      const phRow = document.createElement('div');
+      phRow.className = 'fx-column placeholder-column';
+      phRow.title = `Bấm để thêm hiệu ứng vào KÊNH ${slotIdx + 1}`;
+      phRow.innerHTML = `
+        <div class="fx-placeholder-switch"></div>
+        <div class="fx-placeholder-body">
+          <div class="fx-placeholder-icon">+</div>
+          <div class="fx-placeholder-text">THÊM</div>
+        </div>
+        <div class="fx-placeholder-box">---</div>
+        <div class="fx-placeholder-label">KÊNH ${slotIdx + 1}</div>
+      `;
+      phRow.addEventListener('click', () => {
+        openEffectEditModal({ isNew: true, slotIndex: slotIdx });
+      });
+      DOM.effectsContainer.appendChild(phRow);
+    }
   }
   
+  if (DOM.btnAddEffect) DOM.btnAddEffect.style.display = 'none';
+
   if (states.isFxPanelOpen) {
-    const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 50;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight + 20; // Thêm 20px padding
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   }
 }
@@ -675,24 +791,36 @@ function getUsedCCs() {
 
 function findNextAvailableValueCC() {
   const usedCCs = getUsedCCs();
-  // Khuyên dùng: 20 - 29 (Nhóm thanh kéo)
-  for (let i = 20; i <= 63; i++) {
+  for (let i = 20; i <= 119; i++) {
     if (!usedCCs.has(i)) return i;
   }
   return 0;
 }
 
-function findNextAvailableToggleCC() {
+function findNextAvailableToggleCC(baseValueCC) {
   const usedCCs = getUsedCCs();
-  // Khuyên dùng: 102 - 111 (Nhóm công tắc)
-  for (let i = 102; i <= 119; i++) {
+  let start = (typeof baseValueCC === 'number' && baseValueCC >= 0) ? baseValueCC + 1 : 21;
+  for (let i = start; i <= 119; i++) {
+    if (!usedCCs.has(i)) return i;
+  }
+  for (let i = 20; i < start; i++) {
     if (!usedCCs.has(i)) return i;
   }
   return 0;
 }
 
-export function openEffectEditModal(id) {
-  let fx = id ? appConfig.effects.find(e => e.id === id) : null;
+export function openEffectEditModal(target) {
+  let targetId = null;
+  let targetSlotIndex = undefined;
+
+  if (target && typeof target === 'object') {
+    targetId = target.id || null;
+    if (target.slotIndex !== undefined) targetSlotIndex = target.slotIndex;
+  } else if (typeof target === 'string' || typeof target === 'number') {
+    targetId = target;
+  }
+
+  let fx = targetId ? appConfig.effects.find(e => e.id === targetId) : null;
   const existingCCs = appConfig.effects
     .filter(e => e.id !== (fx ? fx.id : null))
     .map(e => ({ name: e.name, ccValue: e.ccValue, ccToggle: e.ccToggle }));
@@ -707,20 +835,21 @@ export function openEffectEditModal(id) {
   }
 
   if (!fx) {
-    let maxEffectNum = 0;
-    appConfig.effects.forEach(e => {
-      if (e.name && e.name.toUpperCase().startsWith('EFFECT ')) {
-        const num = parseInt(e.name.substring(7));
-        if (!isNaN(num) && num > maxEffectNum) {
-          maxEffectNum = num;
-        }
-      }
-    });
-    const nextName = `EFFECT ${maxEffectNum + 1}`;
-    fx = { isNew: true, name: nextName, ccValue: findNextAvailableValueCC(), ccToggle: findNextAvailableToggleCC() };
+    const assignedSlot = targetSlotIndex !== undefined ? targetSlotIndex : appConfig.effects.length;
+    const nextName = `CH ${assignedSlot + 1}`;
+    const nextValCC = findNextAvailableValueCC();
+    const nextToggleCC = findNextAvailableToggleCC(nextValCC);
+    fx = { 
+      isNew: true, 
+      name: nextName, 
+      ccValue: nextValCC, 
+      ccToggle: nextToggleCC,
+      slotIndex: assignedSlot
+    };
   } else {
     // Clone to avoid mutating original state before save
     fx = JSON.parse(JSON.stringify(fx));
+    if (targetSlotIndex !== undefined) fx.slotIndex = targetSlotIndex;
   }
   fx.existingCCs = existingCCs;
   fx.mappedCCs = mappedCCs;
@@ -739,26 +868,25 @@ if (window.electronAPI && window.electronAPI.onSaveEffectEdit) {
         });
       }
     } else {
-      if (newFxData.ccToggle === -1) {
-        newFxData.ccToggle = findNextAvailableToggleCC();
+      if (newFxData.ccToggle === -1 || newFxData.ccToggle === undefined) {
+        newFxData.ccToggle = findNextAvailableToggleCC(newFxData.ccValue);
       }
-      const isNew = !appConfig.effects.find(e => e.id === newFxData.id);
-      if (isNew) {
-        if (appConfig.effects.length >= 10) {
-          alert('Tối đa 10 hiệu ứng!');
-          return;
-        }
+      const existingIdx = appConfig.effects.findIndex(e => e.id === newFxData.id);
+      if (existingIdx === -1) {
         appConfig.effects.push(newFxData);
-        if (appConfig.presets) {
-          Object.keys(appConfig.presets).forEach(presetName => {
-            if (appConfig.presets[presetName]) {
-              appConfig.presets[presetName][newFxData.id] = newFxData.value;
-            }
-          });
-        }
       } else {
-        const index = appConfig.effects.findIndex(e => e.id === newFxData.id);
-        appConfig.effects[index] = newFxData;
+        appConfig.effects[existingIdx] = newFxData;
+      }
+
+      if (appConfig.presets) {
+        Object.keys(appConfig.presets).forEach(presetName => {
+          if (appConfig.presets[presetName]) {
+            appConfig.presets[presetName][newFxData.id] = {
+              val: newFxData.value,
+              enabled: newFxData.isEnabled !== false
+            };
+          }
+        });
       }
     }
     
@@ -767,7 +895,10 @@ if (window.electronAPI && window.electronAPI.onSaveEffectEdit) {
       Object.keys(appConfig.presets).forEach(presetName => {
         appConfig.effects.forEach(fx => {
           if (appConfig.presets[presetName][fx.id] === undefined) {
-            appConfig.presets[presetName][fx.id] = fx.value;
+            appConfig.presets[presetName][fx.id] = {
+              val: fx.value,
+              enabled: fx.isEnabled !== false
+            };
           }
         });
       });

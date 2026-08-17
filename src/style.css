@@ -351,99 +351,263 @@ body.web-mode .app-container {
 
 .fx-container {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 15px;
+  padding-bottom: 10px;
 }
 
-.fx-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.fx-label {
-  width: 115px;
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 4px 6px;
-  border-radius: 4px;
-  text-align: center;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.label-orange { background: rgba(243, 156, 18, 0.15); color: var(--color-orange); border: 1px solid rgba(243, 156, 18, 0.3); }
-.label-yellow { background: rgba(241, 196, 15, 0.15); color: var(--color-yellow); border: 1px solid rgba(241, 196, 15, 0.3); }
-.label-purple { background: rgba(155, 89, 182, 0.15); color: var(--color-purple); border: 1px solid rgba(155, 89, 182, 0.3); }
-.label-red { background: rgba(231, 76, 60, 0.15); color: var(--color-red); border: 1px solid rgba(231, 76, 60, 0.3); }
-.label-blue { background: rgba(52, 152, 219, 0.15); color: var(--color-blue); border: 1px solid rgba(52, 152, 219, 0.3); }
-
-.fx-slider-wrapper {
-  position: relative;
-  flex-grow: 1;
+/* Tùy chỉnh thanh cuộn ngang */
+.fx-container::-webkit-scrollbar {
   height: 6px;
+}
+.fx-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+.fx-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+.fx-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Standard Cubase Mixer Fader Layout */
+.fx-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 55px; /* Cubase mixer columns are usually narrow */
+  flex-shrink: 0;
+}
+
+.fx-switch {
+  margin-bottom: 8px;
+}
+
+.fx-fader-body.standard-layout {
+  position: relative;
+  width: 40px;
+  height: 180px; /* Cubase faders are long */
+  background: #2a2a2a;
+  border-radius: 2px;
+  border: 1px solid #1a1a1a;
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  cursor: pointer;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+  margin-bottom: 8px;
+}
+
+.fx-fader-track {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  width: 6px;
+  margin-left: -3px;
+  background: #111;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.fx-fader-thumb {
+  position: absolute;
+  bottom: 50%; /* Sẽ bị js ghi đè */
+  left: 50%;
+  width: 28px;
+  height: 20px;
+  margin-left: -14px;
+  background: var(--color-blue);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.3);
+  z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Let the body handle dragging */
 }
 
-.fx-slider-wrapper input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
+.fx-fader-thumb-line {
   width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 3px;
-  outline: none;
-  z-index: 2;
-  cursor: pointer;
+  height: 2px;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.4);
 }
 
-.fx-slider-wrapper input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
-  transition: transform 0.1s ease;
-}
-
-/* Thumb màu sắc khớp từng thanh chỉnh vang */
-.fx-slider-wrapper input[type="range"].orange::-webkit-slider-thumb { box-shadow: 0 0 8px var(--color-orange); }
-.fx-slider-wrapper input[type="range"].yellow::-webkit-slider-thumb { box-shadow: 0 0 8px var(--color-yellow); }
-.fx-slider-wrapper input[type="range"].purple::-webkit-slider-thumb { box-shadow: 0 0 8px var(--color-purple); }
-.fx-slider-wrapper input[type="range"].red::-webkit-slider-thumb { box-shadow: 0 0 8px var(--color-red); }
-.fx-slider-wrapper input[type="range"].blue::-webkit-slider-thumb { box-shadow: 0 0 8px var(--color-blue); }
-
-.fx-slider-wrapper input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
-}
-
-.fx-track-fill {
+/* Fader scale ticks (Vạch chia độ) */
+.fx-fader-ticks {
   position: absolute;
-  left: 0;
   top: 0;
-  height: 100%;
-  border-radius: 3px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
   z-index: 1;
+}
+
+.fader-tick-item {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  transform: translateY(50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   pointer-events: none;
 }
 
-.fill-orange { background: var(--color-orange); }
-.fill-yellow { background: var(--color-yellow); }
-.fill-purple { background: var(--color-purple); }
-.fill-red { background: var(--color-red); }
-.fill-blue { background: var(--color-blue); }
+.fader-tick-line {
+  width: 4px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
 
-.fx-value {
-  font-size: 10px;
+.fader-tick-label {
+  font-size: 7.5px;
   font-weight: 700;
-  width: 25px;
-  text-align: right;
-  opacity: 0.8;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.fx-value-box {
+  width: 100%;
+  text-align: center;
+  background: #333;
+  color: #ddd;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  margin-bottom: 4px;
+  border: 1px solid #222;
+}
+
+.fx-label-box {
+  width: 100%;
+  text-align: center;
+  background: #444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, filter 0.2s;
+}
+
+.fx-label-box:hover {
+  filter: brightness(1.2);
+}
+
+/* Placeholder Channel Slots (Slot kênh rỗng) */
+.fx-column.placeholder-column {
+  opacity: 0.4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fx-column.placeholder-column:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+.fx-placeholder-switch {
+  height: 26px;
+}
+
+.fx-placeholder-body {
+  width: 40px;
+  height: 180px;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.fx-column.placeholder-column:hover .fx-placeholder-body {
+  border-color: #3498db;
+  background: rgba(52, 152, 219, 0.12);
+  box-shadow: 0 0 12px rgba(52, 152, 219, 0.3);
+}
+
+.fx-placeholder-icon {
+  font-size: 20px;
+  font-weight: bold;
+  color: #3498db;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.fx-placeholder-text {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+}
+
+.fx-placeholder-box {
+  width: 100%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  margin-bottom: 4px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.fx-placeholder-label {
+  width: 100%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.hidden-slider {
+  display: none !important;
+}
+
+/* Các màu chữ */
+.label-orange { background: #5a3c11; }
+.label-yellow { background: #5c4e10; }
+.label-purple { background: #4a2e57; }
+.label-red { background: #5a221f; }
+.label-blue { background: #1a425c; }
+
+/* Các màu fader thumb */
+.fill-orange { background: var(--color-orange) !important; }
+.fill-yellow { background: var(--color-yellow) !important; }
+.fill-purple { background: var(--color-purple) !important; }
+.fill-red { background: var(--color-red) !important; }
+.fill-blue { background: #3498db !important; }
+
+/* Ẩn fx-value cũ */
+.fx-value {
+  display: none;
 }
 
 /* Panel Cài đặt (Settings Panel) */
@@ -1200,8 +1364,9 @@ body.light-theme .presets-divider-line {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 120px;
+  width: 130px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .key-label {
@@ -1217,6 +1382,9 @@ body.light-theme .presets-divider-line {
   font-weight: 800;
   color: var(--color-red);
   text-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .keys-list {

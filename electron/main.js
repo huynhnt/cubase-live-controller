@@ -31,7 +31,7 @@ const configPath = path.join(app.getPath('userData'), 'config.json');
 const WINDOW_SIZES = {
   collapsed: { width: 960, height: 95 },
   expanded: { width: 960, height: 310 },
-  expanded_tone_only: { width: 960, height: 165 },
+  expanded_tone_only: { width: 960, height: 175 },
   settings: { width: 960, height: 430 },
   update: { width: 960, height: 230 }
 };
@@ -333,12 +333,31 @@ function registerGlobalShortcuts(config) {
   }
 }
 
+let isSavingConfig = false;
+let pendingSaveConfig = null;
+
 async function saveConfig(config) {
+  pendingSaveConfig = config;
+  if (isSavingConfig) return true;
+  isSavingConfig = true;
+  
   try {
-    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf8');
+    while (pendingSaveConfig) {
+      const cfgToSave = pendingSaveConfig;
+      pendingSaveConfig = null;
+      const tempPath = configPath + '.tmp';
+      await fs.writeFile(tempPath, JSON.stringify(cfgToSave, null, 2), 'utf8');
+      try {
+        await fs.rename(tempPath, configPath);
+      } catch (err) {
+        await fs.writeFile(configPath, JSON.stringify(cfgToSave, null, 2), 'utf8');
+      }
+    }
+    isSavingConfig = false;
     return true;
   } catch (error) {
     console.error('Lỗi khi lưu config:', error);
+    isSavingConfig = false;
     return false;
   }
 }
@@ -489,8 +508,8 @@ app.whenReady().then(() => {
 
     effectEditWindow = new BrowserWindow({
       parent: mainWindow,
-      width: 440,
-      height: 520,
+      width: 450,
+      height: 610,
       frame: false,
       transparent: true,
       alwaysOnTop: true,
@@ -517,6 +536,12 @@ app.whenReady().then(() => {
     effectEditWindow.on('closed', () => {
       effectEditWindow = null;
     });
+  });
+
+  ipcMain.on('resize-effect-edit-window', (event, width, height) => {
+    if (effectEditWindow && !effectEditWindow.isDestroyed()) {
+      effectEditWindow.setContentSize(width, height);
+    }
   });
 
   ipcMain.on('close-effect-edit-window', () => {

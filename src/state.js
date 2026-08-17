@@ -41,7 +41,10 @@ export const DEFAULT_CONFIG = {
     autotuneScale: 32
   },
   presets: {
-    "Mặc định": { fx1: 24, fx2: 24, fx3: 24, fx4: 20, fx5: 50 }
+    "Mặc định": { fx1: { val: 24, enabled: true }, fx2: { val: 24, enabled: true }, fx3: { val: 15, enabled: true }, fx4: { val: 20, enabled: true }, fx5: { val: 50, enabled: true } },
+    "Nhạc Trẻ": { fx1: { val: 30, enabled: true }, fx2: { val: 20, enabled: true }, fx3: { val: 18, enabled: true }, fx4: { val: 10, enabled: true }, fx5: { val: 30, enabled: true } },
+    "Bolero": { fx1: { val: 45, enabled: true }, fx2: { val: 35, enabled: true }, fx3: { val: 40, enabled: true }, fx4: { val: 35, enabled: true }, fx5: { val: 60, enabled: true } },
+    "Voice": { fx1: { val: 0, enabled: false }, fx2: { val: 10, enabled: true }, fx3: { val: 0, enabled: false }, fx4: { val: 0, enabled: false }, fx5: { val: 0, enabled: false } }
   },
   soundboard: [
     { id: 0, name: 'Tiếng Cười', filePath: '', shortcut: 'num1', color: 'purple' },

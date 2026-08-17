@@ -149,7 +149,7 @@ function renderCubaseTables() {
         tr1.append(tdName1, tdStatus1, tdChannel1, tdAddress1, tdMax1, tdFlags1);
         tbody.appendChild(tr1);
         
-        if (fx.isEnabled && fx.ccToggle >= 0) {
+        if (fx.ccToggle >= 0) {
           const tr2 = document.createElement('tr');
           
           const tdName2 = document.createElement('td');
@@ -310,8 +310,7 @@ export async function saveSettings() {
       if (presetsContainer) presetsContainer.classList.remove('hidden');
       
       const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-      const addBtnHeight = fxCount >= 10 ? 0 : 40;
-      const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+      const customHeight = 450;
       window.electronAPI.resizeWindow('expanded', customHeight);
     } else if (states.isKeySelectorOpen) {
       DOM.fxPanel.classList.remove('hidden');
@@ -349,8 +348,7 @@ export function cancelSettings() {
     if (presetsContainer) presetsContainer.classList.remove('hidden');
     
     const fxCount = appConfig.effects ? appConfig.effects.length : 0;
-    const addBtnHeight = fxCount >= 10 ? 0 : 40;
-    const customHeight = 120 + (fxCount * 40) + addBtnHeight;
+    const customHeight = 450;
     window.electronAPI.resizeWindow('expanded', customHeight);
   } else if (states.isKeySelectorOpen) {
     DOM.fxPanel.classList.remove('hidden');

@@ -60,21 +60,25 @@ export async function exportEffectsXML() {
   const banks = [];
   
   const effects = appConfig.effects || [];
-  for (const fx of effects) {
+  const sortedEffects = [...effects].sort((a, b) => (a.slotIndex ?? 0) - (b.slotIndex ?? 0));
+
+  sortedEffects.forEach((fx, idx) => {
+    const channelNum = (fx.slotIndex !== undefined ? fx.slotIndex : idx) + 1;
+    const safeName = fx.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    const fullName = `CH ${channelNum} (${safeName})`;
+    
     if (fx.ccValue >= 0) {
-      // Remove vietnamese accents for XML compatibility
-      const safeName = fx.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-      ctrls.push({ name: safeName, cc: fx.ccValue, flags: 3 });
-      banks.push({ name: safeName, path: '', flags: 0 }); // Empty path
+      ctrls.push({ name: fullName, cc: fx.ccValue, flags: 3 });
+      banks.push({ name: fullName, path: '', flags: 0 }); // Empty path
     }
+    
     const isToggleOn = fx.isEnabled !== false;
     if (isToggleOn && fx.ccToggle >= 0) {
-      const safeName = fx.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-      const toggleName = `Tat ${safeName}`;
+      const toggleName = `Tat CH ${channelNum} (${safeName})`;
       ctrls.push({ name: toggleName, cc: fx.ccToggle, flags: 3 });
       banks.push({ name: toggleName, path: '', flags: 2 }); // Empty path
     }
-  }
+  });
   
   const xml = buildXML('Cubase Live Controller - Hieu ung', ctrls, banks);
   const success = await window.electronAPI.saveXMLFile(xml, 'Cubase_Live_Effects.xml');
