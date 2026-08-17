@@ -69,6 +69,11 @@ export function renderPresets() {
 
 export function loadPreset(name) {
   if (!appConfig || !appConfig.presets) return;
+
+  if (states.currentMode === 'voice' && name !== states.activePreset) {
+    alert('Đang ở chế độ VOICE THOẠI. Vui lòng bấm chuyển về HÁT LIVE để đổi Preset khác!');
+    return;
+  }
   
   // Tạo rỗng nếu preset hệ thống vô tình bị xóa khỏi config
   const defaultPresets = SYSTEM_PRESETS;

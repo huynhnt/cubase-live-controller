@@ -284,6 +284,11 @@ export function setMode(targetMode) {
 
     savedSingingValues.beatVol = parseInt(DOM.sliderBeatVol.value);
     savedSingingValues.micVol = parseInt(DOM.sliderMicVol.value);
+    savedSingingValues.activePreset = states.activePreset;
+
+    const presetName = appConfig.voicePreset?.presetName || 'Voice';
+    states.activePreset = presetName;
+    renderPresets();
 
     appConfig.effects.forEach(fx => {
       const slider = document.getElementById(`slider-fx-${fx.id}`);
@@ -294,7 +299,6 @@ export function setMode(targetMode) {
       };
     });
 
-    const presetName = appConfig.voicePreset?.presetName || 'Voice';
     const preset = appConfig.presets && appConfig.presets[presetName] ? appConfig.presets[presetName] : {};
 
     appConfig.effects.forEach(fx => {
@@ -360,6 +364,11 @@ export function setMode(targetMode) {
     DOM.btnModeToggle.style.backgroundColor = '';
     DOM.btnModeToggle.querySelector('.mode-text').innerText = 'HÁT LIVE';
     DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click đổi Voice';
+
+    if (savedSingingValues.activePreset) {
+      states.activePreset = savedSingingValues.activePreset;
+      renderPresets();
+    }
 
     appConfig.effects.forEach(fx => {
       let saved = savedSingingValues[fx.id];
