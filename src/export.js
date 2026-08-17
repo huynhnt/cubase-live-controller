@@ -13,7 +13,11 @@ function buildXML(name, ctrls, banks) {
   xml += `<bank name="${name} Bank">\n`;
   for (const b of banks) {
     xml += `<entry ctrl="${b.name}">\n`;
-    xml += `<value><device>VST Mixer</device><chan>1</chan><name>${b.path}</name><flags>${b.flags}</flags></value>\n`;
+    if (b.path === 'EMPTY_EFFECT') {
+      xml += `<value><device>VST Mixer</device><chan>1819440227</chan><tag>1</tag><flags>${b.flags}</flags></value>\n`;
+    } else {
+      xml += `<value><device>VST Mixer</device><chan>1</chan><name>${b.path}</name><flags>${b.flags}</flags></value>\n`;
+    }
     xml += `</entry>\n`;
   }
   xml += `</bank>\n`;
@@ -60,14 +64,14 @@ export async function exportCombinedXML() {
     
     if (fx.ccValue >= 0) {
       ctrls.push({ name: fullName, cc: fx.ccValue, flags: 3 });
-      banks.push({ name: fullName, path: 'volume', flags: 0 }); // Set 'volume' instead of empty to keep VST Mixer selected
+      banks.push({ name: fullName, path: 'EMPTY_EFFECT', flags: 0 }); // Use EMPTY_EFFECT to generate correct Cubase tag
     }
     
     const isToggleOn = fx.isEnabled !== false;
     if (isToggleOn && fx.ccToggle >= 0) {
       const toggleName = `Tat CH ${channelNum} (${safeName})`;
       ctrls.push({ name: toggleName, cc: fx.ccToggle, flags: 3 });
-      banks.push({ name: toggleName, path: 'mute', flags: 2 }); // Set 'mute' instead of empty to keep VST Mixer selected
+      banks.push({ name: toggleName, path: 'EMPTY_EFFECT', flags: 2 }); // Use EMPTY_EFFECT to generate correct Cubase tag
     }
   });
   
