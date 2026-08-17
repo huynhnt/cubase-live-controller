@@ -47,8 +47,28 @@ checkboxHasToggle.addEventListener('change', (e) => {
   uiTextToggle.innerText = isOn ? 'BẬT (ON)' : 'TẮT (OFF)';
 });
 
+function fitWindowSize() {
+  setTimeout(() => {
+    const titlebar = document.querySelector('.titlebar');
+    const content = document.querySelector('.content');
+    const footer = document.querySelector('.footer');
+    
+    let totalHeight = 520;
+    if (titlebar && content && footer) {
+      totalHeight = titlebar.offsetHeight + content.scrollHeight + footer.offsetHeight + 4;
+    } else {
+      totalHeight = document.body.scrollHeight;
+    }
+    
+    if (window.electronAPI && window.electronAPI.resizeEffectEditWindow) {
+      window.electronAPI.resizeEffectEditWindow(450, totalHeight);
+    }
+  }, 40);
+}
+
 selectFxFormat.addEventListener('change', () => {
   fxCustomRange.style.display = selectFxFormat.value === 'custom' ? 'flex' : 'none';
+  fitWindowSize();
 });
 
 function closeWindow() {
@@ -62,10 +82,6 @@ function closeWindow() {
 let currentFx = null;
 let existingCCs = [];
 let mappedCCs = [];
-
-selectFxFormat.addEventListener('change', () => {
-  fxCustomRange.style.display = selectFxFormat.value === 'custom' ? 'flex' : 'none';
-});
 
 btnClose.addEventListener('click', closeWindow);
 btnFxCancel.addEventListener('click', closeWindow);
@@ -123,7 +139,8 @@ btnFxSave.addEventListener('click', () => {
     min: parseFloat(inputFxMin.value) || 0,
     max: parseFloat(inputFxMax.value) || 0,
     value: parseInt(inputFxValue.value) || 24, // Giá trị mặc định do user tự nhập
-    isEnabled: isEnabled
+    isEnabled: isEnabled,
+    slotIndex: (currentFx && currentFx.slotIndex !== undefined) ? currentFx.slotIndex : 0
   };
   
   if (window.electronAPI && window.electronAPI.saveEffectEdit) {
@@ -173,5 +190,6 @@ if (window.electronAPI && window.electronAPI.onLoadEffectEdit) {
     inputFxValue.value = isNew ? 24 : (fx ? (fx.value ?? 24) : 24);
     
     btnFxDelete.style.display = (!isNew && fx && fx.id) ? 'block' : 'none';
+    fitWindowSize();
   });
 }

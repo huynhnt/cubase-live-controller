@@ -210,7 +210,7 @@ export function handleIncomingMidiCC({ cc, value }) {
     const fx = appConfig.effects.find(e => e.ccValue === cc || e.ccToggle === cc);
     if (fx.ccValue === cc && !interactingSliders[fx.id]) {
       const slider = document.getElementById(`slider-fx-${fx.id}`);
-      const fill = document.getElementById(`fill-fx-${fx.id}`);
+      const fill = document.getElementById(`thumb-fx-${fx.id}`) || document.getElementById(`fill-fx-${fx.id}`);
       const valText = document.getElementById(`val-fx-${fx.id}`);
       if (slider) {
         slider.value = value;
@@ -287,23 +287,54 @@ export function setMode(targetMode) {
 
     appConfig.effects.forEach(fx => {
       const slider = document.getElementById(`slider-fx-${fx.id}`);
-      if (slider) {
-        savedSingingValues[fx.id] = parseInt(slider.value) || 0;
-      }
+      const val = slider ? parseInt(slider.value) || 0 : fx.value;
+      savedSingingValues[fx.id] = {
+        val: val,
+        enabled: fx.isEnabled !== false
+      };
     });
 
     const presetName = appConfig.voicePreset?.presetName || 'Voice';
     const preset = appConfig.presets && appConfig.presets[presetName] ? appConfig.presets[presetName] : {};
 
     appConfig.effects.forEach(fx => {
-      const presetVal = preset[fx.id] !== undefined ? preset[fx.id] : (fx.value ?? 24);
+      let presetData = preset[fx.id];
+      let presetVal, isEnabled;
+      if (typeof presetData === 'object' && presetData !== null) {
+        presetVal = presetData.val ?? fx.value ?? 24;
+        isEnabled = presetData.enabled !== false;
+      } else if (typeof presetData === 'number') {
+        presetVal = presetData;
+        isEnabled = fx.isEnabled !== false;
+      } else {
+        presetVal = fx.value ?? 24;
+        isEnabled = fx.isEnabled !== false;
+      }
+
+      fx.value = presetVal;
+      fx.isEnabled = isEnabled;
+
       midi.sendCC(fx.ccValue, presetVal);
+      if (fx.ccToggle > 0) {
+        midi.sendCC(fx.ccToggle, isEnabled ? 127 : 0);
+      }
+
       const slider = document.getElementById(`slider-fx-${fx.id}`);
-      const fill = document.getElementById(`fill-fx-${fx.id}`);
+      const fill = document.getElementById(`thumb-fx-${fx.id}`) || document.getElementById(`fill-fx-${fx.id}`);
       const valText = document.getElementById(`val-fx-${fx.id}`);
+      const toggleCheckbox = document.querySelector(`.fx-toggle-checkbox[data-id="${fx.id}"]`);
+      const row = slider ? slider.closest('.fx-column') : null;
+
       if (slider) {
         slider.value = presetVal;
         updateSliderFill(slider, fill, valText);
+      }
+      if (toggleCheckbox) {
+        toggleCheckbox.checked = isEnabled;
+        const switchSlider = row ? row.querySelector('.fx-switch-slider') : null;
+        const switchKnob = row ? row.querySelector('.fx-switch-knob') : null;
+        if (switchSlider) switchSlider.style.background = isEnabled ? '#2ecc71' : 'rgba(255,255,255,0.2)';
+        if (switchKnob) switchKnob.style.left = isEnabled ? '16px' : '2px';
       }
     });
 
@@ -331,17 +362,34 @@ export function setMode(targetMode) {
     DOM.btnModeToggle.querySelector('.mode-sub').innerText = 'Click đổi Voice';
 
     appConfig.effects.forEach(fx => {
-      let val = savedSingingValues[fx.id];
-      if (val === undefined) val = fx.value;
+      let saved = savedSingingValues[fx.id];
+      let val = typeof saved === 'object' ? saved.val : (typeof saved === 'number' ? saved : fx.value);
+      let isEnabled = typeof saved === 'object' ? (saved.enabled !== false) : (fx.isEnabled !== false);
+
       fx.value = val;
+      fx.isEnabled = isEnabled;
+
       midi.sendCC(fx.ccValue, val);
+      if (fx.ccToggle > 0) {
+        midi.sendCC(fx.ccToggle, isEnabled ? 127 : 0);
+      }
 
       const slider = document.getElementById(`slider-fx-${fx.id}`);
-      const fill = document.getElementById(`fill-fx-${fx.id}`);
+      const fill = document.getElementById(`thumb-fx-${fx.id}`) || document.getElementById(`fill-fx-${fx.id}`);
       const valText = document.getElementById(`val-fx-${fx.id}`);
+      const toggleCheckbox = document.querySelector(`.fx-toggle-checkbox[data-id="${fx.id}"]`);
+      const row = slider ? slider.closest('.fx-column') : null;
+
       if (slider) {
         slider.value = val;
         updateSliderFill(slider, fill, valText);
+      }
+      if (toggleCheckbox) {
+        toggleCheckbox.checked = isEnabled;
+        const switchSlider = row ? row.querySelector('.fx-switch-slider') : null;
+        const switchKnob = row ? row.querySelector('.fx-switch-knob') : null;
+        if (switchSlider) switchSlider.style.background = isEnabled ? '#2ecc71' : 'rgba(255,255,255,0.2)';
+        if (switchKnob) switchKnob.style.left = isEnabled ? '16px' : '2px';
       }
     });
 
@@ -546,7 +594,6 @@ export function setupEventListeners() {
   DOM.sliderBeatVol.addEventListener('change', autoSaveCurrentStates);
   DOM.sliderMicVol.addEventListener('change', autoSaveCurrentStates);
 
-  if (DOM.btnAddEffect) DOM.btnAddEffect.addEventListener('click', () => openEffectEditModal(null));
   if (DOM.btnExportFeatures) DOM.btnExportFeatures.addEventListener('click', exportFeaturesXML);
   if (DOM.btnExportEffects) DOM.btnExportEffects.addEventListener('click', exportEffectsXML);
 

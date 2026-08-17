@@ -149,7 +149,7 @@ function renderCubaseTables() {
         tr1.append(tdName1, tdStatus1, tdChannel1, tdAddress1, tdMax1, tdFlags1);
         tbody.appendChild(tr1);
         
-        if (fx.isEnabled && fx.ccToggle >= 0) {
+        if (fx.ccToggle >= 0) {
           const tr2 = document.createElement('tr');
           
           const tdName2 = document.createElement('td');

@@ -439,6 +439,44 @@ body.web-mode .app-container {
   border-bottom: 1px solid rgba(255,255,255,0.4);
 }
 
+/* Fader scale ticks (Vạch chia độ) */
+.fx-fader-ticks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fader-tick-item {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  transform: translateY(50%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.fader-tick-line {
+  width: 4px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.fader-tick-label {
+  font-size: 7.5px;
+  font-weight: 700;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
 .fx-value-box {
   width: 100%;
   text-align: center;
@@ -465,6 +503,88 @@ body.web-mode .app-container {
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, filter 0.2s;
+}
+
+.fx-label-box:hover {
+  filter: brightness(1.2);
+}
+
+/* Placeholder Channel Slots (Slot kênh rỗng) */
+.fx-column.placeholder-column {
+  opacity: 0.4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fx-column.placeholder-column:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+.fx-placeholder-switch {
+  height: 26px;
+}
+
+.fx-placeholder-body {
+  width: 40px;
+  height: 180px;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.fx-column.placeholder-column:hover .fx-placeholder-body {
+  border-color: #3498db;
+  background: rgba(52, 152, 219, 0.12);
+  box-shadow: 0 0 12px rgba(52, 152, 219, 0.3);
+}
+
+.fx-placeholder-icon {
+  font-size: 20px;
+  font-weight: bold;
+  color: #3498db;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.fx-placeholder-text {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+}
+
+.fx-placeholder-box {
+  width: 100%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  margin-bottom: 4px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.fx-placeholder-label {
+  width: 100%;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 9px;
+  font-weight: bold;
+  padding: 4px 0;
+  border-radius: 2px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
 }
 
 .hidden-slider {
@@ -1244,8 +1364,9 @@ body.light-theme .presets-divider-line {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 120px;
+  width: 130px;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .key-label {
@@ -1261,6 +1382,9 @@ body.light-theme .presets-divider-line {
   font-weight: 800;
   color: var(--color-red);
   text-shadow: 0 0 8px rgba(231, 76, 60, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .keys-list {

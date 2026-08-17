@@ -3,19 +3,23 @@ import { states, appConfig } from './state.js';
 import { midi } from './midi.js';
 import { updateSliderFill, autoSaveCurrentStates } from './ui.js';
 
+export const SYSTEM_PRESETS = ["Mặc định", "Nhạc Trẻ", "Bolero", "Voice"];
+
 export function renderPresets() {
   if (!DOM.presetsSystemList || !DOM.presetsCustomList || !appConfig || !appConfig.presets) return;
   
   DOM.presetsSystemList.innerHTML = '';
   DOM.presetsCustomList.innerHTML = '';
   
-  const defaultPresets = ["Mặc định", "Voice"];
+  const defaultPresets = SYSTEM_PRESETS;
   
   const keys = Object.keys(appConfig.presets);
   
-  // Đảm bảo Mặc định và Voice luôn tồn tại trong danh sách để render
-  if (!keys.includes("Mặc định")) keys.push("Mặc định");
-  if (!keys.includes("Voice")) keys.push("Voice");
+  // Đảm bảo các preset hệ thống luôn tồn tại trong danh sách để render
+  defaultPresets.forEach(pName => {
+    if (!keys.includes(pName)) keys.push(pName);
+    if (!appConfig.presets[pName]) appConfig.presets[pName] = {};
+  });
   
   const systemKeys = keys.filter(k => defaultPresets.includes(k));
   // Giữ nguyên thứ tự gốc (thứ tự thêm vào) cho các preset cá nhân
@@ -33,17 +37,25 @@ export function renderPresets() {
       btn.classList.add('active');
     }
     
-    btn.addEventListener('click', () => loadPreset(name));
+    btn.addEventListener('click', (e) => {
+      if (e.ctrlKey) {
+        states.presetToOverwrite = name;
+        DOM.overwriteModalText.innerText = `Bạn có muốn cập nhật (ghi đè) cấu hình hiện tại của các hiệu ứng vào Preset "${name}" không?`;
+        DOM.overwriteModal.classList.remove('hidden');
+      } else {
+        loadPreset(name);
+      }
+    });
     
     const isSystem = defaultPresets.includes(name);
     
     if (isSystem) {
       btn.classList.add('system-preset');
-      btn.title = name === "Mặc định" ? "Preset chuẩn hệ thống (không thể xóa)" : "Preset hệ thống cho Voice (nháy đúp hoặc lưu đè để sửa, không thể xóa)";
+      btn.title = `Preset hệ thống "${name}" (Ctrl+Click để lưu đè cấu hình hiện tại, không thể xóa)`;
       DOM.presetsSystemList.appendChild(btn);
     } else {
       btn.classList.add('custom-preset');
-      btn.title = "Preset cá nhân của bạn (chuột phải để xóa)";
+      btn.title = "Preset cá nhân của bạn (Ctrl+Click để lưu đè cấu hình hiện tại, chuột phải để xóa)";
       
       btn.addEventListener('contextmenu', (e) => {
         e.preventDefault();
@@ -59,7 +71,7 @@ export function loadPreset(name) {
   if (!appConfig || !appConfig.presets) return;
   
   // Tạo rỗng nếu preset hệ thống vô tình bị xóa khỏi config
-  const defaultPresets = ["Mặc định", "Voice"];
+  const defaultPresets = SYSTEM_PRESETS;
   if (defaultPresets.includes(name) && !appConfig.presets[name]) {
     appConfig.presets[name] = {};
   }
@@ -72,20 +84,46 @@ export function loadPreset(name) {
   const preset = appConfig.presets[name];
   
   appConfig.effects.forEach(fx => {
-    let val = preset[fx.id];
-    if (val === undefined) val = fx.value ?? 24;
+    let presetData = preset[fx.id];
+    let val, isEnabled;
+    
+    if (typeof presetData === 'object' && presetData !== null) {
+      val = presetData.val ?? fx.value ?? 24;
+      isEnabled = presetData.enabled !== false;
+    } else if (typeof presetData === 'number') {
+      val = presetData;
+      isEnabled = fx.isEnabled !== false;
+    } else {
+      val = fx.value ?? 24;
+      isEnabled = fx.isEnabled !== false;
+    }
     
     fx.value = val;
+    fx.isEnabled = isEnabled;
+    
     const slider = document.getElementById(`slider-fx-${fx.id}`);
-    const fill = document.getElementById(`fill-fx-${fx.id}`);
+    const fill = document.getElementById(`thumb-fx-${fx.id}`) || document.getElementById(`fill-fx-${fx.id}`);
     const valText = document.getElementById(`val-fx-${fx.id}`);
+    const toggleCheckbox = document.querySelector(`.fx-toggle-checkbox[data-id="${fx.id}"]`);
+    const row = slider ? slider.closest('.fx-column') : null;
     
     if (slider) {
       slider.value = val;
       updateSliderFill(slider, fill, valText);
     }
     
+    if (toggleCheckbox) {
+      toggleCheckbox.checked = isEnabled;
+      const switchSlider = row ? row.querySelector('.fx-switch-slider') : null;
+      const switchKnob = row ? row.querySelector('.fx-switch-knob') : null;
+      if (switchSlider) switchSlider.style.background = isEnabled ? '#2ecc71' : 'rgba(255,255,255,0.2)';
+      if (switchKnob) switchKnob.style.left = isEnabled ? '16px' : '2px';
+    }
+    
     midi.sendCC(fx.ccValue, val);
+    if (fx.ccToggle > 0) {
+      midi.sendCC(fx.ccToggle, isEnabled ? 127 : 0);
+    }
   });
   
   autoSaveCurrentStates();
@@ -101,11 +139,6 @@ export async function submitNewPreset() {
   const name = DOM.inputPresetName.value.trim();
   if (name === '') {
     alert('Tên Preset không được để trống!');
-    return;
-  }
-  
-  if (name === "Mặc định") {
-    alert('Không thể ghi đè Preset "Mặc định" của hệ thống!');
     return;
   }
   
@@ -125,7 +158,10 @@ export async function executeSavePreset(name) {
     const slider = document.getElementById(`slider-fx-${fx.id}`);
     let val = slider ? parseInt(slider.value) : fx.value;
     if (isNaN(val)) val = 24;
-    newPreset[fx.id] = val;
+    newPreset[fx.id] = {
+      val: val,
+      enabled: fx.isEnabled !== false
+    };
   });
   
   if (!appConfig.presets) appConfig.presets = {};
@@ -150,9 +186,9 @@ export function confirmOverwritePreset() {
 }
 
 export function deletePreset(name) {
-  const defaultPresets = ["Mặc định", "Voice"];
+  const defaultPresets = SYSTEM_PRESETS;
   if (defaultPresets.includes(name)) {
-    alert(`Không thể xóa Preset "${name}" của hệ thống!`);
+    alert(`Không thể xóa Preset hệ thống "${name}"!`);
     return;
   }
   
