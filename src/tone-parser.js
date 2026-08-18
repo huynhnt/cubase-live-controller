@@ -104,3 +104,14 @@ export function extractSongInfo(title) {
   }
   return { song: clean.trim(), artist: '' };
 }
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+/**
+ * Chuyển đổi key (0-11) và scale (0=Major, 1=Minor) thành tên tone chuẩn (vd: "Am", "C#m", "Eb")
+ */
+export function getToneName(key, scale) {
+  const note = NOTE_NAMES[((key % 12) + 12) % 12] || 'C';
+  return scale === 1 ? `${note}m` : note;
+}
+

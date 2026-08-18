@@ -38,7 +38,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   downloadUpdate: () => ipcRenderer.send('download-update'),
   closeUpdateWindow: () => ipcRenderer.send('close-update-window'),
   checkForUpdates: () => ipcRenderer.send('check-for-updates'),
-  getAppVersion: () => ipcRenderer.invoke('get-app-version')
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  logDebug: (msg) => ipcRenderer.send('log-debug', msg),
+  getSystemAudioSource: () => ipcRenderer.invoke('get-system-audio-source')
 });
 
 

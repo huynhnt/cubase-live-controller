@@ -271,6 +271,8 @@ export function initKeySelector() {
           if (foundTone) {
             states.detectedKey = foundTone.key;
             states.detectedScale = foundTone.scale;
+            states.detectedConfidence = 95;
+            states.candidateKeys = [{ key: foundTone.key, scale: foundTone.scale, confidence: 95 }];
             states.detectionMethod = 'title';
             states.isWaitingForAutoKey = false;
             
@@ -289,7 +291,7 @@ export function initKeySelector() {
       }
 
       // ===== TIER 2: Web Audio Analysis =====
-      DOM.detectedKeyDisplay.innerText = '🎤 Tier 2...';
+      DOM.detectedKeyDisplay.innerText = '🎤 Smart Tone v2...';
       DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
 
       try {
@@ -305,6 +307,10 @@ export function initKeySelector() {
 
         states.detectedKey = audioResult.key;
         states.detectedScale = audioResult.scale;
+        states.detectedConfidence = audioResult.confidence;
+        states.candidateKeys = audioResult.candidates || [];
+        states.detectedVoteDetails = audioResult.voteDetails || [];
+        states.detectedSessionTime = audioResult.sessionTime || '';
         states.detectionMethod = 'audio';
         
         // Tự động áp dụng kết quả
@@ -316,6 +322,9 @@ export function initKeySelector() {
         DOM.btnGetTone.classList.remove('analyzing');
         updateAutoKeyDisplay();
       } catch (audioErr) {
+        if (window.electronAPI?.logDebug) {
+          window.electronAPI.logDebug('❌ [SmartTone Error] Lỗi phân tích âm thanh: ' + audioErr.message);
+        }
         // Tất cả 3 tier đều thất bại
         states.isWaitingForAutoKey = false;
         DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
@@ -404,8 +413,8 @@ export function updateKeyDisplay() {
 
 export function updateAutoKeyDisplay() {
   const METHOD_BADGE = {
-    'title': '📋',
-    'audio': '🎤',
+    'title': '📋 Titling',
+    'audio': '🎤 Smart Tone v2',
   };
 
   if (states.detectedKey !== null && states.detectedScale !== null) {
@@ -414,17 +423,34 @@ export function updateAutoKeyDisplay() {
     const keyName = names[states.detectedKey] || 'C';
     const scaleName = isMajor ? 'Major' : 'Minor';
     const badge = states.detectionMethod ? ` — ${METHOD_BADGE[states.detectionMethod] || ''}` : '';
-    DOM.detectedKeyDisplay.innerText = `${keyName} ${scaleName}${badge}`;
-    DOM.detectedKeyDisplay.style.color = 'var(--color-green)';
+    const confStr = states.detectedConfidence ? ` (${states.detectedConfidence}%)` : '';
+    const timeTag = states.detectedSessionTime ? `${states.detectedSessionTime} ` : '';
+
+    let altTip = '';
+    if (states.candidateKeys && states.candidateKeys.length > 1) {
+      const alt = states.candidateKeys[1];
+      altTip = ` | Gợi ý 2: ${alt.name} (${alt.confidence}%)`;
+    }
+
+    let votesTip = '';
+    if (states.detectedVoteDetails && states.detectedVoteDetails.length > 0) {
+      const topVotes = states.detectedVoteDetails.slice(0, 4);
+      votesTip = '\n\n📊 Ma trận Bầu chọn Frames:\n' + topVotes.map(v => `   • ${v.name}: ${v.count} phiếu`).join('\n');
+    }
+
+    DOM.detectedKeyDisplay.innerText = `${keyName} ${scaleName}${confStr}${badge}`;
+    DOM.detectedKeyDisplay.title = `${timeTag}Smart Tone v2: ${keyName} ${scaleName} (Độ tin cậy ${states.detectedConfidence || 100}%)${altTip}${votesTip}`;
+    DOM.detectedKeyDisplay.style.color = (states.detectedConfidence && states.detectedConfidence < 65) ? 'var(--color-yellow, #f39c12)' : 'var(--color-green)';
 
     if (states.isWaitingForAutoKey) {
       states.isWaitingForAutoKey = false;
-      DOM.btnGetTone.innerText = 'Lấy Tone';
+      DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
       DOM.btnGetTone.classList.remove('analyzing');
     }
   } else {
     DOM.detectedKeyDisplay.innerText = 'Smart Tone: Chưa rõ';
     DOM.detectedKeyDisplay.style.color = '';
+    DOM.detectedKeyDisplay.title = '';
   }
 }
 

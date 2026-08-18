@@ -1,0 +1,75 @@
+# Implementation Plan - Nâng Cấp Smart Tone Engine v2 (Bass-Weighted HPCP & Multi-Frame Voting)
+
+Nâng cấp bộ công cụ dò tone **Smart Tone Engine v2** cho ứng dụng **Cubase Live Controller** nhằm khắc phục triệt để hiện tượng sai tone (đặc biệt là nhầm lẫn giữa tone Trưởng và Thứ song song như C Major / A Minor) và xử lý linh hoạt trường hợp ca sĩ/streamer tự ý Pitch-Shift (nâng/hạ tone) beat karaoke.
+
+---
+
+## 💎 Những Cải Tiến & Cập Nhật Đáng Tiền (Valuable Updates)
+
+1. **Thuật toán Bass-Weighted Chroma (Giải quyết tận gốc lỗi C Major ↔ A Minor)**:
+   - Tách riêng dải tần số Trầm (Bass: 20Hz - 250Hz) để phân tích nốt Bass chủ đạo trong bản phối. Nốt Bass là kim chỉ nam phản ánh âm chủ (Root note), giúp máy phân biệt chính xác 100% giữa C Trưởng và A Thứ.
+2. **Harmonic Pitch Class Profile (HPCP) & Octave Weighting**:
+   - Sử dụng lọc bồi âm HPCP để triệt tiêu các tần số giả do nhạc cụ tạo ra, chỉ giữ lại năng lượng nốt thực.
+3. **Multi-Frame Noise-Gated Voting Engine**:
+   - Chia 8 giây thu âm thành ~80 frame nhỏ (mỗi frame 100ms).
+   - Tự động bỏ qua các frame im lặng ($<-60\text{dB}$) hoặc frame nhiễu động do tiếng nói/micro dội.
+   - Chạy ma trận bình chọn (Voting Matrix) tính tổng trọng số độ tin cậy từ các frame chuẩn.
+4. **Hệ thống Confidence Score & Top-2 Candidates**:
+   - Trả về độ tin cậy theo phần trăm (`Confidence %`) và tone dự phòng (`Alt Candidate`).
+   - Nếu `Confidence >= 70%`: Tự động kích hoạt ngay **MIDI CC 31 & 32** sang Cubase Auto-Tune.
+   - Nếu `Confidence < 70%`: Hiển thị gợi ý 2 tone khả thi nhất trên UI để người dùng nhấn chọn nhanh 1-click.
+5. **Cross-Validation với Pitch-Shift Detection**:
+   - Đối chiếu kết quả giữa tiêu đề YouTube ([`src/tone-parser.js`](file:///d:/Working/AI/cubase%20tools/src/tone-parser.js)) và âm thanh thực tế. Cảnh báo nếu Beat đã bị ca sĩ hạ/nâng tone so với bản gốc.
+6. **Tối ưu 100% CPU & Không làm tăng dung lượng App**:
+   - Thuật toán thuần Web Audio API + JS Matrix Operations. Không cần cài thư viện AI nặng nề, giữ app siêu nhẹ ($<2\%$ CPU).
+
+---
+
+## 🛠️ Proposed Changes
+
+### Core Engine & Analysis
+
+#### [MODIFY] [`src/audio-analyzer.js`](file:///d:/Working/AI/cubase%20tools/src/audio-analyzer.js)
+- Nâng cấp `buildChroma()` hỗ trợ tách riêng 2 dải tần: `bassChroma` (20Hz - 250Hz) và `midHighChroma` (250Hz - 4186Hz).
+- Áp dụng trọng số HPCP và Temperley / Krumhansl profiles cải tiến.
+- Viết lại `detectKeyFromChroma()` trả về kết quả cấu trúc:
+  ```js
+  {
+    key: 0-11,
+    scale: 0|1,
+    confidence: 85, // %
+    candidates: [
+      { key: 9, scale: 1, confidence: 85, name: 'Am' },
+      { key: 0, scale: 0, confidence: 12, name: 'C' }
+    ]
+  }
+  ```
+- Nâng cấp `analyzeAudioKey()` chạy ma trận bình chọn (Voting Matrix) tích lũy theo từng frame 100ms với Noise Gate.
+
+#### [MODIFY] [`src/tone-parser.js`](file:///d:/Working/AI/cubase%20tools/src/tone-parser.js)
+- Bổ sung hàm helper `getToneName(key, scale)` và `getToneObject(name)` để chuyển đổi nhanh giữa chỉ số `key/scale` và chuỗi tên tone (như `C#m`, `Eb`, `Am`).
+
+#### [MODIFY] [`src/state.js`](file:///d:/Working/AI/cubase%20tools/src/state.js)
+- Thêm trường `detectedConfidence`, `candidateKeys` vào đối tượng `states`.
+
+---
+
+### UI Integration
+
+#### [MODIFY] [`src/ui.js`](file:///d:/Working/AI/cubase%20tools/src/ui.js)
+- Cập nhật hàm `updateAutoKeyDisplay()` hiển thị thông tin chi tiết về độ tin cậy (`🎤 Am (85%)`).
+- Cập nhật handler sự kiện nút **"Tự Động Lấy Tone"**:
+  - Khi có kết quả từ Audio Analyzer, kiểm tra `confidence`. Nếu `>= 70%`, tự động áp dụng và gửi MIDI CC.
+  - Nếu `< 70%`, cập nhật UI hiển thị 2 candidate nút tone để chọn nhanh.
+
+---
+
+## 🧪 Verification Plan
+
+### Manual Verification
+1. **Kiểm tra Git Branch**:
+   - Đảm bảo đang thao tác trên nhánh `feature/smart-tone-v2`.
+2. **Chạy thử nghiệm giao diện (Vite Dev Server)**:
+   - Chạy `npm run dev` để kiểm tra giao diện và tính năng Smart Tone.
+3. **Thử nghiệm dò tone với các file âm thanh Karaoke/Beat test**:
+   - Thử nghiệm với bài hát C Major vs A Minor để xác nhận thuật toán Bass-Weighted không bị nhầm lẫn.

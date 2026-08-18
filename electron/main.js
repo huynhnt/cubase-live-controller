@@ -677,6 +677,17 @@ app.whenReady().then(() => {
     }
   });
 
+  // Lấy ID nguồn Desktop Screen để thu âm thanh hệ thống (WASAPI Loopback) trực tiếp
+  ipcMain.handle('get-system-audio-source', async () => {
+    try {
+      const sources = await desktopCapturer.getSources({ types: ['screen'] });
+      return (sources && sources.length > 0) ? sources[0].id : null;
+    } catch (err) {
+      console.error('Lỗi get-system-audio-source:', err);
+      return null;
+    }
+  });
+
   ipcMain.handle('get-app-version', () => {
     return app.getVersion();
   });
@@ -736,6 +747,10 @@ app.whenReady().then(() => {
       updateWindow.close();
       updateWindow = null;
     }
+  });
+
+  ipcMain.on('log-debug', (event, msg) => {
+    console.log(msg);
   });
 
   autoUpdater.on('update-available', (info) => {

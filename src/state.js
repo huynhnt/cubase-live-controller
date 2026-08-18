@@ -193,6 +193,10 @@ export let states = {
   currentScale: 0, // 0 = Major (Trưởng)
   detectedKey: null,
   detectedScale: null,
+  detectedConfidence: null,
+  candidateKeys: [],
+  detectedVoteDetails: [],
+  detectedSessionTime: '',
   isWaitingForAutoKey: false,
   detectionMethod: null, // 'title' | 'spotify' | 'audio' | null
 };
