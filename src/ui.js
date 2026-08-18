@@ -298,11 +298,15 @@ export function initKeySelector() {
         const durationMs = appConfig.audioAnalyzer?.duration ? appConfig.audioAnalyzer.duration * 1000 : 8000;
         const minFreq = appConfig.audioAnalyzer?.minFreq ?? 27.5;
         
-        DOM.btnGetTone.innerText = `Đang dò... (${durationMs/1000}s)`;
+        DOM.btnGetTone.innerText = `Đang nghĩ... (${durationMs/1000}s)`;
         
-        const audioResult = await analyzeAudioKey(durationMs, minFreq, (progress) => {
+        const audioResult = await analyzeAudioKey(durationMs, minFreq, (progress, preliminaryName, preliminaryConfidence) => {
           const sec = Math.round(((100 - progress) / 100) * (durationMs / 1000));
-          DOM.btnGetTone.innerText = `Dò âm... ${sec}s`;
+          if (preliminaryName) {
+            DOM.btnGetTone.innerText = `Nghĩ: ${preliminaryName} ${preliminaryConfidence}% (${sec}s)`;
+          } else {
+            DOM.btnGetTone.innerText = `Đang nghĩ... ${sec}s`;
+          }
         });
 
         states.detectedKey = audioResult.key;

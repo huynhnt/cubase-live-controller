@@ -353,7 +353,7 @@ export async function analyzeAudioKey(durationMs = 8000, minFreq = 27.5, onProgr
 
     // Gửi sự kiện callback về UI ngay lập tức
     if (onProgress && typeof onProgress === 'function') {
-      onProgress(Math.min(((Date.now() - startTime) / durationMs) * 100, 100), segmentResult.name);
+      onProgress(Math.min(((Date.now() - startTime) / durationMs) * 100, 100), segmentResult.name, segmentResult.confidence);
     }
 
     // Reset accumulator cho segment tiếp theo
