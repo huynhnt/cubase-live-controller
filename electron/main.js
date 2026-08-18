@@ -31,7 +31,7 @@ const configPath = path.join(app.getPath('userData'), 'config.json');
 const WINDOW_SIZES = {
   collapsed: { width: 960, height: 95 },
   expanded: { width: 960, height: 310 },
-  expanded_tone_only: { width: 960, height: 175 },
+  expanded_tone_only: { width: 960, height: 235 },
   settings: { width: 960, height: 430 },
   update: { width: 960, height: 230 }
 };

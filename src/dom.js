@@ -54,6 +54,8 @@ export const DOM = {
   get currentKeyDisplay() { return document.getElementById('current-key-display'); },
   get detectedKeyDisplay() { return document.getElementById('detected-key-display'); },
   get btnGetTone() { return document.getElementById('btn-get-tone'); },
+  get btnManualTone() { return document.getElementById('btn-manual-tone'); },
+  get toggleAutoListen() { return document.getElementById('toggle-auto-listen'); },
   
   // Panel cài đặt & inputs
   get settingsPanel() { return document.getElementById('settings-panel'); },

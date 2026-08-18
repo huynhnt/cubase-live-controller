@@ -2,7 +2,8 @@ import { DOM } from './dom.js';
 import { states, appConfig, savedSingingValues } from './state.js';
 import { midi } from './midi.js';
 import { parseToneFromTitle, extractSongInfo } from './tone-parser.js';
-import { analyzeAudioKey, stopAnalysis } from './audio-analyzer.js';
+import { analyzeAudioKey, stopAnalysis, resetSessionTimer, startAutoListen, stopAutoListen } from './audio-analyzer.js';
+import { generateHashId, getFromCache, saveToCache } from './cache-db.js';
 
 import { CUBASE_DB_CURVE } from './cubase_curve.js';
 
@@ -236,13 +237,45 @@ export function initKeySelector() {
     });
   });
 
-  if (DOM.btnGetTone) {
-    DOM.btnGetTone.addEventListener('click', async () => {
+  if (DOM.toggleAutoListen) {
+    DOM.toggleAutoListen.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        startAutoListen(() => {
+          // Khi auto-listen phát hiện nhạc
+          if (DOM.btnGetTone && !states.isWaitingForAutoKey) {
+            DOM.btnGetTone.click(); // Giả lập click để chạy luồng dò
+          }
+        }, false); // Chế độ nghe nhạc (sound mode)
+        DOM.detectedKeyDisplay.innerText = '👂 Auto-Listen: ON';
+      } else {
+        stopAutoListen();
+        DOM.detectedKeyDisplay.innerText = 'Smart Tone: Sẵn sàng';
+      }
+    });
+
+    // Kích hoạt ngay lập tức nếu checkbox đang được bật mặc định
+    if (DOM.toggleAutoListen.checked) {
+      DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+    }
+  }
+
+  async function runSmartTone(forceAudio = false) {
       if (states.isWaitingForAutoKey) {
         // Huỷ nếu đang phân tích
         states.isWaitingForAutoKey = false;
         stopAnalysis();
-        DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
+        
+        // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
+        if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
+           startAutoListen(() => {
+              if (DOM.toggleAutoListen.checked) {
+                 DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+              }
+           }, true); // Chế độ chờ im lặng (silence mode)
+        }
+        
+        DOM.btnGetTone.innerText = 'Smart Tone';
+        if (DOM.btnManualTone) DOM.btnManualTone.classList.remove('analyzing');
         DOM.btnGetTone.classList.remove('analyzing');
         DOM.detectedKeyDisplay.innerText = 'Smart Tone: Đã hủy';
         DOM.detectedKeyDisplay.style.color = '';
@@ -254,6 +287,8 @@ export function initKeySelector() {
       states.detectionMethod = null;
       states.isWaitingForAutoKey = true;
 
+      let currentTitleHash = null;
+
       // ===== TIER 1: Parse tiêu đề trình duyệt =====
       try {
         DOM.btnGetTone.innerText = 'Đọc tiêu đề...';
@@ -264,9 +299,48 @@ export function initKeySelector() {
         let browserTitle = null;
         if (window.electronAPI.getBrowserTitle) {
           browserTitle = await window.electronAPI.getBrowserTitle();
+          
+          if (browserTitle) {
+             currentTitleHash = await generateHashId(browserTitle);
+          }
+          
+          // --- SMART CACHE LOGIC ---
+          if (!forceAudio && browserTitle && currentTitleHash) {
+             const cachedResult = getFromCache(currentTitleHash);
+                if (cachedResult) {
+                    states.detectedKey = cachedResult.key;
+                    states.detectedScale = cachedResult.scale;
+                    states.detectedConfidence = 100;
+                    states.detectionMethod = 'cache';
+                    states.isWaitingForAutoKey = false;
+                    
+                    selectKey(states.detectedKey);
+                    selectScale(states.detectedScale);
+                    
+                    DOM.btnGetTone.innerText = '⚡ Smart Tone';
+                    DOM.btnGetTone.classList.remove('analyzing');
+                    DOM.detectedKeyDisplay.innerText = `⚡ Lấy từ Cache: ${cachedResult.name}`;
+                    DOM.detectedKeyDisplay.style.color = '#f1c40f'; // Màu vàng điện
+                    updateAutoKeyDisplay();
+                    
+                    if (window.electronAPI?.logDebug) {
+                       window.electronAPI.logDebug(`⚡ [SmartCache] HIT: Lấy thành công Tone [${cachedResult.name}] từ Cache (0 giây)!`);
+                    }
+                    
+                    // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
+                    if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
+                       startAutoListen(() => {
+                          if (DOM.toggleAutoListen.checked) {
+                             DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+                          }
+                       }, true); // Chế độ chờ im lặng (silence mode)
+                    }
+                    return; // Kết thúc ngay lập tức, 0 giây delay!
+                }
+             }
         }
 
-        if (browserTitle) {
+        if (!forceAudio && browserTitle) {
           const foundTone = parseToneFromTitle(browserTitle);
           if (foundTone) {
             states.detectedKey = foundTone.key;
@@ -280,9 +354,22 @@ export function initKeySelector() {
             selectKey(states.detectedKey);
             selectScale(states.detectedScale);
 
-            DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
+            DOM.btnGetTone.innerText = 'Smart Tone';
             DOM.btnGetTone.classList.remove('analyzing');
             updateAutoKeyDisplay();
+
+            if (window.electronAPI?.logDebug) {
+               window.electronAPI.logDebug(`🔍 [Tier 1] Bắt được Tone [${foundTone.key} ${foundTone.scale}] trực tiếp từ Tiêu đề bài hát!`);
+            }
+
+            // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
+            if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
+               startAutoListen(() => {
+                  if (DOM.toggleAutoListen.checked) {
+                     DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+                  }
+               }, true); // Chế độ chờ im lặng (silence mode)
+            }
             return;
           }
         }
@@ -299,14 +386,12 @@ export function initKeySelector() {
         const minFreq = appConfig.audioAnalyzer?.minFreq ?? 27.5;
         
         DOM.btnGetTone.innerText = `Đang nghĩ... (${durationMs/1000}s)`;
+        DOM.btnGetTone.classList.add('analyzing');
         
         const audioResult = await analyzeAudioKey(durationMs, minFreq, (progress, preliminaryName, preliminaryConfidence) => {
           const sec = Math.round(((100 - progress) / 100) * (durationMs / 1000));
-          if (preliminaryName) {
-            DOM.btnGetTone.innerText = `Nghĩ: ${preliminaryName} ${preliminaryConfidence}% (${sec}s)`;
-          } else {
-            DOM.btnGetTone.innerText = `Đang nghĩ... ${sec}s`;
-          }
+          const text = preliminaryName ? `Nghĩ: ${preliminaryName} ${preliminaryConfidence}% (${sec}s)` : `Đang nghĩ... ${sec}s`;
+          DOM.btnGetTone.innerText = text;
         });
 
         states.detectedKey = audioResult.key;
@@ -317,22 +402,54 @@ export function initKeySelector() {
         states.detectedSessionTime = audioResult.sessionTime || '';
         states.detectionMethod = 'audio';
         
+        // --- LƯU SMART CACHE KHI DÒ THÀNH CÔNG ---
+        // Luôn luôn cập nhật kho kiến thức (Cache) bất kể nút "Dùng Cache" có bật hay không.
+        // Nút "Dùng Cache" chỉ dùng để quyết định có bypass quá trình dò hay không.
+        if (currentTitleHash) {
+           saveToCache(currentTitleHash, { 
+             key: audioResult.key, 
+             scale: audioResult.scale, 
+             name: audioResult.name,
+             voteDetails: audioResult.voteDetails 
+           });
+           if (window.electronAPI?.logDebug) {
+              window.electronAPI.logDebug(`💾 [SmartCache] Đã cập nhật Tone [${audioResult.name}] vào kho kiến thức Cache!`);
+           }
+        }
+        
         // Tự động áp dụng kết quả
         selectKey(states.detectedKey);
         selectScale(states.detectedScale);
 
         states.isWaitingForAutoKey = false;
-        DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
+        DOM.btnGetTone.innerText = 'Smart Tone';
         DOM.btnGetTone.classList.remove('analyzing');
+        if (DOM.btnManualTone) {
+            DOM.btnManualTone.innerText = 'Nghe Lại';
+            DOM.btnManualTone.classList.remove('analyzing');
+        }
         updateAutoKeyDisplay();
+
+        // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
+        if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
+           startAutoListen(() => {
+              if (DOM.toggleAutoListen.checked) {
+                 DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+              }
+           }, true); // Chế độ chờ im lặng (silence mode)
+        }
       } catch (audioErr) {
         if (window.electronAPI?.logDebug) {
-          window.electronAPI.logDebug('❌ [SmartTone Error] Lỗi phân tích âm thanh: ' + audioErr.message);
+          window.electronAPI.logDebug(`❌ [SmartTone Error] Lỗi phân tích âm thanh: ${audioErr.message}`);
         }
-        // Tất cả 3 tier đều thất bại
+        console.error('Audio Analysis Error:', audioErr);
         states.isWaitingForAutoKey = false;
-        DOM.btnGetTone.innerText = 'Tự Động Lấy Tone';
+        DOM.btnGetTone.innerText = 'Smart Tone';
         DOM.btnGetTone.classList.remove('analyzing');
+        if (DOM.btnManualTone) {
+            DOM.btnManualTone.innerText = 'Nghe Lại';
+            DOM.btnManualTone.classList.remove('analyzing');
+        }
         DOM.detectedKeyDisplay.innerText = 'Chưa rõ (Im lặng)';
         DOM.detectedKeyDisplay.title = `Không tìm được tone: ${audioErr.message}`;
         DOM.detectedKeyDisplay.style.color = 'var(--color-red, #e74c3c)';
@@ -341,8 +458,24 @@ export function initKeySelector() {
           DOM.detectedKeyDisplay.title = '';
           DOM.detectedKeyDisplay.style.color = '';
         }, 5000);
+        
+        // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
+        if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
+           startAutoListen(() => {
+              if (DOM.toggleAutoListen.checked) {
+                 DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+              }
+           }, true); // Chế độ chờ im lặng (silence mode)
+        }
       }
-    });
+  } // end runSmartTone
+
+  if (DOM.btnGetTone) {
+      DOM.btnGetTone.addEventListener('click', () => runSmartTone(false));
+  }
+  
+  if (DOM.btnManualTone) {
+      DOM.btnManualTone.addEventListener('click', () => runSmartTone(true));
   }
 
   selectKey(states.currentKey, false);

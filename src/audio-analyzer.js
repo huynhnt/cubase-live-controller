@@ -265,6 +265,89 @@ async function getActiveAudioStream() {
   }
 }
 
+let _autoListenStream = null;
+let _autoListenCtx = null;
+let _autoListenInterval = null;
+
+export function stopAutoListen() {
+  if (_autoListenInterval) { clearInterval(_autoListenInterval); _autoListenInterval = null; }
+  if (_autoListenStream) { _autoListenStream.getTracks().forEach(t => t.stop()); _autoListenStream = null; }
+  if (_autoListenCtx) { _autoListenCtx.close().catch(()=>{}); _autoListenCtx = null; }
+  debugLog('🛑 [AutoListen] Đã dừng theo dõi âm thanh nền.');
+}
+
+export async function startAutoListen(onTrigger, waitForSilenceMode = false) {
+  stopAutoListen();
+  let loopbackSuccess = false;
+
+  if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.getSystemAudioSource) {
+    try {
+      const sourceId = await window.electronAPI.getSystemAudioSource();
+      if (sourceId) {
+        _autoListenStream = await navigator.mediaDevices.getUserMedia({
+          audio: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: sourceId } },
+          video: { mandatory: { chromeMediaSource: 'desktop', chromeMediaSourceId: sourceId } }
+        });
+        _autoListenStream.getVideoTracks().forEach(track => track.stop());
+        loopbackSuccess = true;
+      }
+    } catch (e) {}
+  }
+
+  if (!loopbackSuccess) {
+    try { _autoListenStream = await getActiveAudioStream(); } 
+    catch (e) { return false; }
+  }
+
+  _autoListenCtx = new AudioContext();
+  const source = _autoListenCtx.createMediaStreamSource(_autoListenStream);
+  const analyser = _autoListenCtx.createAnalyser();
+  analyser.fftSize = 512;
+  source.connect(analyser);
+  
+  const freqData = new Float32Array(analyser.frequencyBinCount);
+  let triggerFrames = 0;
+  
+  if (waitForSilenceMode) {
+    debugLog('⏳ [AutoListen] Đang chờ nhạc kết thúc (Im lặng > 1s)...');
+  } else {
+    debugLog('👂 [AutoListen] Đang theo dõi tín hiệu âm thanh nền...');
+  }
+
+  _autoListenInterval = setInterval(() => {
+    analyser.getFloatFrequencyData(freqData);
+    const maxLevel = Math.max(...freqData);
+    
+    if (waitForSilenceMode) {
+      if (maxLevel < -50) {
+        triggerFrames++;
+        if (triggerFrames >= 10) { // 1 giây im lặng liên tục
+          debugLog(`🔇 [AutoListen] Đã im lặng hoàn toàn. Kích hoạt lại bộ nghe!`);
+          stopAutoListen();
+          if (onTrigger) onTrigger();
+        }
+      } else {
+        triggerFrames = 0;
+      }
+    } else {
+      // Nếu âm lượng lớn hơn -50dB
+      if (maxLevel > -50) {
+        triggerFrames++;
+        // Đợi 1 giây liên tục (10 frames x 100ms) để chắc chắn không phải nhiễu
+        if (triggerFrames >= 10) {
+          debugLog(`🚀 [AutoListen] Đã phát hiện nhạc bật! (Level: ${maxLevel.toFixed(1)}dB). Kích hoạt Auto-Trigger!`);
+          stopAutoListen(); // Tạm dừng theo dõi
+          if (onTrigger) onTrigger(); // Gọi callback
+        }
+      } else {
+        triggerFrames = 0;
+      }
+    }
+  }, 100);
+
+  return true;
+}
+
 /**
  * Capture system audio và phân tích key bằng Multi-Segment Voting Matrix.
  */
