@@ -5,8 +5,11 @@
 
 export async function generateHashId(title) {
   if (!title) return null;
+  // Bỏ tiền tố thông báo Youtube kiểu "(54) "
+  let tempTitle = title.replace(/^\(\d+\)\s*/, '');
+  
   // Xóa các ký tự đặc biệt, dấu câu, khoảng trắng thừa
-  const cleanTitle = title.toLowerCase()
+  const cleanTitle = tempTitle.toLowerCase()
     .replace(/[^\w\s\u00C0-\u024F\u1E00-\u1EFF]/g, '')
     .replace(/\s+/g, '-')
     .trim();

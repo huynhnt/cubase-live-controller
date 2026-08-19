@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "electron": "electron .",
+    "electron": "chcp 65001 >NUL && electron .",
     "build": "vite build",
     "dist": "vite build && electron-builder"
   },
@@ -52,6 +52,7 @@
     ]
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "electron-updater": "^6.8.9"
   },
   "overrides": {

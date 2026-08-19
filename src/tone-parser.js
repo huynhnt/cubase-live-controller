@@ -91,8 +91,11 @@ export function parseToneFromTitle(title) {
 export function extractSongInfo(title) {
   if (!title) return { song: '', artist: '' };
 
+  // Bỏ tiền tố thông báo Youtube kiểu "(54) " ở đầu
+  let clean = title.replace(/^\(\d+\)\s*/, '');
+
   // Bỏ " - YouTube" hoặc "| YouTube" ở cuối
-  let clean = title.replace(/\s*[-|]\s*youtube\s*$/i, '').trim();
+  clean = clean.replace(/\s*[-|]\s*youtube\s*$/i, '').trim();
 
   // Bỏ nhãn như (Official Video), [Lyric Video], (Beat), (Karaoke), (Tone Nữ Fm)...
   clean = clean.replace(/\s*[\(\[](?:official|lyric|mv|m\/v|video|audio|live|karaoke|nh\u1ea1c|beat|hd|4k|full|tone|key).*?[\)\]]/gi, '').trim();

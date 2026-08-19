@@ -268,8 +268,10 @@ async function getActiveAudioStream() {
 let _autoListenStream = null;
 let _autoListenCtx = null;
 let _autoListenInterval = null;
+let _isInitializingAutoListen = false;
 
 export function stopAutoListen() {
+  _isInitializingAutoListen = false; // Hủy cờ khởi tạo nếu đang chạy
   if (_autoListenInterval) { clearInterval(_autoListenInterval); _autoListenInterval = null; }
   if (_autoListenStream) { _autoListenStream.getTracks().forEach(t => t.stop()); _autoListenStream = null; }
   if (_autoListenCtx) { _autoListenCtx.close().catch(()=>{}); _autoListenCtx = null; }
@@ -277,7 +279,11 @@ export function stopAutoListen() {
 }
 
 export async function startAutoListen(onTrigger, waitForSilenceMode = false) {
+  if (_isInitializingAutoListen) return false; // Chặn gọi đồng thời
+  _isInitializingAutoListen = true;
+  
   stopAutoListen();
+  _isInitializingAutoListen = true; // Phục hồi lại cờ vì stopAutoListen vừa vô tình clear nó
   let loopbackSuccess = false;
 
   if (typeof window !== 'undefined' && window.electronAPI && window.electronAPI.getSystemAudioSource) {
@@ -314,6 +320,13 @@ export async function startAutoListen(onTrigger, waitForSilenceMode = false) {
     debugLog('👂 [AutoListen] Đang theo dõi tín hiệu âm thanh nền...');
   }
 
+  // Nếu trong quá trình await mà người dùng bấm stop thì hủy
+  if (!_isInitializingAutoListen) {
+     if (_autoListenStream) { _autoListenStream.getTracks().forEach(t => t.stop()); _autoListenStream = null; }
+     if (_autoListenCtx) { _autoListenCtx.close().catch(()=>{}); _autoListenCtx = null; }
+     return false;
+  }
+
   _autoListenInterval = setInterval(() => {
     analyser.getFloatFrequencyData(freqData);
     const maxLevel = Math.max(...freqData);
@@ -345,6 +358,7 @@ export async function startAutoListen(onTrigger, waitForSilenceMode = false) {
     }
   }, 100);
 
+  _isInitializingAutoListen = false;
   return true;
 }
 

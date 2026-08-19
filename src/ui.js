@@ -4,6 +4,7 @@ import { midi } from './midi.js';
 import { parseToneFromTitle, extractSongInfo } from './tone-parser.js';
 import { analyzeAudioKey, stopAnalysis, resetSessionTimer, startAutoListen, stopAutoListen } from './audio-analyzer.js';
 import { generateHashId, getFromCache, saveToCache } from './cache-db.js';
+import { getCloudAnalysis, saveCloudAnalysis } from './cloud-db.js';
 
 import { CUBASE_DB_CURVE } from './cubase_curve.js';
 
@@ -288,15 +289,19 @@ export function initKeySelector() {
       states.isWaitingForAutoKey = true;
 
       let currentTitleHash = null;
+      let browserTitle = null;
 
       // ===== TIER 1: Parse tiêu đề trình duyệt =====
       try {
         DOM.btnGetTone.innerText = 'Đọc tiêu đề...';
         DOM.btnGetTone.classList.add('analyzing');
-        DOM.detectedKeyDisplay.innerText = '🔍 Tier 1...';
+        DOM.detectedKeyDisplay.innerText = '🔍 Đang nhận diện...';
         DOM.detectedKeyDisplay.style.color = 'var(--color-orange)';
 
-        let browserTitle = null;
+        // Đợi 800ms để trình duyệt (Chrome/Edge) kịp cập nhật Title mới
+        // Vì đôi khi nhạc (Audio) phát ra trước khi tab kịp load xong thẻ <title>
+        await new Promise(r => setTimeout(r, 800));
+
         if (window.electronAPI.getBrowserTitle) {
           browserTitle = await window.electronAPI.getBrowserTitle();
           
@@ -304,40 +309,92 @@ export function initKeySelector() {
              currentTitleHash = await generateHashId(browserTitle);
           }
           
-          // --- SMART CACHE LOGIC ---
+          // --- SMART CACHE & CLOUD LOGIC ---
           if (!forceAudio && browserTitle && currentTitleHash) {
-             const cachedResult = getFromCache(currentTitleHash);
-                if (cachedResult) {
-                    states.detectedKey = cachedResult.key;
-                    states.detectedScale = cachedResult.scale;
-                    states.detectedConfidence = 100;
-                    states.detectionMethod = 'cache';
-                    states.isWaitingForAutoKey = false;
-                    
-                    selectKey(states.detectedKey);
-                    selectScale(states.detectedScale);
-                    
-                    DOM.btnGetTone.innerText = '⚡ Smart Tone';
-                    DOM.btnGetTone.classList.remove('analyzing');
-                    DOM.detectedKeyDisplay.innerText = `⚡ Lấy từ Cache: ${cachedResult.name}`;
-                    DOM.detectedKeyDisplay.style.color = '#f1c40f'; // Màu vàng điện
-                    updateAutoKeyDisplay();
-                    
-                    if (window.electronAPI?.logDebug) {
-                       window.electronAPI.logDebug(`⚡ [SmartCache] HIT: Lấy thành công Tone [${cachedResult.name}] từ Cache (0 giây)!`);
-                    }
-                    
-                    // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
-                    if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
-                       startAutoListen(() => {
-                          if (DOM.toggleAutoListen.checked) {
-                             DOM.toggleAutoListen.dispatchEvent(new Event('change'));
-                          }
-                       }, true); // Chế độ chờ im lặng (silence mode)
-                    }
-                    return; // Kết thúc ngay lập tức, 0 giây delay!
+             let cachedResult = getFromCache(currentTitleHash);
+             let isFromCloud = false;
+
+             if (!cachedResult) {
+                DOM.detectedKeyDisplay.innerText = '☁️ Đang tìm trên Cloud...';
+                const cloudData = await getCloudAnalysis(currentTitleHash);
+                if (cloudData && cloudData.tones && cloudData.tones.length > 0) {
+                   const topTone = cloudData.tones[0];
+                   cachedResult = {
+                      key: topTone.key,
+                      scale: topTone.scale,
+                      name: topTone.name
+                   };
+                   saveToCache(currentTitleHash, cachedResult);
+                   isFromCloud = true;
                 }
+             } else {
+                // ĐỒNG BỘ NGẦM (BACKGROUND SYNC)
+                getCloudAnalysis(currentTitleHash).then(cloudData => {
+                   if (cloudData && cloudData.tones && cloudData.tones.length > 0) {
+                      const topTone = cloudData.tones[0];
+                      // Nếu Cloud có kết quả uy tín hơn Local (Tone bị thay đổi)
+                      if (topTone.key !== cachedResult.key || topTone.scale !== cachedResult.scale) {
+                         const newCache = {
+                            key: topTone.key,
+                            scale: topTone.scale,
+                            name: topTone.name
+                         };
+                         // 1. Chép đè kết quả của cộng đồng vào Local Cache
+                         saveToCache(currentTitleHash, newCache);
+                         
+                         // 2. Nếu App vẫn đang hiển thị bài hát này, update UI ngay lập tức
+                         if (states.detectedKey === cachedResult.key && states.detectedScale === cachedResult.scale) {
+                             states.detectedKey = topTone.key;
+                             states.detectedScale = topTone.scale;
+                             states.detectionMethod = 'cloud_sync'; // Đánh dấu là update ngầm
+                             
+                             selectKey(states.detectedKey);
+                             selectScale(states.detectedScale);
+                             updateAutoKeyDisplay();
+                             
+                             if (window.electronAPI?.logDebug) {
+                                window.electronAPI.logDebug(`🔄 [Background Sync] Đã cập nhật Tone [${topTone.name}] uy tín hơn từ Cloud!`);
+                             }
+                         }
+                      }
+                   }
+                }).catch(() => { /* Bỏ qua lỗi mạng ngầm để không làm phiền user */ });
              }
+
+             if (cachedResult) {
+                 states.detectedKey = cachedResult.key;
+                 states.detectedScale = cachedResult.scale;
+                 states.detectedConfidence = 100;
+                 states.detectionMethod = isFromCloud ? 'cloud' : 'cache';
+                 states.isWaitingForAutoKey = false;
+                 
+                 selectKey(states.detectedKey);
+                 selectScale(states.detectedScale);
+                 
+                 DOM.btnGetTone.innerText = '⚡ Smart Tone';
+                 DOM.btnGetTone.classList.remove('analyzing');
+                 DOM.detectedKeyDisplay.innerText = isFromCloud 
+                    ? `☁️ Cloud Database: ${cachedResult.name}` 
+                    : `⚡ Local Cache: ${cachedResult.name}`;
+                 DOM.detectedKeyDisplay.style.color = '#f1c40f'; // Màu vàng điện
+                 updateAutoKeyDisplay();
+                 
+                 if (window.electronAPI?.logDebug) {
+                    const sourceName = isFromCloud ? 'Cloud DB' : 'Local Cache';
+                    window.electronAPI.logDebug(`⚡ [SmartCache] HIT: Lấy thành công Tone [${cachedResult.name}] từ ${sourceName}!`);
+                 }
+                 
+                 // --- CHỜ IM LẶNG ĐỂ RESET AUTO-LISTEN ---
+                 if (DOM.toggleAutoListen && DOM.toggleAutoListen.checked) {
+                    startAutoListen(() => {
+                       if (DOM.toggleAutoListen.checked) {
+                          DOM.toggleAutoListen.dispatchEvent(new Event('change'));
+                       }
+                    }, true); // Chế độ chờ im lặng (silence mode)
+                 }
+                 return; // Kết thúc ngay lập tức, 0 giây delay!
+             }
+          }
         }
 
         if (!forceAudio && browserTitle) {
@@ -402,18 +459,40 @@ export function initKeySelector() {
         states.detectedSessionTime = audioResult.sessionTime || '';
         states.detectionMethod = 'audio';
         
-        // --- LƯU SMART CACHE KHI DÒ THÀNH CÔNG ---
-        // Luôn luôn cập nhật kho kiến thức (Cache) bất kể nút "Dùng Cache" có bật hay không.
-        // Nút "Dùng Cache" chỉ dùng để quyết định có bypass quá trình dò hay không.
+        // --- LƯU SMART CACHE & CLOUD DB KHI DÒ THÀNH CÔNG ---
         if (currentTitleHash) {
+           // 1. Lưu Local Cache
            saveToCache(currentTitleHash, { 
              key: audioResult.key, 
              scale: audioResult.scale, 
              name: audioResult.name,
              voteDetails: audioResult.voteDetails 
            });
+           
+           // 2. Upload lên Cloud DB
+           const tonesArray = (audioResult.candidates || []).map(c => ({
+              key: c.key,
+              scale: c.scale,
+              name: c.name,
+              vote: c.confidence // Dùng confidence tạm thay cho vote
+           }));
+           
+           saveCloudAnalysis(currentTitleHash, browserTitle, tonesArray).then((success) => {
+              if (window.electronAPI?.logDebug) {
+                 if (success) {
+                    window.electronAPI.logDebug(`☁️ [CloudDB] Đã chia sẻ Tone [${audioResult.name}] lên Cloud thành công!`);
+                 } else {
+                    window.electronAPI.logDebug(`⚠️ [CloudDB] Không thể chia sẻ Tone lên Cloud (Lỗi mạng hoặc chưa setup).`);
+                 }
+              }
+           }).catch((err) => {
+              if (window.electronAPI?.logDebug) {
+                 window.electronAPI.logDebug(`❌ [CloudDB] Lỗi không lường trước: ${err.message}`);
+              }
+           });
+           
            if (window.electronAPI?.logDebug) {
-              window.electronAPI.logDebug(`💾 [SmartCache] Đã cập nhật Tone [${audioResult.name}] vào kho kiến thức Cache!`);
+              window.electronAPI.logDebug(`💾 [SmartCache] Đã cập nhật Tone [${audioResult.name}] vào kho kiến thức Local!`);
            }
         }
         
