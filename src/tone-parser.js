@@ -108,13 +108,16 @@ export function extractSongInfo(title) {
   return { song: clean.trim(), artist: '' };
 }
 
-const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const NOTE_NAMES_MAJOR = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+const NOTE_NAMES_MINOR = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
 
 /**
- * Chuyển đổi key (0-11) và scale (0=Major, 1=Minor) thành tên tone chuẩn (vd: "Am", "C#m", "Eb")
+ * Chuyển đổi key (0-11) và scale (0=Major, 1=Minor) thành tên tone chuẩn nhạc lý
+ * Áp dụng luật Enharmonic (A#m -> Bbm, D#m -> Ebm...)
  */
 export function getToneName(key, scale) {
-  const note = NOTE_NAMES[((key % 12) + 12) % 12] || 'C';
+  const index = ((key % 12) + 12) % 12;
+  const note = scale === 1 ? NOTE_NAMES_MINOR[index] : NOTE_NAMES_MAJOR[index];
   return scale === 1 ? `${note}m` : note;
 }
 
