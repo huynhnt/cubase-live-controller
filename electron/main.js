@@ -538,7 +538,47 @@ app.whenReady().then(() => {
       callback({ cancel: true });
     });
 
-    youtubeWindow.loadURL('https://www.youtube.com');
+    youtubeWindow.loadURL('about:blank');
+
+    async function fetchKeyValueSettings() {
+      try {
+        const supabaseUrl = 'https://yfnvqxgybvxvtranxzur.supabase.co';
+        const supabaseKey = 'sb_publishable_JPoGKnFTRyK0ZwwvsIpyNg_Jv92Wh56';
+        
+        const response = await net.fetch(`${supabaseUrl}/rest/v1/app_settings?is_active=eq.true&select=key,value`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        });
+        const data = await response.json();
+        const settings = {};
+        if (Array.isArray(data)) {
+          data.forEach(row => {
+            settings[row.key] = row.value;
+          });
+        }
+        return settings;
+      } catch (e) {
+        console.error("Lỗi lấy cấu hình từ Main process:", e);
+        return {};
+      }
+    }
+
+    fetchKeyValueSettings().then(settings => {
+      let targetUrl = 'https://www.youtube.com';
+      let defaultSongs = settings.default_songs;
+      if (typeof defaultSongs === 'string') {
+        try { defaultSongs = JSON.parse(defaultSongs); } catch (e) {}
+      }
+      if (String(settings.load_default_song) === 'true' && Array.isArray(defaultSongs) && defaultSongs.length > 0) {
+        const randomIndex = Math.floor(Math.random() * defaultSongs.length);
+        targetUrl = defaultSongs[randomIndex];
+      }
+      if (youtubeWindow && !youtubeWindow.isDestroyed()) {
+        youtubeWindow.loadURL(targetUrl);
+      }
+    });
 
     youtubeWindow.webContents.on('enter-html-full-screen', () => {
       youtubeWindow.setFullScreen(true);

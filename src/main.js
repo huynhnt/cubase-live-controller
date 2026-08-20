@@ -20,7 +20,8 @@ import {
   autoSaveCurrentStates,
   toggleSoundboardPanel,
   renderEffects,
-  openEffectEditModal
+  openEffectEditModal,
+  updateToneToggleButton
 } from './ui.js';
 import { exportCombinedXML } from './export.js';
 import {
@@ -429,7 +430,7 @@ export function openSettingsPanel() {
   DOM.fxPanel.classList.add('hidden');
   DOM.btnReverbToggle.innerText = 'Hiệu Ứng ▾';
   DOM.btnReverbToggle.classList.remove('active');
-  DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+  updateToneToggleButton();
   DOM.btnToneToggle.classList.remove('active');
 
   window.electronAPI.resizeWindow('settings');

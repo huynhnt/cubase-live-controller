@@ -133,7 +133,7 @@ export function toggleFxPanel() {
     if (states.isKeySelectorOpen) {
       states.isKeySelectorOpen = false;
       if (DOM.keySelectorPanel) DOM.keySelectorPanel.classList.add('hidden');
-      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      updateToneToggleButton();
       DOM.btnToneToggle.classList.remove('active');
     }
     if (states.isSoundboardOpen) {
@@ -183,8 +183,8 @@ export function toggleKeySelector() {
       DOM.btnSoundboardToggle.innerText = 'FX ▾';
       DOM.btnSoundboardToggle.classList.remove('active');
     }
-    if (DOM.keySelectorPanel) DOM.keySelectorPanel.classList.remove('hidden');
-    DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+    if (DOM.keySelectorPanel)    DOM.keySelectorPanel.classList.remove('hidden');
+    updateToneToggleButton();
     DOM.btnToneToggle.classList.add('active');
 
     if (states.isSettingsOpen) {
@@ -193,8 +193,8 @@ export function toggleKeySelector() {
 
     window.electronAPI.resizeWindow('expanded_tone_only');
   } else {
-    if (DOM.keySelectorPanel) DOM.keySelectorPanel.classList.add('hidden');
-    DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+    if (DOM.keySelectorPanel)    DOM.keySelectorPanel.classList.add('hidden');
+    updateToneToggleButton();
     DOM.btnToneToggle.classList.remove('active');
 
     window.electronAPI.resizeWindow('collapsed');
@@ -625,6 +625,17 @@ export function updateKeyDisplay() {
   const keyName = names[states.currentKey] || 'C';
   const scaleName = isMajor ? 'Trưởng (Major)' : 'Thứ (Minor)';
   DOM.currentKeyDisplay.innerText = `${keyName} ${scaleName}`;
+  updateToneToggleButton();
+}
+
+export function updateToneToggleButton() {
+  if (!DOM.btnToneToggle) return;
+  const isMajor = states.currentScale === 0;
+  const names = isMajor ? KEY_NAMES_MAJOR : KEY_NAMES_MINOR;
+  const keyName = names[states.currentKey] || 'C';
+  const scaleShort = isMajor ? 'M' : 'm';
+  const arrow = states.isKeySelectorOpen ? '▴' : '▾';
+  DOM.btnToneToggle.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; gap: 4px;">Tone: <b style="color: #fff; font-size: 13px;">${keyName}${scaleShort}</b> <span style="font-size: 10px">${arrow}</span></span>`;
 }
 
 export function updateAutoKeyDisplay() {
@@ -683,7 +694,7 @@ export function toggleAboutPanel() {
     if (states.isKeySelectorOpen) {
       states.isKeySelectorOpen = false;
       DOM.keySelectorContainer.classList.add('hidden');
-      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      updateToneToggleButton();
       DOM.btnToneToggle.classList.remove('active');
     }
     if (states.isSoundboardOpen) {
@@ -724,7 +735,7 @@ export function toggleSoundboardPanel() {
     if (states.isKeySelectorOpen) {
       states.isKeySelectorOpen = false;
       DOM.keySelectorContainer.classList.add('hidden');
-      DOM.btnToneToggle.innerText = 'Chọn Tone ▾';
+      updateToneToggleButton();
       DOM.btnToneToggle.classList.remove('active');
     }
     if (states.isSettingsOpen) {

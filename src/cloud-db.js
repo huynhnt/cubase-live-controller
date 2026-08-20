@@ -14,6 +14,30 @@ export const supabase = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey)
   : null;
 
+let cloudSettings = null;
+
+export async function fetchCloudSettings() {
+  if (!supabase) return;
+  try {
+    const { data, error } = await supabase
+      .from('app_settings')
+      .select('key, value')
+      .eq('is_active', true);
+    
+    if (!error && Array.isArray(data)) {
+      cloudSettings = {};
+      data.forEach(row => {
+        cloudSettings[row.key] = row.value;
+      });
+    }
+  } catch (err) {
+    console.error('Lỗi lấy cloud settings:', err);
+  }
+}
+
+// Gọi một lần khi file được load để nạp cấu hình sớm
+fetchCloudSettings();
+
 /**
  * Lấy dữ liệu phân tích từ Cloud dựa vào mã Hash
  */
@@ -59,10 +83,12 @@ export async function saveCloudAnalysis(fileHash, rawTitle, tonesArray, analysis
     let mergedTones = [];
     if (currentData && currentData.tones && Array.isArray(currentData.tones)) {
       // 1.5. KIỂM TRA ĐIỀU KIỆN KHÓA VOTE (LOCK)
-      // Nếu Tone Top 1 đã đạt đủ độ "chín" (>= 200 lượt vote, và độ tin cậy trung bình >= 95%)
-      // Thì không cần nhận thêm vote nữa để tiết kiệm tài nguyên ghi DB
+      // Sử dụng cấu hình động từ bảng app_settings, nếu lỗi mạng thì fallback mặc định (200 vote, 95%)
+      const lockCount = cloudSettings?.lock_vote_count ?? 200;
+      const lockPercent = cloudSettings?.lock_vote_percent ?? 95;
+
       const topTone = currentData.tones[0];
-      if (topTone && topTone.count >= 200 && topTone.vote >= 95) {
+      if (topTone && topTone.count >= lockCount && topTone.vote >= lockPercent) {
         if (window.electronAPI?.logDebug) {
           window.electronAPI.logDebug(`🔒 [CloudDB] Bỏ qua Vote! Tone [${topTone.name}] đã đạt mức hoàn hảo tuyệt đối (${topTone.count} votes, ${topTone.vote}%).`);
         }

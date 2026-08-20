@@ -1,7 +1,7 @@
 import { DOM } from './dom.js';
 import { states, appConfig, setAppConfig } from './state.js';
 import { midi } from './midi.js';
-import { closeSettingsPanelUI, renderEffects } from './ui.js';
+import { closeSettingsPanelUI, renderEffects, updateToneToggleButton } from './ui.js';
 import { connectMidi } from './main.js';
 
 let pendingMidiMappings = {};
@@ -315,7 +315,7 @@ export async function saveSettings() {
     } else if (states.isKeySelectorOpen) {
       DOM.fxPanel.classList.remove('hidden');
       DOM.keySelectorContainer.classList.remove('hidden');
-      DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+      updateToneToggleButton();
       DOM.btnToneToggle.classList.add('active');
       
       const fxContainer = DOM.fxPanel.querySelector('.fx-container');
@@ -353,7 +353,7 @@ export function cancelSettings() {
   } else if (states.isKeySelectorOpen) {
     DOM.fxPanel.classList.remove('hidden');
     DOM.keySelectorContainer.classList.remove('hidden');
-    DOM.btnToneToggle.innerText = 'Chọn Tone ▴';
+    updateToneToggleButton();
     DOM.btnToneToggle.classList.add('active');
     
     const fxContainer = DOM.fxPanel.querySelector('.fx-container');
