@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   resizeWindow: (state, customHeight) => ipcRenderer.send('window-resize', state, customHeight),
   playPauseMedia: () => ipcRenderer.send('play-pause-media'),
   toggleApp: (targetName) => ipcRenderer.send('toggle-app', targetName),
+  openYouTubeWindow: () => ipcRenderer.send('open-youtube-window'),
   onShortcutPressed: (callback) => ipcRenderer.on('shortcut-pressed', (event, action) => callback(action)),
   onPinStateChanged: (callback) => ipcRenderer.on('pin-state-changed', (event, isPinned) => callback(isPinned)),
   getBrowserTitle: () => ipcRenderer.invoke('get-browser-title'),

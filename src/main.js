@@ -496,8 +496,7 @@ export function setupEventListeners() {
     DOM.btnMediaPlayPause.addEventListener('click', () => window.electronAPI.playPauseMedia());
     if (DOM.btnToggleCubase) DOM.btnToggleCubase.addEventListener('click', () => window.electronAPI.toggleApp('cubase'));
     if (DOM.btnToggleYouTube) DOM.btnToggleYouTube.addEventListener('click', () => {
-      const target = appConfig.customAppTarget || 'YouTube';
-      window.electronAPI.toggleApp(target);
+      window.electronAPI.openYouTubeWindow();
     });
   } else {
     DOM.btnMinimize.style.display = 'none';

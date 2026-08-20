@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut, desktopCapturer, protocol, net } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, shell, session, globalShortcut, desktopCapturer, protocol, net, screen } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import fsSync from 'fs';
@@ -383,13 +383,13 @@ function createWindow() {
   // Force the window to stay on top of fullscreen apps (like YouTube, games)
   mainWindow.setAlwaysOnTop(true, 'screen-saver');
 
-  // Cho phép phân quyền truy cập Web MIDI, Media và Screen Capture trong Electron
+  // Cho phép phân quyền truy cập Web MIDI, Media, Screen Capture và Fullscreen trong Electron
   session.defaultSession.setPermissionCheckHandler((webContents, permission) => {
-    if (['midi', 'midiSysex', 'media', 'display-capture', 'audioCapture'].includes(permission)) return true;
+    if (['midi', 'midiSysex', 'media', 'display-capture', 'audioCapture', 'fullscreen'].includes(permission)) return true;
     return false;
   });
   session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    if (['midi', 'midiSysex', 'media', 'display-capture', 'audioCapture'].includes(permission)) callback(true);
+    if (['midi', 'midiSysex', 'media', 'display-capture', 'audioCapture', 'fullscreen'].includes(permission)) callback(true);
     else callback(false);
   });
 
@@ -498,6 +498,70 @@ app.whenReady().then(() => {
   });
 
   let effectEditWindow = null;
+  let youtubeWindow = null;
+
+  function createYouTubeWindow() {
+    if (youtubeWindow && !youtubeWindow.isDestroyed()) {
+      youtubeWindow.focus();
+      return;
+    }
+
+    youtubeWindow = new BrowserWindow({
+      width: 960,
+      height: 700,
+      title: 'YouTube - Cubase Live Controller',
+      autoHideMenuBar: true,
+      webPreferences: {
+        contextIsolation: true,
+        nodeIntegration: false
+      }
+    });
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const primaryDisplay = screen.getPrimaryDisplay();
+      const { workArea } = primaryDisplay;
+
+      const groupWidth = 960;
+      const ytHeight = 700;
+      const appBounds = mainWindow.getBounds();
+      const groupHeight = ytHeight + appBounds.height;
+
+      const x = Math.round(workArea.x + (workArea.width - groupWidth) / 2);
+      const y = Math.round(workArea.y + (workArea.height - groupHeight) / 2);
+
+      youtubeWindow.setBounds({ x, y, width: groupWidth, height: ytHeight });
+      mainWindow.setBounds({ x, y: y + ytHeight, width: groupWidth, height: appBounds.height });
+    }
+
+    // Bỏ chặn quảng cáo cơ bản (tùy chọn) bằng cách chặn các request đến máy chủ quảng cáo
+    youtubeWindow.webContents.session.webRequest.onBeforeRequest({ urls: ['*://*.doubleclick.net/*'] }, (details, callback) => {
+      callback({ cancel: true });
+    });
+
+    youtubeWindow.loadURL('https://www.youtube.com');
+
+    youtubeWindow.webContents.on('enter-html-full-screen', () => {
+      youtubeWindow.setFullScreen(true);
+    });
+
+    youtubeWindow.webContents.on('leave-html-full-screen', () => {
+      youtubeWindow.setFullScreen(false);
+    });
+
+    // Chèn script nhỏ để lấy tiêu đề chính xác của video youtube (thay vì thêm hậu tố "- YouTube" rườm rà)
+    youtubeWindow.webContents.on('did-finish-load', () => {
+      // Có thể chạy script ở đây nếu cần, hiện tại getTitle() là đủ
+    });
+
+    youtubeWindow.on('closed', () => {
+      youtubeWindow = null;
+    });
+  }
+
+  ipcMain.on('open-youtube-window', () => {
+    createYouTubeWindow();
+  });
+
 
   ipcMain.on('open-effect-edit-window', (event, fxData) => {
     if (effectEditWindow && !effectEditWindow.isDestroyed()) {
@@ -660,17 +724,44 @@ app.whenReady().then(() => {
   // Lấy tiêu đề các cửa sổ trình duyệt đang mở (phục vụ Tier 1 detect tone)
   ipcMain.handle('get-browser-title', async () => {
     try {
-      const sources = await desktopCapturer.getSources({ 
-        types: ['window'],
-        fetchWindowIcons: false,
-        thumbnailSize: { width: 0, height: 0 }
-      });
-      // Tìm cửa sổ Chrome/Edge/Firefox có "YouTube" trong tiêu đề
-      const ytWindow = sources.find(s =>
-        /youtube/i.test(s.name) &&
-        /chrome|edge|firefox|brave|opera/i.test(s.name)
-      ) || sources.find(s => /youtube/i.test(s.name));
-      return ytWindow ? ytWindow.name : null;
+      let finalTitle = null;
+
+      // 1. Ưu tiên lấy từ cửa sổ YouTube nội bộ trước
+      if (youtubeWindow && !youtubeWindow.isDestroyed()) {
+        finalTitle = youtubeWindow.webContents.getTitle();
+      }
+
+      // 2. Nếu title nội bộ trống hoặc chỉ là trang chủ "YouTube", thử tìm từ trình duyệt ngoài
+      const isGeneric = (t) => !t || /^youtube(\s*-\s*cubase live controller)?$/i.test(t.trim());
+
+      if (isGeneric(finalTitle)) {
+        const sources = await desktopCapturer.getSources({ 
+          types: ['window'],
+          fetchWindowIcons: false,
+          thumbnailSize: { width: 0, height: 0 }
+        });
+        
+        // Tìm cửa sổ Chrome/Edge/Firefox có "YouTube" trong tiêu đề
+        const ytWindow = sources.find(s =>
+          /youtube/i.test(s.name) &&
+          /chrome|edge|firefox|brave|opera/i.test(s.name)
+        ) || sources.find(s => /youtube/i.test(s.name) && !/cubase live controller/i.test(s.name));
+        
+        if (ytWindow) {
+          finalTitle = ytWindow.name;
+        }
+      }
+
+      // 3. Lọc title rác (VD: "YouTube - Google Chrome" -> "YouTube")
+      if (finalTitle) {
+        const cleanTitle = finalTitle.replace(/\s*-\s*(Google Chrome|Microsoft Edge|Mozilla Firefox|Brave|Opera|Cubase Live Controller)/i, '').trim();
+        if (cleanTitle.toLowerCase() === 'youtube') {
+          return null; // Trả về null để không bị nhận nhầm thành bài hát
+        }
+        return finalTitle;
+      }
+
+      return null;
     } catch (err) {
       console.error('Lỗi get-browser-title:', err);
       return null;
@@ -813,6 +904,7 @@ app.whenReady().then(() => {
   });
 
   createWindow();
+  createYouTubeWindow();
 });
 
 app.on('window-all-closed', () => {
