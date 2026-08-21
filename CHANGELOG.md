@@ -36,6 +36,10 @@ Tất cả các thay đổi đáng chú ý của dự án sẽ được ghi lạ
 - **Xử lý triệt để lỗi giật/tụt giao diện khi Dò âm (`Smart Tone`):** Rút gọn thông báo lỗi âm lượng im lặng thành `Chưa rõ (Im lặng)` + Tooltip chi tiết, kết hợp khóa tràn viền CSS (`text-overflow: ellipsis`), loại bỏ hoàn toàn hiện tượng đẩy dàn nút bấm lặn xuống mép dưới cửa sổ.
 - **Chống khóa file lưu cấu hình (`EBUSY Prevention`):** Áp dụng ghi file bất đồng bộ qua tập tin tạm `.tmp` giúp ứng dụng lưu cài đặt liên tục cực kỳ ổn định trên Windows mà không lo bị crash do kẹt tiến trình.
 
+#### 7. ☁️ Hệ Sinh Thái Cloud & Lõi Phân Tích Thế Hệ Mới
+- **Kiến trúc lõi phân tích hợp âm (Chord Analysis Core) hoàn toàn mới:** Nâng cấp toàn diện bộ engine phân tích cao độ và hợp âm (Smart Tone V2). Thuật toán thế hệ mới giúp bóc tách và nhận diện các lớp âm thanh phức tạp với độ chính xác tuyệt đối, giảm thiểu tối đa độ trễ trong quá trình xử lý thời gian thực.
+- **Tích hợp Cloud & Đồng Thuận Phi Tập Trung (Decentralized Consensus):** Lần đầu tiên mang tư duy của Blockchain vào phần mềm thu âm! Hệ thống nay hoạt động như một mạng lưới phân tán, tự động thu thập và "đồng thuận xác thực" (Consensus) kết quả dò Tone từ hàng ngàn người dùng (Node) khác nhau. Bằng cách đối chiếu chéo (Cross-Validation), kết quả dò Tone/Key giờ đây loại bỏ hoàn toàn sai số cá nhân và đạt độ chính xác tuyệt đối.
+
 ## [v1.0.6] - 2026-08-15
 ### 🚀 Tính năng Mới & Cải tiến
 
